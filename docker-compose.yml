@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: clinic-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: clinic
+      POSTGRES_PASSWORD: clinic
+      POSTGRES_DB: clinic
+    ports:
+      - "5432:5432"
+    volumes:
+      - clinic-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clinic -d clinic"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Production Next.js + Payload build. Talks to the postgres service on the
+  # docker network (hostname `postgres`, not localhost). Reads .env.local for
+  # secrets but DATABASE_URL is hardcoded here so the container uses the right
+  # hostname regardless of what's in .env.local (which points at localhost for
+  # the dev server).
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Same .env.local values used at runtime — passed via interpolation
+        # so the build can resolve Payload's plugin chain. DATABASE_URL is
+        # overridden to use the docker network hostname.
+        DATABASE_URL: postgresql://clinic:clinic@postgres:5432/clinic
+        PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+        BLOB_READ_WRITE_TOKEN: ${BLOB_READ_WRITE_TOKEN}
+        TOTP_DISABLED: "true"
+    container_name: clinic-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://clinic:clinic@postgres:5432/clinic
+      NODE_ENV: production
+      TOTP_DISABLED: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+    env_file:
+      # PAYLOAD_SECRET, BLOB_READ_WRITE_TOKEN, DOCTRA_* come from here.
+      # The `environment:` block above wins for DATABASE_URL.
+      - .env.local
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  clinic-pgdata:

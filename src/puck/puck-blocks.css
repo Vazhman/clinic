@@ -1,0 +1,154 @@
+/*
+ * Puck block styles — plain CSS, NOT Tailwind.
+ *
+ * Loaded in BOTH the admin builder canvas (via PuckBuilderField) AND the public
+ * blog page (via PuckArticle), so the editor is true WYSIWYG: the same rules
+ * render the blocks identically in both places, with zero dependency on the
+ * site's Tailwind being present in the Payload admin (it isn't).
+ *
+ * Everything is scoped under .pk-root (the Root block) so these rules never
+ * leak into the Payload admin chrome.
+ */
+
+/* FiraGO so the canvas matches the site font (admin doesn't load globals.css). */
+@font-face { font-family: "FiraGO"; src: url("/fonts/FiraGO-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "FiraGO"; src: url("/fonts/FiraGO-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "FiraGO"; src: url("/fonts/FiraGO-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+
+.pk-root {
+  font-family: "FiraGO", system-ui, sans-serif;
+  color: #3D3D3D;
+  line-height: 1.65;
+  font-size: 17px;
+  max-width: 768px;
+  margin-inline: auto;
+  padding: 8px 4px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.pk-root * { box-sizing: border-box; }
+
+/* Heading */
+.pk-heading { color: #682149; font-weight: 700; line-height: 1.2; margin: 1.75rem 0 0.75rem; }
+.pk-heading--h2 { font-size: 1.75rem; }
+.pk-heading--h3 { font-size: 1.35rem; }
+
+/* Rich text (TipTap HTML output) */
+.pk-richtext { margin: 1rem 0; }
+.pk-richtext p { margin: 0 0 0.85rem; }
+.pk-richtext p:last-child { margin-bottom: 0; }
+.pk-richtext strong { font-weight: 700; }
+.pk-richtext em { font-style: italic; }
+.pk-richtext a { color: #DD64A6; text-decoration: underline; }
+.pk-richtext h3 { color: #682149; font-size: 1.3rem; font-weight: 700; margin: 1.25rem 0 0.5rem; }
+.pk-richtext h4 { color: #682149; font-size: 1.1rem; font-weight: 700; margin: 1rem 0 0.5rem; }
+.pk-richtext ul, .pk-richtext ol { margin: 0 0 0.85rem; padding-left: 1.5rem; }
+.pk-richtext ul { list-style: disc; }
+.pk-richtext ol { list-style: decimal; }
+.pk-richtext li { margin: 0.25rem 0; }
+.pk-richtext blockquote { border-left: 4px solid #DD64A6; margin: 0.85rem 0; padding: 0.25rem 1rem; color: #3D3D3D; }
+/* Inline images inside the text — float so text wraps around them (the
+   natural "image with text flowing around it"). Clearfix contains the float
+   within the block. */
+.pk-richtext::after { content: ""; display: table; clear: both; }
+.pk-richtext .pk-inline-img { height: auto; border-radius: 0.75rem; }
+.pk-richtext .pk-inline-img--left { float: left; max-width: 45%; margin: 0.25rem 1.25rem 0.75rem 0; }
+.pk-richtext .pk-inline-img--right { float: right; max-width: 45%; margin: 0.25rem 0 0.75rem 1.25rem; }
+.pk-richtext .pk-inline-img--center { display: block; max-width: 100%; margin: 1rem auto; }
+@media (max-width: 640px) {
+  .pk-richtext .pk-inline-img--left,
+  .pk-richtext .pk-inline-img--right { float: none; display: block; max-width: 100%; margin: 1rem 0; }
+}
+
+/* Image */
+.pk-image { margin: 1.5rem 0; max-width: 100%; }
+.pk-image--left { margin-left: 0; margin-right: auto; }
+.pk-image--center { margin-left: auto; margin-right: auto; }
+.pk-image--right { margin-left: auto; margin-right: 0; }
+.pk-image--full { width: 100%; }
+.pk-image img { display: block; width: 100%; height: auto; border-radius: 0; }
+.pk-image--radius-lg img { border-radius: 1rem; }
+.pk-image--radius-full img { border-radius: 9999px; aspect-ratio: 1 / 1; object-fit: cover; }
+.pk-image--shadow-soft img { box-shadow: 0 4px 12px rgba(104, 33, 73, 0.10); }
+.pk-image--shadow-strong img { box-shadow: 0 12px 28px rgba(104, 33, 73, 0.20); }
+.pk-image figcaption { font-size: 0.8rem; color: #6B6B6B; text-align: center; margin-top: 0.5rem; font-style: italic; }
+
+/* Empty placeholder (no image chosen yet) */
+.pk-placeholder { margin: 1.5rem 0; padding: 1.5rem; text-align: center; color: #6B6B6B; border: 1px dashed #d4b8c9; border-radius: 0.5rem; }
+
+/* Image + Text */
+.pk-imagetext { margin: 1.5rem 0; }
+.pk-imagetext--cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: center; }
+.pk-imagetext--cols.pk-ratio-1-2 { grid-template-columns: 1fr 2fr; }
+.pk-imagetext--cols.pk-ratio-2-1 { grid-template-columns: 2fr 1fr; }
+.pk-imagetext--img-right.pk-imagetext--cols .pk-imagetext__img { order: 2; }
+.pk-imagetext--img-right.pk-imagetext--cols .pk-imagetext__text { order: 1; }
+/* wrap mode: image floats, text flows around it (one container) */
+.pk-imagetext--wrap::after { content: ""; display: table; clear: both; }
+.pk-imagetext--wrap .pk-imagetext__img { float: left; width: 45%; margin: 0 1.5rem 1rem 0; }
+.pk-imagetext--wrap.pk-imagetext--img-right .pk-imagetext__img { float: right; margin: 0 0 1rem 1.5rem; }
+@media (max-width: 768px) {
+  .pk-imagetext--cols { grid-template-columns: 1fr; }
+  .pk-imagetext--wrap .pk-imagetext__img { float: none; width: 100%; margin: 0 0 1rem; }
+}
+
+/* Section — a colored band wrapper. Switch its background in one click. */
+.pk-section { margin: 1.5rem 0; padding: 1.75rem; border-radius: 1rem; }
+.pk-section--none { padding: 0; background: transparent; }
+.pk-section--cream { background: #FAFAF8; }
+.pk-section--pink { background: #F5E6EF; }
+.pk-section--blackberry { background: #682149; color: #fff; }
+.pk-section--center { text-align: center; }
+.pk-section--center .pk-image,
+.pk-section--center .pk-button { margin-left: auto; margin-right: auto; }
+/* Light text on the dark band */
+.pk-section--blackberry .pk-heading,
+.pk-section--blackberry .pk-richtext,
+.pk-section--blackberry .pk-quote p,
+.pk-section--blackberry .pk-richtext a { color: #fff; }
+.pk-section--blackberry .pk-button--secondary { color: #fff; border-color: rgba(255, 255, 255, 0.5); }
+
+/* Row / Columns — a flexible layout primitive. The slot itself is the grid,
+   so any blocks dropped into it become columns. Column count + gap come from
+   CSS vars set inline; collapses to a single column on mobile. */
+.pk-row {
+  display: grid;
+  grid-template-columns: repeat(var(--pk-cols, 2), minmax(0, 1fr));
+  gap: var(--pk-gap, 1.5rem);
+  margin: 1.5rem 0;
+}
+.pk-row > * { min-width: 0; }
+@media (max-width: 768px) {
+  .pk-row { grid-template-columns: 1fr; }
+}
+
+/* Gallery */
+.pk-gallery { display: grid; gap: 0.75rem; margin: 1.5rem 0; }
+.pk-gallery--2 { grid-template-columns: repeat(2, 1fr); }
+.pk-gallery--3 { grid-template-columns: repeat(3, 1fr); }
+.pk-gallery--4 { grid-template-columns: repeat(4, 1fr); }
+.pk-gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 0.75rem; }
+@media (max-width: 768px) { .pk-gallery--3, .pk-gallery--4 { grid-template-columns: repeat(2, 1fr); } }
+
+/* Callout */
+.pk-callout { margin: 1.5rem 0; border-left: 4px solid; border-radius: 0 0.75rem 0.75rem 0; padding: 1rem 1.25rem; }
+.pk-callout p { margin: 0 0 0.6rem; }
+.pk-callout p:last-child { margin-bottom: 0; }
+.pk-callout--note { background: rgba(245, 230, 239, 0.5); border-color: #DD64A6; }
+.pk-callout--warning { background: #FFFBEB; border-color: #FBBF24; }
+.pk-callout--tip { background: rgba(104, 33, 73, 0.05); border-color: #682149; }
+
+/* Quote */
+.pk-quote { margin: 1.5rem 0; border-left: 4px solid #DD64A6; background: rgba(245, 230, 239, 0.3); border-radius: 0 0.75rem 0.75rem 0; padding: 0.75rem 1.25rem; }
+.pk-quote p { font-style: italic; color: #3D3D3D; margin: 0; }
+.pk-quote cite { display: block; margin-top: 0.5rem; font-size: 0.8rem; color: #6B6B6B; font-style: normal; }
+
+/* Button */
+.pk-button { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 1.75rem; border-radius: 9999px; font-weight: 700; text-decoration: none; margin: 1rem 0; cursor: pointer; }
+.pk-button--primary { background: #682149; color: #fff; }
+.pk-button--pink { background: #DD64A6; color: #fff; }
+.pk-button--white { background: #fff; color: #682149; border: 1px solid #682149; }
+.pk-button--secondary { border: 1px solid rgba(104, 33, 73, 0.2); color: #682149; background: transparent; }
+
+/* Divider */
+.pk-divider { margin: 2rem 0; border: 0; border-top: 1px solid rgba(104, 33, 73, 0.1); }

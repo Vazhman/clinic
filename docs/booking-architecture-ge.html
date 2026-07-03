@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ჩაწერის არქიტექტურა — Doctra ↔ Payload ↔ კლინიკის საიტი</title>
+<style>
+  :root {
+    --blackberry: #682149;
+    --blackberry-dark: #4a1735;
+    --pink: #DD64A6;
+    --pink-soft: #F7D6E7;
+    --pink-bg: #FDF4F9;
+    --grey: #3D3D3D;
+    --grey-soft: #6E6E6E;
+    --grey-line: #E4E4E4;
+    --cream: #FAFAF8;
+    --green: #2F9E6B;
+    --amber: #C58A23;
+    --red: #C84444;
+    --code-bg: #F4ECF2;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "FiraGO", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Georgian", "Sylfaen", Roboto, sans-serif;
+    color: var(--grey);
+    background: var(--cream);
+    line-height: 1.65;
+    font-size: 15px;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px 96px; }
+  header.page {
+    border-bottom: 2px solid var(--blackberry);
+    padding-bottom: 18px;
+    margin-bottom: 32px;
+  }
+  header.page h1 {
+    margin: 0 0 6px;
+    color: var(--blackberry);
+    font-size: 30px;
+    letter-spacing: -0.5px;
+  }
+  header.page p.lead {
+    margin: 0;
+    color: var(--grey-soft);
+    font-size: 15px;
+  }
+  h2 {
+    color: var(--blackberry);
+    margin: 56px 0 16px;
+    font-size: 22px;
+    border-left: 4px solid var(--pink);
+    padding-left: 12px;
+  }
+  h3 {
+    color: var(--blackberry-dark);
+    margin: 28px 0 8px;
+    font-size: 17px;
+  }
+  p { margin: 8px 0; }
+  code, pre {
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    font-size: 13px;
+  }
+  code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; color: var(--blackberry-dark); }
+  pre {
+    background: #1f1419;
+    color: #f3e9ee;
+    padding: 14px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 10px 0;
+  }
+  pre code { background: transparent; padding: 0; color: inherit; }
+
+  .endpoint-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .endpoint {
+    background: white;
+    border: 1px solid var(--grey-line);
+    border-radius: 12px;
+    padding: 16px 18px;
+    border-left: 4px solid var(--blackberry);
+  }
+  .endpoint.read { border-left-color: var(--pink); }
+  .endpoint.write { border-left-color: var(--amber); }
+  .endpoint .verb {
+    display: inline-block;
+    background: var(--blackberry);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .endpoint .verb.get { background: var(--pink); }
+  .endpoint .verb.post { background: var(--blackberry); }
+  .endpoint h4 {
+    margin: 8px 0 6px;
+    font-size: 15px;
+    color: var(--blackberry-dark);
+    font-family: "JetBrains Mono", monospace;
+    word-break: break-all;
+  }
+  .endpoint .desc {
+    color: var(--grey);
+    font-size: 13.5px;
+    margin: 0 0 8px;
+  }
+  .endpoint .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .chip {
+    display: inline-block;
+    background: var(--pink-bg);
+    color: var(--blackberry);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--pink-soft);
+  }
+  .chip.warn { background: #FFF6E5; color: var(--amber); border-color: #F0D9A0; }
+  .chip.good { background: #E5F7EE; color: var(--green); border-color: #BFE5D0; }
+  .chip.bad  { background: #FCE7E7; color: var(--red);   border-color: #F0B5B5; }
+
+  .diagram {
+    background: white;
+    border: 1px solid var(--grey-line);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 16px 0;
+    overflow-x: auto;
+  }
+  .diagram svg { display: block; max-width: 100%; height: auto; }
+
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; background: white; }
+  th, td { padding: 10px 14px; border-bottom: 1px solid var(--grey-line); text-align: left; vertical-align: top; }
+  th { background: var(--blackberry); color: white; font-size: 13px; font-weight: 600; }
+  tr:nth-child(even) td { background: var(--pink-bg); }
+  td.tight { white-space: nowrap; font-family: "JetBrains Mono", monospace; font-size: 13px; }
+
+  .callout {
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-left: 4px solid var(--pink);
+    background: var(--pink-bg);
+  }
+  .callout.warn { background: #FFF6E5; border-left-color: var(--amber); }
+  .callout.good { background: #E5F7EE; border-left-color: var(--green); }
+  .callout strong { color: var(--blackberry); }
+
+  ol.steps { padding-left: 0; counter-reset: step; list-style: none; }
+  ol.steps li {
+    counter-increment: step;
+    background: white;
+    border: 1px solid var(--grey-line);
+    border-radius: 10px;
+    padding: 14px 18px 14px 56px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  ol.steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    width: 30px;
+    height: 30px;
+    background: var(--blackberry);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-family: "JetBrains Mono", monospace;
+  }
+  ol.steps li.doctra::before { background: var(--amber); }
+  ol.steps li.payload::before { background: var(--pink); }
+  ol.steps li strong { color: var(--blackberry); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--grey-soft);
+  }
+  .legend .swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .legend > span { display: inline-flex; align-items: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page">
+  <h1>ჩაწერის არქიტექტურა — რა რას ეძახის</h1>
+  <p class="lead">
+    Doctra არის კლინიკის HIS (1C:Enterprise) — სამედიცინო ინფორმაციული სისტემა.
+    Payload CMS კი ჩვენი სარედაქციო ფენაა. ვებსაიტი ორივეს ესაუბრება, მაგრამ
+    მხოლოდ ერთი მათგანია „ცხელი ბილიკი“. ქვემოთ — ფაქტობრივი API ზედაპირი,
+    სად ცხოვრობს თითოეული გამოძახება და როდის რა იცვლება.
+  </p>
+</header>
+
+<!-- ─────────────────────── DOCTRA ENDPOINTS ─────────────────────── -->
+<h2>1. Doctra REST API — რას გვაძლევს კლინიკა</h2>
+<p>
+  ყველა ენდპოინტი არის <code>POST</code> მისამართზე
+  <code>http://31.146.167.162:9090/doctra/hs/portal_exchange/v1/&lt;method&gt;</code>.
+  იმპლემენტაცია იწერება ფაილში <code>src/lib/doctra-api.ts</code>.
+</p>
+
+<div class="callout warn">
+  <strong>Doctra-ს თავისებურებები (გამოცდილებით ნასწავლი):</strong>
+  <ul style="margin: 6px 0 0 18px; padding: 0;">
+    <li>ყველა მოთხოვნის body-ში სავალდებულოა <code>"hash": ""</code> — დოკუმენტაციაში არ წერია, მაგრამ აუცილებელია.</li>
+    <li>Auth ჰედერი ქვედა ხაზით: <code>Authorization: Bearer_&lt;token&gt;</code>, და არა სტანდარტული <code>Bearer &lt;token&gt;</code>.</li>
+    <li>Token-ის ვადა 60 წამია — ვაქეშავთ და ავტომატურად ვაახლებთ <code>status: 9</code>-ის შემთხვევაში.</li>
+    <li><code>get_time_slots</code>, თუ <code>date_end = date + 1</code>, აბრუნებს ცარიელ პასუხს — საჭიროა მინიმუმ <code>date + 2</code>, მერე ვფილტრავთ ჩვენ მხარეს.</li>
+    <li>სლოტების თარიღი ISO-შია (<code>2026-04-28</code>), ხოლო ჩაწერის გაგზავნისას უნდა იყოს კომპაქტური ფორმატით (<code>202604281300</code>).</li>
+  </ul>
+</div>
+
+<div class="endpoint-grid">
+
+  <div class="endpoint">
+    <span class="verb post">POST</span>
+    <h4>/token</h4>
+    <p class="desc">ავტორიზაცია. აბრუნებს <code>token</code>-ს და <code>token_active_time</code>-ს (წუთებში).</p>
+    <div class="meta">
+      <span class="chip">ქეშირებული 60 წმ</span>
+      <span class="chip">ავტო-განახლება status 9-ზე</span>
+    </div>
+  </div>
+
+  <div class="endpoint read">
+    <span class="verb post">POST</span>
+    <h4>/get_departments</h4>
+    <p class="desc">აბრუნებს ჩასაწერი განყოფილებების (სერვისების) კატალოგს. ყოველი ელემენტი: <code>id</code>, <code>name</code>, <code>name_en</code>, <code>address</code>, <code>type</code>.</p>
+    <div class="meta">
+      <span class="chip">იმპორტდება ერთჯერ</span>
+      <span class="chip">→ Payload services</span>
+    </div>
+  </div>
+
+  <div class="endpoint read">
+    <span class="verb post">POST</span>
+    <h4>/get_doctors</h4>
+    <p class="desc">ექიმები გამოყოფილი <code>department_id</code>-ით. ყოველი: <code>id</code>, <code>name</code>, <code>name_en</code>, <code>specialty</code>, <code>specialty_en</code>, <code>degree</code>, <code>picture</code>, <code>email</code>, <code>phone</code>.</p>
+    <div class="meta">
+      <span class="chip">იმპორტდება ერთჯერ</span>
+      <span class="chip">→ Payload doctors</span>
+    </div>
+  </div>
+
+  <div class="endpoint read">
+    <span class="verb post">POST</span>
+    <h4>/get_time_slots</h4>
+    <p class="desc">სლოტების ბადე ერთი განყოფილებისთვის თარიღების შუალედში. აბრუნებს ყველა ექიმის სტრიქონს — ჩვენ მხარეს ვფილტრავთ კონკრეტულ ექიმზე.</p>
+    <div class="meta">
+      <span class="chip warn">ლაივ — არ ქეშირდება</span>
+      <span class="chip warn">ნელი (~500–2000 მს)</span>
+    </div>
+  </div>
+
+  <div class="endpoint write">
+    <span class="verb post">POST</span>
+    <h4>/booking_without_otac</h4>
+    <p class="desc">ჩაწერის გაგზავნა. body: doctor_id, date_begin (yyyyMMddHHmm), პაციენტის მონაცემები. წარმატება — <code>status: 0</code>.</p>
+    <div class="meta">
+      <span class="chip bad">არ შემოწმდეს ცოცხალზე</span>
+      <span class="chip">წერს რეალურ ჩაწერებს</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─────────────────────── ARCHITECTURE DIAGRAM ─────────────────────── -->
+<h2>2. სად ზის Payload — სრული სურათი</h2>
+
+<div class="legend">
+  <span><span class="swatch" style="background: var(--pink);"></span> ცხელი ბილიკი (ყოველი გვერდის ჩატვირთვისას / მომხმარებლის მოქმედებისას)</span>
+  <span><span class="swatch" style="background: var(--amber);"></span> Doctra-ს ლაივ გამოძახება (ნელი, მხოლოდ საჭიროებისას)</span>
+  <span><span class="swatch" style="background: var(--blackberry);"></span> ადმინის მიერ გაშვებული, მუშაობს ერთხელ იმპორტზე</span>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 1140 660" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow-pink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#DD64A6"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#C58A23"/>
+    </marker>
+    <marker id="arrow-blackberry" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#682149"/>
+    </marker>
+    <marker id="arrow-grey" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6E6E6E"/>
+    </marker>
+  </defs>
+
+  <!-- ── COLUMN 1: Browser ── -->
+  <g>
+    <rect x="20" y="40" width="220" height="180" rx="14" fill="white" stroke="#682149" stroke-width="2"/>
+    <text x="130" y="68" font-family="FiraGO, sans-serif" font-size="14" font-weight="700" fill="#682149" text-anchor="middle">პაციენტის ბრაუზერი</text>
+    <text x="130" y="88" font-family="sans-serif" font-size="11" fill="#6E6E6E" text-anchor="middle">khozrevanidze.ge/{ge|en|ru}/booking</text>
+
+    <rect x="40" y="100" width="180" height="46" rx="8" fill="#FDF4F9" stroke="#DD64A6"/>
+    <text x="130" y="120" font-family="FiraGO, sans-serif" font-size="12" font-weight="700" fill="#682149" text-anchor="middle">BookingWizard</text>
+    <text x="130" y="136" font-family="FiraGO, sans-serif" font-size="11" fill="#3D3D3D" text-anchor="middle">5-ნაბიჯიანი ნაკადი</text>
+
+    <rect x="40" y="156" width="180" height="46" rx="8" fill="#FDF4F9" stroke="#DD64A6"/>
+    <text x="130" y="176" font-family="FiraGO, sans-serif" font-size="12" font-weight="700" fill="#682149" text-anchor="middle">DateTimeStep</text>
+    <text x="130" y="192" font-family="FiraGO, sans-serif" font-size="11" fill="#3D3D3D" text-anchor="middle">კალენდარი + სლოტები</text>
+  </g>
+
+  <!-- ── COLUMN 1B: Admin browser ── -->
+  <g>
+    <rect x="20" y="450" width="220" height="120" rx="14" fill="white" stroke="#682149" stroke-width="2"/>
+    <text x="130" y="478" font-family="FiraGO, sans-serif" font-size="14" font-weight="700" fill="#682149" text-anchor="middle">კლინიკის ადმინი</text>
+    <text x="130" y="498" font-family="sans-serif" font-size="11" fill="#6E6E6E" text-anchor="middle">/admin (Payload UI)</text>
+
+    <rect x="40" y="514" width="180" height="40" rx="8" fill="#F4ECF2" stroke="#682149"/>
+    <text x="130" y="538" font-family="FiraGO, sans-serif" font-size="11" font-weight="700" fill="#682149" text-anchor="middle">ახლებს ექიმებს / სერვისებს</text>
+  </g>
+
+  <!-- ── COLUMN 2: Next.js (clinic app) ── -->
+  <g>
+    <rect x="320" y="20" width="380" height="600" rx="14" fill="white" stroke="#682149" stroke-width="2"/>
+    <text x="510" y="48" font-family="FiraGO, sans-serif" font-size="14" font-weight="700" fill="#682149" text-anchor="middle">Next.js 16 აპი (Vercel)</text>
+
+    <!-- SSR -->
+    <rect x="340" y="68" width="340" height="100" rx="10" fill="#FDF4F9" stroke="#DD64A6"/>
+    <text x="510" y="90" font-family="FiraGO, sans-serif" font-size="12" font-weight="700" fill="#682149" text-anchor="middle">/booking გვერდი (Server Component)</text>
+    <text x="510" y="110" font-family="monospace" font-size="11" fill="#3D3D3D" text-anchor="middle">getBookingServicesFromPayload()</text>
+    <text x="510" y="126" font-family="monospace" font-size="11" fill="#3D3D3D" text-anchor="middle">getBookingDoctorsFromPayload(locale)</text>
+    <text x="510" y="148" font-family="FiraGO, sans-serif" font-size="11" font-style="italic" fill="#2F9E6B" text-anchor="middle">~50მს — მხოლოდ Postgres, Doctra-ს გარეშე</text>
+
+    <!-- timeslots route -->
+    <rect x="340" y="190" width="340" height="74" rx="10" fill="#FFF6E5" stroke="#C58A23"/>
+    <text x="510" y="212" font-family="monospace" font-size="12" font-weight="700" fill="#C58A23" text-anchor="middle">GET /api/booking/timeslots</text>
+    <text x="510" y="230" font-family="FiraGO, sans-serif" font-size="11" fill="#3D3D3D" text-anchor="middle">?summary=1 → 180 დღის ხელმისაწვდომობა</text>
+    <text x="510" y="246" font-family="FiraGO, sans-serif" font-size="11" fill="#3D3D3D" text-anchor="middle">?date=YYYY-MM-DD → კონკრეტული დღის სლოტები</text>
+    <text x="510" y="259" font-family="FiraGO, sans-serif" font-size="10" font-style="italic" fill="#C58A23" text-anchor="middle">ლაივ Doctra პროქსი — ეშვება მხოლოდ ექიმის არჩევისას</text>
+
+    <!-- submit route -->
+    <rect x="340" y="284" width="340" height="60" rx="10" fill="#FCE7E7" stroke="#C84444"/>
+    <text x="510" y="306" font-family="monospace" font-size="12" font-weight="700" fill="#C84444" text-anchor="middle">POST /api/booking/submit</text>
+    <text x="510" y="324" font-family="FiraGO, sans-serif" font-size="11" fill="#3D3D3D" text-anchor="middle">წერს ჩაწერას booking_without_otac-ით</text>
+    <text x="510" y="338" font-family="FiraGO, sans-serif" font-size="10" font-style="italic" fill="#C84444" text-anchor="middle">რეფაქტორმა არ შეეხო</text>
+
+    <!-- import route -->
+    <rect x="340" y="378" width="340" height="74" rx="10" fill="#F4ECF2" stroke="#682149"/>
+    <text x="510" y="400" font-family="monospace" font-size="12" font-weight="700" fill="#682149" text-anchor="middle">POST /api/import-doctra</text>
+    <text x="510" y="418" font-family="FiraGO, sans-serif" font-size="11" fill="#3D3D3D" text-anchor="middle">მხოლოდ ადმინი · Doctra → Payload</text>
+    <text x="510" y="432" font-family="FiraGO, sans-serif" font-size="11" fill="#3D3D3D" text-anchor="middle">იდემპოტენტული · არ ცვლის სარედაქციო ველებს</text>
+    <text x="510" y="446" font-family="FiraGO, sans-serif" font-size="10" font-style="italic" fill="#682149" text-anchor="middle">ეშვება ერთხელ + ახალი ექიმის დამატებისას</text>
+
+    <!-- thin wrappers -->
+    <rect x="340" y="476" width="160" height="60" rx="10" fill="#FAFAF8" stroke="#E4E4E4"/>
+    <text x="420" y="497" font-family="monospace" font-size="11" font-weight="700" fill="#682149" text-anchor="middle">/api/booking/services</text>
+    <text x="420" y="514" font-family="FiraGO, sans-serif" font-size="10" fill="#6E6E6E" text-anchor="middle">თხელი გადამხვევი</text>
+    <text x="420" y="527" font-family="sans-serif" font-size="10" fill="#6E6E6E" text-anchor="middle">→ Payload</text>
+
+    <rect x="520" y="476" width="160" height="60" rx="10" fill="#FAFAF8" stroke="#E4E4E4"/>
+    <text x="600" y="497" font-family="monospace" font-size="11" font-weight="700" fill="#682149" text-anchor="middle">/api/booking/all-doctors</text>
+    <text x="600" y="514" font-family="FiraGO, sans-serif" font-size="10" fill="#6E6E6E" text-anchor="middle">თხელი გადამხვევი</text>
+    <text x="600" y="527" font-family="sans-serif" font-size="10" fill="#6E6E6E" text-anchor="middle">→ Payload</text>
+
+    <text x="510" y="572" font-family="FiraGO, sans-serif" font-size="11" font-style="italic" fill="#6E6E6E" text-anchor="middle">(იყენებს ექიმის გვერდის მინი-ჩაწერის ვიჯეტი)</text>
+  </g>
+
+  <!-- ── COLUMN 3: Payload + Doctra ── -->
+  <g>
+    <!-- Payload box -->
+    <rect x="780" y="40" width="340" height="240" rx="14" fill="white" stroke="#DD64A6" stroke-width="2"/>
+    <text x="950" y="68" font-family="FiraGO, sans-serif" font-size="14" font-weight="700" fill="#DD64A6" text-anchor="middle">Payload CMS</text>
+    <text x="950" y="86" font-family="FiraGO, sans-serif" font-size="11" fill="#6E6E6E" text-anchor="middle">Postgres (Neon) — ჩვენებისთვის ჭეშმარიტების წყარო</text>
+
+    <rect x="800" y="100" width="300" height="74" rx="8" fill="#FDF4F9" stroke="#DD64A6"/>
+    <text x="950" y="120" font-family="FiraGO, sans-serif" font-size="12" font-weight="700" fill="#682149" text-anchor="middle">services კოლექცია</text>
+    <text x="950" y="138" font-family="monospace" font-size="10" fill="#3D3D3D" text-anchor="middle">doctraBranchId · name (3 ენა)</text>
+    <text x="950" y="152" font-family="monospace" font-size="10" fill="#3D3D3D" text-anchor="middle">category · description · icon · slug</text>
+    <text x="950" y="166" font-family="FiraGO, sans-serif" font-size="10" font-style="italic" fill="#6E6E6E" text-anchor="middle">ფილტრი: doctraBranchId არსებობს</text>
+
+    <rect x="800" y="184" width="300" height="86" rx="8" fill="#FDF4F9" stroke="#DD64A6"/>
+    <text x="950" y="204" font-family="FiraGO, sans-serif" font-size="12" font-weight="700" fill="#682149" text-anchor="middle">doctors კოლექცია</text>
+    <text x="950" y="222" font-family="monospace" font-size="10" fill="#3D3D3D" text-anchor="middle">doctraId · doctraBranchId · inactive</text>
+    <text x="950" y="236" font-family="monospace" font-size="10" fill="#3D3D3D" text-anchor="middle">name · specialty (3 ენა) · slug</text>
+    <text x="950" y="250" font-family="monospace" font-size="10" fill="#3D3D3D" text-anchor="middle">photo (Media) · biography · qualifications</text>
+    <text x="950" y="264" font-family="FiraGO, sans-serif" font-size="10" font-style="italic" fill="#6E6E6E" text-anchor="middle">ფილტრი: doctraId არსებობს AND inactive ≠ true</text>
+
+    <!-- Doctra box -->
+    <rect x="780" y="320" width="340" height="280" rx="14" fill="white" stroke="#C58A23" stroke-width="2"/>
+    <text x="950" y="348" font-family="FiraGO, sans-serif" font-size="14" font-weight="700" fill="#C58A23" text-anchor="middle">Doctra (1C:Enterprise HIS)</text>
+    <text x="950" y="366" font-family="FiraGO, sans-serif" font-size="11" fill="#6E6E6E" text-anchor="middle">31.146.167.162:9090 — კლინიკის მხარეს, ნელი</text>
+
+    <rect x="800" y="380" width="300" height="44" rx="8" fill="#FFF6E5" stroke="#C58A23"/>
+    <text x="950" y="398" font-family="monospace" font-size="11" font-weight="700" fill="#C58A23" text-anchor="middle">/get_departments</text>
+    <text x="950" y="414" font-family="FiraGO, sans-serif" font-size="10" fill="#3D3D3D" text-anchor="middle">ერთჯერადი წაკითხვა → Payload services</text>
+
+    <rect x="800" y="432" width="300" height="44" rx="8" fill="#FFF6E5" stroke="#C58A23"/>
+    <text x="950" y="450" font-family="monospace" font-size="11" font-weight="700" fill="#C58A23" text-anchor="middle">/get_doctors (department_id)</text>
+    <text x="950" y="466" font-family="FiraGO, sans-serif" font-size="10" fill="#3D3D3D" text-anchor="middle">ერთჯერადი წაკითხვა → Payload doctors</text>
+
+    <rect x="800" y="484" width="300" height="44" rx="8" fill="#FFF6E5" stroke="#C58A23"/>
+    <text x="950" y="502" font-family="monospace" font-size="11" font-weight="700" fill="#C58A23" text-anchor="middle">/get_time_slots</text>
+    <text x="950" y="518" font-family="FiraGO, sans-serif" font-size="10" fill="#3D3D3D" text-anchor="middle">ლაივ — ერთადერთი ცოცხალი მიმართვა Doctra-ზე</text>
+
+    <rect x="800" y="536" width="300" height="44" rx="8" fill="#FCE7E7" stroke="#C84444"/>
+    <text x="950" y="554" font-family="monospace" font-size="11" font-weight="700" fill="#C84444" text-anchor="middle">/booking_without_otac</text>
+    <text x="950" y="570" font-family="FiraGO, sans-serif" font-size="10" fill="#3D3D3D" text-anchor="middle">წერა — ჩაწერის გაგზავნა</text>
+  </g>
+
+  <!-- ── ARROWS ── -->
+  <line x1="240" y1="118" x2="340" y2="118" stroke="#DD64A6" stroke-width="2.5" marker-end="url(#arrow-pink)"/>
+  <text x="290" y="110" font-family="FiraGO, sans-serif" font-size="10" fill="#DD64A6" text-anchor="middle">გვერდის ჩატვირთვა</text>
+
+  <line x1="240" y1="179" x2="340" y2="227" stroke="#C58A23" stroke-width="2.5" marker-end="url(#arrow-amber)"/>
+  <text x="298" y="195" font-family="FiraGO, sans-serif" font-size="10" fill="#C58A23" text-anchor="middle">ექიმი/თარიღი</text>
+
+  <line x1="240" y1="200" x2="340" y2="314" stroke="#C84444" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow-amber)"/>
+  <text x="294" y="278" font-family="FiraGO, sans-serif" font-size="10" fill="#C84444" text-anchor="middle">ფორმის გაგზავნა</text>
+
+  <line x1="240" y1="510" x2="340" y2="415" stroke="#682149" stroke-width="2.5" marker-end="url(#arrow-blackberry)"/>
+  <text x="290" y="475" font-family="FiraGO, sans-serif" font-size="10" fill="#682149" text-anchor="middle">იმპორტის გაშვება</text>
+
+  <line x1="240" y1="534" x2="800" y2="232" stroke="#682149" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arrow-blackberry)"/>
+  <text x="540" y="430" font-family="FiraGO, sans-serif" font-size="10" fill="#682149" text-anchor="middle">ფოტო / ბიო / სპეციალობის რედაქტირება</text>
+
+  <line x1="680" y1="118" x2="800" y2="138" stroke="#DD64A6" stroke-width="2.5" marker-end="url(#arrow-pink)"/>
+  <line x1="680" y1="138" x2="800" y2="220" stroke="#DD64A6" stroke-width="2.5" marker-end="url(#arrow-pink)"/>
+
+  <line x1="680" y1="227" x2="800" y2="500" stroke="#C58A23" stroke-width="2.5" marker-end="url(#arrow-amber)"/>
+
+  <line x1="680" y1="314" x2="800" y2="556" stroke="#C84444" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow-amber)"/>
+
+  <line x1="680" y1="408" x2="800" y2="402" stroke="#682149" stroke-width="2" marker-end="url(#arrow-blackberry)"/>
+  <line x1="680" y1="425" x2="800" y2="450" stroke="#682149" stroke-width="2" marker-end="url(#arrow-blackberry)"/>
+
+  <line x1="680" y1="385" x2="800" y2="138" stroke="#682149" stroke-width="2" stroke-dasharray="2 3" marker-end="url(#arrow-blackberry)"/>
+  <line x1="680" y1="395" x2="800" y2="220" stroke="#682149" stroke-width="2" stroke-dasharray="2 3" marker-end="url(#arrow-blackberry)"/>
+
+  <line x1="500" y1="500" x2="800" y2="170" stroke="#6E6E6E" stroke-width="1" stroke-dasharray="2 3" marker-end="url(#arrow-grey)"/>
+  <line x1="600" y1="500" x2="800" y2="220" stroke="#6E6E6E" stroke-width="1" stroke-dasharray="2 3" marker-end="url(#arrow-grey)"/>
+</svg>
+</div>
+
+<!-- ─────────────────────── REQUEST FLOW ─────────────────────── -->
+<h2>3. რა ხდება, როცა პაციენტი ხსნის /booking-ს</h2>
+
+<ol class="steps">
+  <li class="payload">
+    <strong>გვერდის მოთხოვნა Server Component-ში მიდის.</strong>
+    <code>src/app/(frontend)/[locale]/booking/page.tsx</code> პარალელურად ეძახის
+    <code>getBookingServicesFromPayload()</code>-ს და <code>getBookingDoctorsFromPayload(locale)</code>-ს.
+    ორი Postgres-ის მოთხოვნა. <strong>ჯამში ~50 მწ. Doctra საერთოდ არ გამოიძახება.</strong>
+  </li>
+  <li class="payload">
+    <strong>HTML მზა Wizard-ით იგზავნება.</strong>
+    <code>BookingWizard</code> ჩაირთვება უკვე შევსებული <code>initialServices</code>-ით და <code>initialDoctors</code>-ით.
+    1-ლი ნაბიჯი (სერვისის არჩევა) და მე-2 ნაბიჯი (ექიმის არჩევა) მყისიერად ერქმევა — დატვირთვის ანიმაციის გარეშე.
+  </li>
+  <li class="doctra">
+    <strong>პაციენტი ირჩევს ექიმს.</strong> <code>DateTimeStep</code> ეშვება
+    <code>GET /api/booking/timeslots?summary=1&amp;branchId=…&amp;operatorId=…&amp;dateBegin=…&amp;dateEnd=…</code>.
+    ეს Doctra-ს <code>get_time_slots</code>-ისკენ მიდის 180 დღის ფანჯრით და აბრუნებს ხელმისაწვდომ თარიღებს.
+    ლაივ Doctra გამოძახება — როგორც წესი 500–2000 მწ. შედეგად კალენდარში ვამქრქალებთ მიუწვდომელ დღეებს.
+  </li>
+  <li class="doctra">
+    <strong>პაციენტი ირჩევს თარიღს.</strong> <code>DateTimeStep</code> ეშვება
+    <code>GET /api/booking/timeslots?date=YYYY-MM-DD&amp;branchId=…&amp;operatorId=…</code>.
+    ერთი დღის სლოტები (Doctra-ს 1-დღიანი ფანჯრის ბაგის გვერდის ავლის მიზნით ვითხოვთ 2 დღეს). შემდეგ რენდერდება დროის ჩიპები.
+  </li>
+  <li>
+    <strong>პაციენტი ავსებს მონაცემებს და ნიშნავს ჩაწერას.</strong> <code>POST /api/booking/submit</code> →
+    Doctra-ს <code>booking_without_otac</code>. რეფაქტორმა არ შეეხო; ცოცხალ ენდპოინტზე არ მოწმდება.
+  </li>
+</ol>
+
+<!-- ─────────────────────── DATA OWNERSHIP ─────────────────────── -->
+<h2>4. ვის ეკუთვნის რომელი მონაცემი</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>მონაცემი</th>
+      <th>ჭეშმარიტების წყარო</th>
+      <th>როგორ ხვდება</th>
+      <th>როგორ კითხულობს საიტი</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>განყოფილებები (სერვისები)</td>
+      <td>Payload <code>services</code></td>
+      <td>Doctra-ს <code>get_departments</code>-დან <code>/api/import-doctra</code>-თი (ადმინი ეშვებს, იდემპოტენტული)</td>
+      <td>Postgres SELECT, ~50 მწ</td>
+    </tr>
+    <tr>
+      <td>ექიმების სია</td>
+      <td>Payload <code>doctors</code></td>
+      <td>Doctra-ს <code>get_doctors</code>-დან <code>/api/import-doctra</code>-თი</td>
+      <td>Postgres SELECT, ~50 მწ</td>
+    </tr>
+    <tr>
+      <td>ექიმის ფოტო, ბიოგრაფია, კვალიფიკაცია, ენები</td>
+      <td>Payload <code>doctors</code> (ადმინი არედაქტირებს)</td>
+      <td>ატვირთვა / რედაქტირება Payload ადმინ-პანელში — ხელახალი იმპორტი არასოდეს გადააწერს</td>
+      <td>Postgres + Media URL</td>
+    </tr>
+    <tr>
+      <td>ექიმის სახელი, სპეციალობა (ქართული + ინგლისური)</td>
+      <td>Payload (Doctra-დან თესავს)</td>
+      <td>პირველი იმპორტი იღებს Doctra-ს <code>name</code>/<code>name_en</code>/<code>specialty</code>-ს. ხელახალი იმპორტი არ ცვლის.</td>
+      <td>Postgres, ლოკალის გათვალისწინებით</td>
+    </tr>
+    <tr>
+      <td>ექიმის inactive ფლეგი</td>
+      <td>Payload (ადმინის კონტროლი)</td>
+      <td>ადმინი მონიშნავს <code>inactive</code> ჩექბოქსს, რომ დამალოს წაშლის გარეშე</td>
+      <td>ფილტრი: <code>inactive ≠ true</code></td>
+    </tr>
+    <tr>
+      <td>ექიმი ↔ განყოფილების კავშირი</td>
+      <td>Doctra (იმპორტზე ახლდება)</td>
+      <td>ხელახალი იმპორტი ახლებს <code>doctraBranchId</code>-ს, თუ Doctra-ში გადავიდა სხვა განყოფილებაში</td>
+      <td>ჩაწერილია Payload-ის ექიმის ჩანაწერში</td>
+    </tr>
+    <tr>
+      <td><strong>დროის სლოტები / ხელმისაწვდომობა</strong></td>
+      <td><strong>Doctra (ლაივ)</strong></td>
+      <td>არასდროს ქეშირდება, არასდროს კოპირდება — კლინიკის საკუთარი განრიგი</td>
+      <td><strong>ცოცხალი HTTP გამოძახება Doctra-ზე ექიმისა და თარიღის არჩევისას</strong></td>
+    </tr>
+    <tr>
+      <td>ჩაწერის გაგზავნა</td>
+      <td>Doctra (ჩასაწერი)</td>
+      <td>პირდაპირი POST <code>booking_without_otac</code>-ზე</td>
+      <td>(მხოლოდ წერა)</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ─────────────────────── PERFORMANCE ─────────────────────── -->
+<h2>5. წარმადობა — რეფაქტორამდე და მის შემდეგ</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>მოქმედება</th>
+      <th>მანამდე</th>
+      <th>ახლა</th>
+      <th>რატომ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>/booking-ის გახსნა (cold)</td>
+      <td class="tight">~5000 მწ</td>
+      <td class="tight">~50–200 მწ</td>
+      <td>ყველა განყოფილებისთვის Doctra-ს ეძახდა. ახლა მხოლოდ Postgres SELECT × 2.</td>
+    </tr>
+    <tr>
+      <td>Wizard-ში ხედავ სერვისებს და ექიმებს</td>
+      <td class="tight">მეორე client fetch-ის შემდეგ</td>
+      <td class="tight">უკვე HTML-შია</td>
+      <td>SSR წინასწარ იღებს. <code>BookingWizard</code> შევსებული ჩაირთვება.</td>
+    </tr>
+    <tr>
+      <td>კალენდარი ამქრქალებს დაკავებულ დღეებს</td>
+      <td class="tight">~5000 მწ (state ცვლილება)</td>
+      <td class="tight">~500–2000 მწ</td>
+      <td>ერთი Doctra გამოძახება მხოლოდ არჩეულ ექიმზე — არა ყველა განყოფილებაზე.</td>
+    </tr>
+    <tr>
+      <td>თარიღის არჩევა → დროის ჩიპები</td>
+      <td class="tight">~500–1500 მწ</td>
+      <td class="tight">~500–1500 მწ</td>
+      <td>არ შეცვლილა — სავალდებულოდ ლაივი (რეალური ხელმისაწვდომობა).</td>
+    </tr>
+    <tr>
+      <td>ჩაწერის გაგზავნა</td>
+      <td class="tight">~700 მწ</td>
+      <td class="tight">~700 მწ</td>
+      <td>არ შეცვლილა — Doctra-ში ჩაწერა.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout good">
+  <strong>საერთო შედეგი:</strong> გვერდის გამოჩენა „5 წამის გაყინვიდან“ მყისიერამდე გადავიდა. ერთადერთი
+  Doctra-დან მომავალი დაყოვნება, რასაც პაციენტი იგრძნობს, არის კალენდარის/სლოტების ჩატვირთვა — და ისიც მხოლოდ
+  მაშინ, როცა მან უკვე აქტიურად აირჩია ექიმი, რაც თავისთავად მისაღებია მცირე დატვირთვის თვალსაზრისით.
+</div>
+
+<!-- ─────────────────────── KEEPING IT FRESH ─────────────────────── -->
+<h2>6. Payload-ის Doctra-სთან სინქრონიზაცია</h2>
+
+<p>Payload აქეშავს კატალოგს, Doctra ფლობს მას. სინქრონი <strong>ხელით და მოთხოვნით ხდება</strong>:</p>
+
+<ol class="steps">
+  <li>
+    <strong>ახალი ექიმი დაემატა Doctra-ში</strong> → ადმინი შედის <code>/admin</code>-ში
+    და უგზავნის <code>POST /api/import-doctra</code>-ს (curl-ით, ღილაკით ან მანუალურად ადმინ-პანელიდან).
+  </li>
+  <li>
+    <strong>იმპორტის ენდპოინტი:</strong>
+    <ul>
+      <li>ეძახის <code>get_departments</code>-ს და <code>get_doctors</code>-ს ყოველი განყოფილებისთვის.</li>
+      <li>თითოეული Doctra-ს ექიმისთვის: თუ Payload-ში <code>doctraId</code>-ით არ მოიძებნა — <strong>აშენებს</strong>
+          ახალს Doctra-ს მონაცემებით. თუ არსებობს — <strong>მხოლოდ კავშირს ანახლებს</strong>;
+          სარედაქციო ველები (ფოტო, ბიო, კვალიფიკაცია) უცვლელი რჩება.</li>
+      <li>იგივე ლოგიკა მუშაობს Payload <code>services</code>-ისთვის.</li>
+      <li>აბრუნებს რეპორტს კოლექციების მიხედვით: <code>{ created, updated, skipped, errors }</code>.</li>
+    </ul>
+  </li>
+  <li>
+    <strong>ადმინი ხსნის ახალ ექიმს Payload-ში</strong>, ტვირთავს ფოტოს, ავსებს ბიოგრაფიას, აპრიალებს
+    ქართულ/ინგლისურ სახელს. სარედაქციო სამუშაო კეთდება ერთხელ — მომავალი იმპორტი არასოდეს ანადგურებს.
+  </li>
+  <li>
+    <strong>ექიმი მიდის კლინიკიდან</strong> → ადმინი მონიშნავს <code>inactive</code> ჩექბოქსს.
+    ექიმი ქრება ჩაწერის ფორმიდან და საიტიდან, მაგრამ ჩანაწერი არ წაიშლება (ძველი ჩაწერები გრძელდება).
+  </li>
+</ol>
+
+<div class="callout warn">
+  <strong>საოპერაციო ნიუანსი:</strong> სუფთა ბაზაზე ჩაწერის გვერდი ცარიელი იქნება, სანამ ვინმე არ გაუშვებს
+  იმპორტს. ეს განზრახაა — Payload არის ჭეშმარიტების წყარო იმისა, რაც საიტზე გამოჩნდება.
+  პროდაქშენში ასევე საჭირო ხდება <code>inactive</code> სვეტის მიგრაცია, რადგან
+  <code>push: true</code> dev-ის გარეთ გამორთულია.
+</div>
+
+<!-- ─────────────────────── FILE MAP ─────────────────────── -->
+<h2>7. ფაილების რუკა (კოდი სად ცხოვრობს)</h2>
+
+<table>
+  <thead>
+    <tr><th>დანიშნულება</th><th>ფაილი</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Doctra REST კლიენტი (auth, fetch, ყველა 5 ენდპოინტი)</td><td class="tight">src/lib/doctra-api.ts</td></tr>
+    <tr><td>Payload-ის დამხმარეები (სერვისები + ექიმები ჩაწერისთვის)</td><td class="tight">src/lib/payload-data.ts</td></tr>
+    <tr><td>ჩაწერის გვერდი (SSR-ით წინასწარ იღებს)</td><td class="tight">src/app/(frontend)/[locale]/booking/page.tsx</td></tr>
+    <tr><td>Wizard (5-ნაბიჯიანი UI)</td><td class="tight">src/components/booking/BookingWizard.tsx</td></tr>
+    <tr><td>კალენდარი + სლოტების ბადე (ერთადერთი ლაივ Doctra მომხმარებელი)</td><td class="tight">src/components/booking/DateTimeStep.tsx</td></tr>
+    <tr><td>სერვისის ამრჩევი</td><td class="tight">src/components/booking/CombinedSelectionStep.tsx</td></tr>
+    <tr><td>დროის სლოტების ლაივ პროქსი</td><td class="tight">src/app/api/booking/timeslots/route.ts</td></tr>
+    <tr><td>ჩაწერის გაგზავნა</td><td class="tight">src/app/api/booking/submit/route.ts</td></tr>
+    <tr><td>Doctra → Payload იმპორტიორი (მხოლოდ ადმინი)</td><td class="tight">src/app/api/import-doctra/route.ts</td></tr>
+    <tr><td>ექიმების კოლექციის სქემა</td><td class="tight">src/collections/Doctors.ts</td></tr>
+    <tr><td>სერვისების კოლექციის სქემა</td><td class="tight">src/collections/Services.ts</td></tr>
+    <tr><td>თხელი Payload გადამხვევი (მინი-ჩაწერის ვიჯეტისთვის)</td><td class="tight">src/app/api/booking/all-doctors/route.ts</td></tr>
+    <tr><td>თხელი Payload გადამხვევი (სერვისების JSON)</td><td class="tight">src/app/api/booking/services/route.ts</td></tr>
+  </tbody>
+</table>
+
+<footer style="margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--grey-line); color: var(--grey-soft); font-size: 12px;">
+  გენერირებულია 2026-05-10 · ხოზრევანიძის კლინიკა · Doctra ↔ Payload ხიდის არქიტექტურა
+</footer>
+
+</div>
+</body>
+</html>

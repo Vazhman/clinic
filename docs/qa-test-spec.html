@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Khozrevanidze Clinic — QA Test Specification</title>
+<style>
+  :root{
+    --blackberry:#682149; --pink:#DD64A6; --grey:#3D3D3D; --cream:#FAFAF8;
+    --line:#e7e2e6; --ok:#1f9d55; --warn:#b8860b; --bad:#c0392b; --muted:#8a8290;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--grey);background:var(--cream);line-height:1.55;font-size:15px}
+  header.hero{background:linear-gradient(135deg,#682149 0%,#8A3A6B 50%,#DD64A6 100%);color:#fff;padding:40px 32px}
+  header.hero h1{margin:0 0 6px;font-size:30px;letter-spacing:-.5px}
+  header.hero p{margin:2px 0;opacity:.92;font-size:14px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:28px 0}
+  .meta-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .meta-card h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .meta-card a{color:var(--blackberry);font-weight:600;word-break:break-all}
+  .meta-card code{background:var(--cream);padding:2px 6px;border-radius:6px;font-size:13px}
+  nav.toc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:24px 0}
+  nav.toc h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:34px}
+  nav.toc a{color:var(--blackberry);text-decoration:none}
+  nav.toc a:hover{text-decoration:underline}
+  section{margin:34px 0}
+  h2{font-size:21px;color:var(--blackberry);border-bottom:2px solid var(--pink);padding-bottom:8px;margin:0 0 6px}
+  h2 .num{color:var(--pink);font-weight:800;margin-right:8px}
+  .sec-note{font-size:13px;color:var(--muted);margin:0 0 14px}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
+  thead th{background:#f4eef1;color:var(--blackberry);text-align:left;padding:10px 12px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line)}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.id{font-weight:700;color:var(--pink);white-space:nowrap;font-variant-numeric:tabular-nums}
+  td.steps{width:46%}
+  td.expect{width:38%}
+  td.res{width:80px;text-align:center}
+  .chk{display:inline-block;width:18px;height:18px;border:2px solid var(--pink);border-radius:5px;vertical-align:middle}
+  ul.tight{margin:4px 0;padding-left:18px}
+  ul.tight li{margin:2px 0}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
+  .pill.crit{background:#fdecea;color:var(--bad)}
+  .pill.high{background:#fef6e7;color:var(--warn)}
+  .pill.norm{background:#eaf6ee;color:var(--ok)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin:10px 0 0;font-size:13px;color:var(--muted)}
+  .callout{background:#fff;border-left:4px solid var(--pink);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14px}
+  .callout.warn{border-left-color:var(--warn);background:#fffdf6}
+  .matrix td,.matrix th{text-align:center}
+  .matrix td:first-child,.matrix th:first-child{text-align:left}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:30px 0 50px}
+  @media print{
+    body{background:#fff;font-size:12px}
+    nav.toc,header.hero{break-inside:avoid}
+    section{break-inside:avoid}
+    .chk{border-color:#999}
+  }
+  @media(max-width:680px){nav.toc ol{columns:1}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Khozrevanidze Clinic — QA Test Specification</h1>
+    <p>Multilingual medical clinic website · Next.js 16 · Payload CMS 3 · Postgres (Neon)</p>
+    <p>Environment: <strong>Vercel demo deployment</strong> · Locales: GE (default) · EN · RU</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="meta-grid">
+    <div class="meta-card">
+      <h4>Test URL (demo)</h4>
+      <a href="https://clinic-one-blush.vercel.app/ge" target="_blank">clinic-one-blush.vercel.app</a>
+    </div>
+    <div class="meta-card">
+      <h4>Admin panel</h4>
+      <a href="https://clinic-one-blush.vercel.app/admin" target="_blank">/admin</a> · Payload CMS (TOTP 2FA)
+    </div>
+    <div class="meta-card">
+      <h4>Locale prefixes</h4>
+      <code>/ge</code> <code>/en</code> <code>/ru</code> — always required
+    </div>
+    <div class="meta-card">
+      <h4>Tester / Date / Build</h4>
+      ____________________ · _______ · commit <code>eb99a48</code>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><span class="pill crit">Critical</span> blocks launch</span>
+    <span><span class="pill high">High</span> major UX/feature</span>
+    <span><span class="pill norm">Normal</span> polish / content</span>
+    <span style="margin-left:auto"><span class="chk"></span> = mark Pass / Fail / N/A in the result column</span>
+  </div>
+
+  <div class="callout warn">
+    <strong>Backend dependencies to confirm before testing.</strong> The booking wizard and patient portal call the live Doctra HIS backend.
+    Booking submission may be intentionally disabled via the <code>BOOKING_SUBMIT_DISABLED</code> env flag (test up to the Confirm step, then verify the guard message rather than expecting a real appointment).
+    The AI chat needs <code>GEMINI_API_KEY</code>; Georgian text-to-speech needs <code>GOOGLE_TTS_API_KEY</code>. Note any feature returning a 500 that traces back to a missing key as <em>config</em>, not a bug.
+  </div>
+
+  <nav class="toc">
+    <h3>Test Areas</h3>
+    <ol>
+      <li><a href="#s1">Global / Cross-cutting</a></li>
+      <li><a href="#s2">Internationalization (i18n)</a></li>
+      <li><a href="#s3">Header &amp; Navigation</a></li>
+      <li><a href="#s4">Footer</a></li>
+      <li><a href="#s5">Home Page</a></li>
+      <li><a href="#s6">Services</a></li>
+      <li><a href="#s7">Doctors</a></li>
+      <li><a href="#s8">Checkup Packages</a></li>
+      <li><a href="#s9">Lab Tests</a></li>
+      <li><a href="#s10">Blog / News</a></li>
+      <li><a href="#s11">About</a></li>
+      <li><a href="#s12">Contact</a></li>
+      <li><a href="#s13">Gallery</a></li>
+      <li><a href="#s14">Health Library &amp; 3D Anatomy</a></li>
+      <li><a href="#s15">Booking Wizard</a></li>
+      <li><a href="#s16">Patient Portal (Patient Room)</a></li>
+      <li><a href="#s17">AI Chat Assistant</a></li>
+      <li><a href="#s18">CMS Dynamic Pages (Terms/Privacy)</a></li>
+      <li><a href="#s19">Admin Panel (Payload CMS)</a></li>
+      <li><a href="#s20">SEO &amp; Structured Data</a></li>
+      <li><a href="#s21">Accessibility</a></li>
+      <li><a href="#s22">Performance</a></li>
+      <li><a href="#s23">Responsive / Cross-browser</a></li>
+      <li><a href="#s24">Security &amp; Error Handling</a></li>
+    </ol>
+  </nav>
+
+  <!-- ============ 1. GLOBAL ============ -->
+  <section id="s1">
+    <h2><span class="num">1</span>Global / Cross-cutting</h2>
+    <p class="sec-note">Applies to every page. Run once per locale at minimum on the home page, then spot-check elsewhere.</p>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">G-01</td><td>Load each top-level page over HTTPS</td><td>Page renders with no console errors; valid TLS padlock; HSTS header present</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">G-02</td><td>Navigate the full site without locale prefix (e.g. <code>/about</code>)</td><td>Redirects/rewrites to a locale-prefixed URL (default <code>/ge</code>)</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">G-03</td><td>Hit a non-existent path (e.g. <code>/ge/does-not-exist</code>)</td><td>Branded 404 page, header/footer intact, links back home</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">G-04</td><td>Browser back/forward across pages</td><td>State preserved, no flashes of unstyled/empty content</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">G-05</td><td>Floating WhatsApp button on public pages</td><td>Opens WhatsApp chat with the clinic number (wa.me)</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">G-06</td><td>Fonts (FiraGO) and brand colors load</td><td>No FOUT/fallback flash; blackberry/pink palette consistent</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">G-07</td><td>Images load (next/image, AVIF/WebP)</td><td>No broken images; responsive srcset served; no layout shift</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 2. i18n ============ -->
+  <section id="s2">
+    <h2><span class="num">2</span>Internationalization (i18n)</h2>
+    <p class="sec-note">Locales: <strong>ge</strong> (default, Georgian), <strong>en</strong>, <strong>ru</strong>. Every public page exists under all three prefixes.</p>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">I-01</td><td>Switch language via the header switcher on each page</td><td>Stays on the same page, content fully translated, URL prefix updates</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">I-02</td><td>Review GE, EN, RU copy for completeness</td><td>No missing keys, no raw <code>Namespace.key</code> strings, no English leaking into GE/RU</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">I-03</td><td>CMS-driven content (services, doctors, news) per locale</td><td>Localized fields show correct language; untranslated fields fall back gracefully (not blank)</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">I-04</td><td>Georgian text rendering &amp; truncation</td><td>No clipped/overflowing Georgian text in buttons, cards, nav</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">I-05</td><td><code>&lt;html lang&gt;</code> and hreflang alternates per locale</td><td>lang attribute matches locale; hreflang tags present for ge/en/ru + x-default</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">I-06</td><td>Localized URL slugs (next-intl pathnames)</td><td>Each locale has its own slug; English-form path (e.g. <code>/ge/about</code>) 307-redirects to the localized one (<code>/ge/shesakheb</code>)</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>Localized URL reference</strong> — use these exact paths when testing each locale. (English-form URLs work too but redirect.)
+    <table style="margin-top:10px">
+      <thead><tr><th>Page</th><th>GE (default)</th><th>EN</th><th>RU</th></tr></thead>
+      <tbody>
+        <tr><td>Home</td><td><code>/ge</code></td><td><code>/en</code></td><td><code>/ru</code></td></tr>
+        <tr><td>About</td><td><code>/ge/shesakheb</code></td><td><code>/en/about</code></td><td><code>/ru/o-nas</code>*</td></tr>
+        <tr><td>Services (list / detail)</td><td><code>/ge/servisebi</code> · <code>/servisebi/[slug]</code></td><td><code>/en/services</code></td><td><code>/ru/uslugi</code>*</td></tr>
+        <tr><td>Doctors (list / detail)</td><td><code>/ge/eqimebi</code> · <code>/eqimebi/[id]</code></td><td><code>/en/doctors</code></td><td><code>/ru/vrachi</code>*</td></tr>
+        <tr><td>Checkups</td><td><code>/ge/cheqapi</code></td><td><code>/en/checkups</code></td><td>*</td></tr>
+        <tr><td>Blog (list / article)</td><td><code>/ge/siaxleebi</code> · <code>/siakhlebi/[slug]</code></td><td><code>/en/blog</code></td><td>*</td></tr>
+        <tr><td>Gallery</td><td><code>/ge/galerea</code></td><td><code>/en/gallery</code></td><td>*</td></tr>
+        <tr><td>Contact</td><td><code>/ge/kontaqti</code></td><td><code>/en/contact</code></td><td><code>/ru/kontakty</code></td></tr>
+        <tr><td>Booking</td><td><code>/ge/chawera</code></td><td><code>/en/booking</code></td><td>*</td></tr>
+        <tr><td>Patient Room</td><td><code>/ge/patient-room</code></td><td><code>/en/patient-room</code></td><td><code>/ru/patient-room</code></td></tr>
+        <tr><td>CMS pages (Terms/Privacy)</td><td><code>/ge/gverdebi/terms</code> · <code>/privacy</code></td><td><code>/en/pages/terms</code></td><td>*</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--muted);margin:8px 0 0">* RU/other slugs follow the same localized-pathname scheme — open the page and copy the redirected URL, or verify against <code>/sitemap.xml</code>. The English-form URL always works and redirects to the correct localized slug.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. HEADER ============ -->
+  <section id="s3">
+    <h2><span class="num">3</span>Header &amp; Navigation</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">N-01</td><td>Logo links home; each nav item routes correctly</td><td>Home, About, Services, Doctors, Checkups, Blog, Contact all resolve</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">N-02</td><td>Active link highlight matches current page</td><td>Correct item highlighted; home not stuck active on sub-pages</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">N-03</td><td>CTA button (Book a visit) in header</td><td>Routes to <code>/booking</code></td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">N-04</td><td>Patient Room link</td><td>Routes to <code>/patient-room</code></td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">N-05</td><td>Mobile hamburger menu</td><td>Opens/closes; links + phone + CTA work; closes on selection; body scroll-lock</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">N-06</td><td>Sticky header on scroll</td><td>Header stays accessible; no overlap with content/anchors</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">N-07</td><td>Click-to-call phone link (mobile)</td><td>Triggers dialer with clinic number</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 4. FOOTER ============ -->
+  <section id="s4">
+    <h2><span class="num">4</span>Footer</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">F-01</td><td>Quick links &amp; auto-included CMS pages</td><td>All footer links resolve to live pages</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">F-02</td><td>Terms &amp; Privacy links</td><td>Open <code>/pages/terms</code> and <code>/pages/privacy</code> with content</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">F-03</td><td>Social media icons</td><td>Open correct profiles in new tab (rel=noopener)</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">F-04</td><td>Phone &amp; email links</td><td><code>tel:</code> and <code>mailto:</code> trigger correctly</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">F-05</td><td>Anatomy attribution links (Z-Anatomy, BodyParts3D, CC BY-SA)</td><td>Open external sources in new tab</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 5. HOME ============ -->
+  <section id="s5">
+    <h2><span class="num">5</span>Home Page</h2>
+    <p class="sec-note">Sections in order: Hero → Symptom Navigator → Stats → Services grid → Doctors preview → Checkup cards → News → Reviews carousel → FAQ → Contact map. Content is CMS-driven (ISR, hourly revalidate).</p>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">H-01</td><td>Hero section: slides, headline, CTA, doctor card</td><td>Slides cycle (if multiple); CTA routes to booking; doctor card shows picked doctors</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">H-02</td><td>Trust strip / badges</td><td>Renders if enabled in CMS; otherwise gracefully absent</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">H-03</td><td>Symptom Navigator: select a symptom</td><td>Maps to relevant service(s); links work</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">H-04</td><td>Stats counter animation</td><td>Counts up (patients/doctors/operations/experience) on scroll into view</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">H-05</td><td>Services grid (first 8) + "view all"</td><td>Cards link to service detail; "all" goes to <code>/services</code></td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">H-06</td><td>Doctors preview (featured)</td><td>Shows admin-configured count; cards link to doctor profiles</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">H-07</td><td>Checkup cards</td><td>Render with price/contents; link to <code>/checkups</code></td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">H-08</td><td>News section (latest)</td><td>Shows only if news exists; cards link to <code>/blog/[slug]</code></td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">H-09</td><td>Reviews carousel</td><td>Swipes/auto-rotates; star ratings render; Google reviews if synced</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">H-10</td><td>FAQ accordion</td><td>Expand/collapse; only renders if Q&amp;A pairs exist; matches FAQ schema</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">H-11</td><td>Contact map (Google Maps embed)</td><td>Map loads, marker at clinic; address/hours correct</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 6. SERVICES ============ -->
+  <section id="s6">
+    <h2><span class="num">6</span>Services</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">SV-01</td><td>Services listing <code>/services</code></td><td>All active services listed with icon/title/teaser</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">SV-02</td><td>Service detail <code>/services/[slug]</code></td><td>Full description, related doctors, booking CTA, breadcrumbs</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">SV-03</td><td>"Book this service" CTA from detail</td><td>Pre-selects the service in the booking wizard</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">SV-04</td><td>Invalid service slug</td><td>404, not a crash</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 7. DOCTORS ============ -->
+  <section id="s7">
+    <h2><span class="num">7</span>Doctors</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">D-01</td><td>Doctors listing <code>/doctors</code></td><td>All doctors with photo, name, specialty; filter/sort if present</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">D-02</td><td>Doctor profile <code>/doctors/[slug]</code></td><td>Bio, specialties, schedule/department, mini-booking widget</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">D-03</td><td>Mini-booking from doctor profile</td><td>Pre-selects the doctor in the booking flow</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">D-04</td><td>Department head badge / ordering</td><td>Heads surfaced first where applicable</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 8. CHECKUPS ============ -->
+  <section id="s8">
+    <h2><span class="num">8</span>Checkup Packages</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">CK-01</td><td>Checkups page <code>/checkups</code></td><td>Packages with included tests, price, featured styling</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">CK-02</td><td>Featured checkup card hover</td><td>Hover effect works; CTA leads to booking/contact</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 9. LAB TESTS ============ -->
+  <section id="s9">
+    <h2><span class="num">9</span>Lab Tests</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">LT-01</td><td>Lab tests listing <code>/lab-tests</code></td><td>Catalogue renders; search/category filter if present</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">LT-02</td><td>Lab test detail <code>/lab-tests/[slug]</code></td><td>Description, prep instructions, price</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 10. BLOG ============ -->
+  <section id="s10">
+    <h2><span class="num">10</span>Blog / News</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">BL-01</td><td>Blog index <code>/blog</code></td><td>Article cards (editorial layout), pagination if many</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BL-02</td><td>Article <code>/blog/[slug]</code></td><td>Lexical rich content renders: headings, images, callouts, galleries</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BL-03</td><td>Article meta (date, author, share)</td><td>Correct metadata; OG/Twitter card preview correct</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 11. ABOUT ============ -->
+  <section id="s11">
+    <h2><span class="num">11</span>About</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">AB-01</td><td>About page <code>/about</code></td><td>Clinic story, values, stats, team imagery render from CMS</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">AB-02</td><td>All About content localized</td><td>GE/EN/RU all populated</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 12. CONTACT ============ -->
+  <section id="s12">
+    <h2><span class="num">12</span>Contact</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">CT-01</td><td>Contact page <code>/contact</code></td><td>Address, phones, email, hours, map all correct &amp; clickable</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">CT-02</td><td>Contact form (if present)</td><td>Validation; submit success/error states; spam guard</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">CT-03</td><td>Map directions link</td><td>Opens Google Maps to clinic location</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 13. GALLERY ============ -->
+  <section id="s13">
+    <h2><span class="num">13</span>Gallery</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">GL-01</td><td>Gallery page <code>/gallery</code></td><td>Image grid loads; lazy-loading; no broken images</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">GL-02</td><td>Lightbox / image zoom (if present)</td><td>Open, navigate prev/next, close (Esc + click outside)</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 14. HEALTH LIBRARY ============ -->
+  <section id="s14">
+    <h2><span class="num">14</span>Health Library &amp; 3D Anatomy <span class="pill high" style="vertical-align:middle">Disabled</span></h2>
+    <div class="callout warn"><strong>Intentionally disabled (2026-05-30, client request).</strong> The Health Library / 3D anatomy page is hidden from the live site via an explicit <code>notFound()</code>. The 3D viewer code and <code>organs.glb</code> model are kept in the repo for future re-enabling. QA here is to confirm it stays hidden — <em>not</em> to test the 3D viewer or TTS.</div>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">HL-01</td><td><code>/ge/health-library</code> (and en/ru)</td><td>Returns 404 (branded not-found), not a crash</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">HL-02</td><td>No "Health Library" link in header, footer, or mobile menu</td><td>Entry absent everywhere</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">HL-03</td><td>Not present in <code>/sitemap.xml</code></td><td>No health-library URLs listed for any locale</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 15. BOOKING ============ -->
+  <section id="s15">
+    <h2><span class="num">15</span>Booking Wizard</h2>
+    <p class="sec-note">4-step wizard → Next.js API routes → Doctra REST backend. Steps: (1) Service + Doctor · (2) Date &amp; Time · (3) Personal Info · (4) Confirm. Auto-advances between steps. Final confirm gated by a Terms &amp; Privacy consent checkbox.</p>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">BK-01</td><td>Open <code>/booking</code></td><td>Step indicator shows 4 steps; step 1 active; services load</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-02</td><td>Step 1 — pick a service</td><td>Doctors for that service appear on the same screen</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-03</td><td>Step 1 — pick a doctor</td><td>Auto-advances to Date &amp; Time</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-04</td><td>Step 2 — date &amp; time slots</td><td>Available slots load from Doctra for selected doctor/date; past dates blocked</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-05</td><td>Step 2 — switch to colleague doctor</td><td>Slots refresh for the new doctor, stays on step 2</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-06</td><td>Step 2 — pick a time</td><td>Auto-advances to Personal Info</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-07</td><td>Step 3 — validation (name, phone, ID)</td><td>Accepts Georgian personal ID <em>and</em> passport numbers; rejects garbage; phone format checked</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-08</td><td>Step 3 — citizenship / non-resident toggle</td><td>Non-resident sets the correct flag forwarded to Doctra</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-09</td><td>Step 3 — auto-advance when valid</td><td>Advances to Confirm only after a real edit makes the form valid</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-10</td><td>Step 4 — review &amp; Edit links</td><td>Summary correct; "Edit" jumps back to the right step without bouncing</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-11</td><td>Step 4 — consent checkbox gates Confirm</td><td>Confirm disabled until Terms &amp; Privacy checkbox ticked</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-12</td><td>Submit booking</td><td>If enabled: success message + appointment created. If <code>BOOKING_SUBMIT_DISABLED</code>: clear "disabled/demo" message, no crash</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-13</td><td>Deep-link prefill (from service/doctor CTA &amp; URL params)</td><td>Wizard jumps ahead with service/doctor pre-selected</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-14</td><td>Backend error handling (Doctra timeout/empty)</td><td>Friendly error, retry possible, no infinite spinner</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">BK-15</td><td>Booking flow on mobile</td><td>Steps usable; date/time picker &amp; keyboard inputs work on touch</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 16. PATIENT ROOM ============ -->
+  <section id="s16">
+    <h2><span class="num">16</span>Patient Portal (Patient Room)</h2>
+    <p class="sec-note">Real Doctra login: ID/credentials → captcha → SMS OTP. On success, shows lab results with search, sort, and PDF download.</p>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">PR-01</td><td>Open <code>/patient-room</code></td><td>Login screen renders (or demo login if configured)</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">PR-02</td><td>Captcha challenge</td><td>Captcha image loads &amp; refreshes; wrong captcha rejected</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">PR-03</td><td>SMS OTP flow</td><td>OTP requested &amp; verified; wrong/expired OTP shows error</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">PR-04</td><td>Invalid credentials</td><td>Clear error, no leak of internal details</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">PR-05</td><td>Lab results list</td><td>Patient name/ID, result count, last/next visit stats correct</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">PR-06</td><td>Search &amp; sort (newest/oldest/name)</td><td>Filters the list correctly; empty-state when no match</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">PR-07</td><td>Download result PDF</td><td>Downloads <code>.pdf</code>; correct file; loading state on button</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">PR-08</td><td>Logout</td><td>Session cleared; protected data no longer accessible</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">PR-09</td><td>Direct access without session</td><td>Cannot reach results/files without authenticating</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 17. CHAT ============ -->
+  <section id="s17">
+    <h2><span class="num">17</span>AI Chat Assistant</h2>
+    <p class="sec-note">Floating chat widget on public pages → <code>/api/chat</code> (Gemini). Needs <code>GEMINI_API_KEY</code>.</p>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">CH-01</td><td>Open chat widget</td><td>Button visible on every public page; panel opens</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">CH-02</td><td>Send a clinic question</td><td>Streams a relevant answer; references services/contact appropriately</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">CH-03</td><td>Language matching</td><td>Replies in the user's language (GE/EN/RU)</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">CH-04</td><td>Missing API key / error</td><td>Clear error message, not a silent failure or raw 500</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">CH-05</td><td>Off-topic / abuse guardrails</td><td>Stays on-scope; doesn't give medical diagnoses it shouldn't</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 18. CMS PAGES ============ -->
+  <section id="s18">
+    <h2><span class="num">18</span>CMS Dynamic Pages</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">PG-01</td><td>Terms <code>/pages/terms</code> &amp; Privacy <code>/pages/privacy</code></td><td>Lexical content renders; localized; linked from footer &amp; booking consent</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">PG-02</td><td>Any other published CMS page</td><td>Renders via shared LexicalContent; appears in nav if <code>showInNav</code></td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">PG-03</td><td>Unpublished / invalid slug</td><td>404, not a server error</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 19. ADMIN ============ -->
+  <section id="s19">
+    <h2><span class="num">19</span>Admin Panel (Payload CMS)</h2>
+    <p class="sec-note">At <code>/admin</code>. TOTP 2FA on login (can be bypassed in dev via <code>TOTP_DISABLED</code>). Collections: Media, Users, Services, Doctors, CheckupPackages, LabTests, Reviews, News, Pages, ChatLogs, BuilderTemplates. Globals: SiteSettings, HomePage, AboutPage, Navigation, Footer, ContactPage, BookingPage.</p>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">AD-01</td><td>Login + TOTP 2FA</td><td>Auth works; 2FA enforced in prod; wrong code rejected</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">AD-02</td><td>Georgian admin UI translation</td><td>Custom GE labels render across collections/globals</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">AD-03</td><td>Edit a Service/Doctor/News, save, view on site</td><td>Change persists (Neon) and reflects on the public site (after ISR window)</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">AD-04</td><td>Lexical editor slash menu (images, callouts, galleries)</td><td>Inserts blocks; renders correctly on the public page</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">AD-05</td><td>Media upload (Vercel Blob)</td><td>Upload succeeds; thumbnails/sizes generated; serves over HTTPS</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">AD-06</td><td>Globals: HomePage hero/doctors/FAQ/stats</td><td>Editing reflects on home page sections</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">AD-07</td><td>Navigation toggles (enabled/label/order, showInNav)</td><td>Header menu updates accordingly</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">AD-08</td><td>Google Reviews sync button</td><td>Syncs (needs Places key) or shows a clear config error</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">AD-09</td><td>Localized field editing (ge/en/ru tabs)</td><td>Each locale saved independently</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 20. SEO ============ -->
+  <section id="s20">
+    <h2><span class="num">20</span>SEO &amp; Structured Data</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">SE-01</td><td><code>/sitemap.xml</code></td><td>Valid XML; includes all locales &amp; key pages; correct origin</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">SE-02</td><td><code>/robots.txt</code></td><td>Allows crawl of public site; references sitemap; admin/api disallowed</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">SE-03</td><td>Canonical URLs &amp; origin</td><td>Canonical uses <code>NEXT_PUBLIC_SITE_URL</code> origin; no localhost/preview leaks</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">SE-04</td><td>Per-page title/description</td><td>Unique, localized, sensible length</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">SE-05</td><td>JSON-LD (Clinic, WebSite, FAQ, Article)</td><td>Valid via Rich Results Test; no errors</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">SE-06</td><td>OG / Twitter cards</td><td>Preview correctly on social debuggers; image 1200×630 resolves</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">SE-07</td><td>hreflang alternates</td><td>ge/en/ru + x-default present &amp; reciprocal</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn"><strong>Demo note:</strong> on the Vercel demo, confirm canonical/sitemap point at the intended origin. If <code>NEXT_PUBLIC_SITE_URL</code> is unset they default to <code>https://www.khozrevanidze.ge</code> (prod) — fine for a demo, but the demo should ideally be <code>noindex</code> so it doesn't compete with production in search.</div>
+  </section>
+
+  <!-- ============ 21. A11Y ============ -->
+  <section id="s21">
+    <h2><span class="num">21</span>Accessibility</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">A-01</td><td>Keyboard-only navigation</td><td>All interactive elements reachable &amp; operable; visible focus ring</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">A-02</td><td>Accessibility toolbar / a11y inline script</td><td>Loads (beforeInteractive); options work; no CSP block</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">A-03</td><td>Screen-reader labels (aria) on icons/buttons/inputs</td><td>Nav, booking, patient-room search/sort have labels</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">A-04</td><td>Color contrast (text on brand colors)</td><td>Meets WCAG AA</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">A-05</td><td>Alt text on images</td><td>Meaningful images have alt; decorative ones empty alt</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">A-06</td><td>Reduced-motion preference</td><td>Animations respect <code>prefers-reduced-motion</code></td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 22. PERF ============ -->
+  <section id="s22">
+    <h2><span class="num">22</span>Performance</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">P-01</td><td>Lighthouse on home (mobile &amp; desktop)</td><td>Perf ≥ 80; no critical opportunities ignored</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">P-02</td><td>Core Web Vitals (LCP, CLS, INP)</td><td>LCP &lt; 2.5s, CLS &lt; 0.1, INP &lt; 200ms on key pages</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">P-03</td><td>ISR / caching on home</td><td>Fast TTFB; content revalidates ~hourly</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">P-04</td><td>3D model &amp; heavy assets</td><td>Lazy-loaded; don't block first paint of the page</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">P-05</td><td>Image optimization (AVIF/WebP, sizing)</td><td>next/image serves modern formats; no oversized originals</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 23. RESPONSIVE ============ -->
+  <section id="s23">
+    <h2><span class="num">23</span>Responsive / Cross-browser</h2>
+    <p class="sec-note">Run the critical flows (Home, Booking, Patient Room, Health Library 3D) across this matrix. Mark each cell.</p>
+    <table class="matrix">
+      <thead><tr><th>Device / Viewport</th><th>Chrome</th><th>Safari</th><th>Firefox</th><th>Edge</th></tr></thead>
+      <tbody>
+        <tr><td>Desktop 1920×1080</td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+        <tr><td>Laptop 1366×768</td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+        <tr><td>Tablet (iPad, 768–1024)</td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+        <tr><td>Mobile (iPhone, 375–430)</td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+        <tr><td>Mobile (Android, 360–412)</td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td><td><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+    <table style="margin-top:14px">
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">R-01</td><td>No horizontal scroll at any breakpoint</td><td>Content fits; no overflow from Georgian text/long words</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">R-02</td><td>Tap targets ≥ 44px on mobile</td><td>Buttons/links comfortably tappable</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">R-03</td><td>Landscape &amp; orientation change</td><td>Layout reflows cleanly; map/3D adapt</td><td><span class="pill norm">Normal</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ 24. SECURITY ============ -->
+  <section id="s24">
+    <h2><span class="num">24</span>Security &amp; Error Handling</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Test</th><th class="expect">Expected result</th><th>Pri</th><th class="res">P/F</th></tr></thead>
+      <tbody>
+        <tr><td class="id">X-01</td><td>Security headers</td><td>HSTS, X-Frame-Options SAMEORIGIN, X-Content-Type-Options, Referrer-Policy, Permissions-Policy present</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">X-02</td><td>Admin &amp; API not publicly indexable</td><td><code>/admin</code> requires auth; sensitive API routes guarded</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">X-03</td><td>Seed routes guarded in prod</td><td><code>/api/seed*</code> rejects without <code>SEED_TOKEN</code></td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">X-04</td><td>Patient data isolation</td><td>One patient cannot access another's results/files (no IDOR)</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">X-05</td><td>Form input validation / injection</td><td>Booking &amp; contact forms sanitize input; no XSS via name/notes</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">X-06</td><td>No secrets leaked client-side</td><td>API keys/credentials not exposed in JS bundle or network tab</td><td><span class="pill crit">Critical</span></td><td class="res"><span class="chk"></span></td></tr>
+        <tr><td class="id">X-07</td><td>Graceful 500 handling</td><td>Errors show a branded page, never a raw stack trace</td><td><span class="pill high">High</span></td><td class="res"><span class="chk"></span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">★</span>Bug Log</h2>
+    <table>
+      <thead><tr><th>#</th><th>Area / Test ID</th><th>Severity</th><th>Description</th><th>Steps to reproduce</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>2</td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>3</td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>4</td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>5</td><td></td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Khozrevanidze Clinic — QA Test Specification · Generated for the Vercel demo deployment ·
+    Print to PDF for sign-off. Sign-off: Tester ____________ &nbsp; Date ________ &nbsp; Result: ☐ Pass ☐ Pass w/ issues ☐ Fail
+  </footer>
+
+</div>
+</body>
+</html>

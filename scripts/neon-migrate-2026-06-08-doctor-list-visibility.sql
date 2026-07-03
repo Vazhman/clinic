@@ -1,0 +1,11 @@
+-- Doctors: per-doctor "show on doctors page" toggle.
+--
+-- New `showOnDoctorsPage` checkbox (default true). When false, the doctor is
+-- hidden from the /doctors list + home featured grid, but the profile stays
+-- reachable by direct link and the BOOKING list is unaffected (booking uses its
+-- own filter and never reads this field). Independent from `inactive` (which
+-- hides everywhere) and `bookingEnabled` (booking button only).
+--
+-- Additive/idempotent. Default true so no existing doctor is hidden on rollout.
+-- doctors is NOT a drafts collection, so no `_doctors_v` mirror is needed.
+ALTER TABLE "doctors" ADD COLUMN IF NOT EXISTS "show_on_doctors_page" boolean DEFAULT true;

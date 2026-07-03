@@ -1,0 +1,96 @@
+"""
+Same clean export as before + kidneys, bladder, suprarenal glands.
+"""
+import bpy
+import os
+
+OUTPUT = r"C:\Users\nfart\OneDrive\Desktop\clinic\public\models\organs.glb"
+
+# Exact object names to keep (from our successful previous export + kidneys)
+KEEP = [
+    "heart", "ventricle", "atrium", "aorta", "cardiac", "valve", "papillary", "semilunar",
+    "coronary", "valvular",
+    "lung", "pulmon", "bronch", "diaphragm",
+    "stomach", "intestin", "colon", "duodenum", "jejunum", "ileum",
+    "liver", "gallbladder", "pancreas", "spleen",
+    "esophag", "cecum", "rectum", "appendix", "sigmoid",
+    "omental", "mucosa of stomach",
+    # KIDNEYS - the missing ones
+    "kidney", "renal pelvis", "urinary bladder", "suprarenal gland",
+    "thyroid gland", "parathyroid",
+    "brain", "cerebr", "cerebellum", "hypothalam", "thalamus",
+    "hippocampus", "brainstem", "medulla oblongata", "pons",
+    "midbrain", "forebrain", "tectum", "tegmentum", "aqueduct",
+    "eyeball", "sclera", "cornea", "iris", "lens", "retina",
+    "chamber of eyeball", "pole of eyeball", "segment of eyeball",
+    "axis of eyeball", "equator of eyeball", "meridians of eyeball",
+    "trachea", "larynx", "epiglottis", "fibro-elastic membrane",
+    "frontal bone", "parietal bone", "temporal bone", "occipital bone",
+    "sphenoid bone", "ethmoid bone", "zygomatic bone", "maxilla",
+    "mandible", "nasal bone", "cranium", "neurocranium", "calvaria",
+    "viscerocranium",
+    "vertebr", "intervertebr", "spinal cord", "pedicle of vertebr",
+    "lamina of vertebr", "articular facet", "pars interarticularis",
+    "paravertebral",
+    "uterus", "ovary", "uterine tube", "pelvic diaphragm",
+]
+
+EXCLUDE = [
+    "muscle", "nerve", "node", "lymph", "ligament", "fascia",
+    "surface", "region", "border", "angle", "margin", "process",
+    "gyrus", "gyri", "sulcus", "sulci", "fossa", "groove",
+    "testis", "teste", "scrotum", "penis", "epididym", "prostat",
+    "skin", "subcutaneous", "joint", "suture",
+    "artery", "vein", "arterial", "venous",
+    "dental", "teeth", "tooth",
+    "capsule", "hilum",
+    "orbital part", "orbital region", "orbital gyri", "orbital sulci",
+    "orbital surface", "orbital plate", "orbital veins",
+    "zygomaticus", "orbicularis",
+    "sinus of frontal", "sinus of sphenoid",
+    "septum of sphenoid",
+    "impression", "incisure",
+    "cells of ethmoid",
+    "squamous part", "petrous part", "tympanic part", "basilar part",
+    "styloid", "mastoid", "jugular", "vaginal process",
+    "foramen", "notch",
+    "femur", "tibia", "fibula", "patella", "foot", "ankle",
+    "humer", "radius", "ulna", "carpal", "metacarp", "finger",
+    "shoulder", "deltoid", "bicep", "tricep", "brachial",
+    "scapul", "clavicl", "acromi",
+]
+
+bpy.ops.object.select_all(action='DESELECT')
+
+selected = 0
+for obj in bpy.data.objects:
+    if obj.type != 'MESH':
+        continue
+    name_lower = obj.name.lower()
+    if not any(kw in name_lower for kw in KEEP):
+        continue
+    if any(kw in name_lower for kw in EXCLUDE):
+        continue
+    obj.select_set(True)
+    selected += 1
+
+# Check kidneys specifically
+kidney_count = 0
+for obj in bpy.context.selected_objects:
+    if 'kidney' in obj.name.lower() or 'renal' in obj.name.lower() or 'bladder' in obj.name.lower() or 'suprarenal' in obj.name.lower():
+        kidney_count += 1
+        print(f"  KIDNEY/URINARY: {obj.name}")
+
+print(f"Selected {selected} objects ({kidney_count} kidney/urinary)")
+
+bpy.ops.export_scene.gltf(
+    filepath=OUTPUT,
+    export_format='GLB',
+    use_selection=True,
+    export_apply=True,
+    export_draco_mesh_compression_enable=True,
+    export_draco_mesh_compression_level=6,
+)
+
+size_mb = os.path.getsize(OUTPUT) / (1024 * 1024)
+print(f"DONE - SIZE: {size_mb:.1f} MB")

@@ -1,0 +1,30 @@
+{
+  "reviews": {
+    "1": {
+      "en": "The best clinic in Batumi! Very satisfied with the service.",
+      "ru": "Лучшая клиника в Батуми! Очень доволен(а) обслуживанием."
+    },
+    "2": {
+      "en": "Professional doctors and friendly staff. Recommend to everyone!",
+      "ru": "Профессиональные врачи и дружелюбный персонал. Рекомендую всем!"
+    },
+    "3": {
+      "en": "Excellent clinic! Great service and professional doctors.",
+      "ge": "შესანიშნავი კლინიკა! შესაშური მომსახურება და პროფესიონალი ექიმები."
+    },
+    "4": {
+      "en": "Good service, modern equipment. Recommended!",
+      "ru": "Хорошее обслуживание, современное оборудование. Рекомендуется!"
+    }
+  },
+  "media": {
+    "2": {
+      "en": "Doctor photo (placeholder)",
+      "ru": "Фото врача (заглушка)"
+    }
+  },
+  "biography_template": {
+    "en": "{NAME} — an experienced {SPECIALTY}, a member of the Khozrevanidze Clinic team. Specializes in diagnostics and treatment, caring for the health and comfort of each patient. Regularly participates in international trainings and conferences to ensure that medical services remain continuously updated and up to date.",
+    "ru": "{NAME} — опытный {SPECIALTY}, член команды клиники Хозреванидзе. Специализируется на диагностике и лечении, заботясь о здоровье и комфорте каждого пациента. Регулярно участвует в международных тренингах и конференциях, чтобы медицинские услуги оставались постоянно обновлёнными и современными."
+  }
+}

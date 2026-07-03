@@ -1,0 +1,217 @@
+﻿Doctra portal_exchange
+token
+Description:
+აბრუნებს ტოკენს, რომელიც აქტიურია “token_active_time” წუთის განმავლობაში.
+HTTP Method: POST
+Intput:
+{
+"auth_type":0,
+"user": "",
+"password": ""
+}
+auth_type – ავტორზაციის ტიპი, დეფოლტად 0
+user – მომხმარებელი
+password – პაროლი
+Output:
+{
+“status”:0,
+“error_text”: “”,
+“token”:””,
+“token_active_time”:0
+}
+Status :
+0 - Success
+1 - Unknown error
+2 - Incorrect data format
+3 - Authorization error
+refresh_token
+HTTP Method: POST
+Description:
+ანახლებს გადაცემული ტოკენის აქტიურობის დროს(“ token_active_time”)
+Intput:
+{
+"auth_type":0,
+"user": "",
+"password": "",
+“token”: "",
+}
+auth_type – ავტორზაციის ტიპი, დეფოლტად 0
+user – მომხმარებელი
+password – პაროლი
+token   - ტოკენი
+Output:
+{
+“status”:0,
+“error_text”: “”
+}
+Status :
+0 - Success
+1 - Unknown error
+2 - Incorrect data format
+3 - Authorization error
+9 - Incorrect or inactive token
+invalidate_token
+HTTP Method: POST
+Description:
+ანულებს გადაცემული ტოკენის აქტიურობის დროს(“ token_active_time”)
+Intput:
+{
+"auth_type":0,
+"user": "",
+"password": "",
+“token”: "",
+}
+auth_type – ავტორზაციის ტიპი, დეფოლტად 0
+user – მომხმარებელი
+password – პაროლი
+token   - ტოკენი
+Output:
+{
+“status”:0,
+“error_text”: “”
+}
+Status :
+0 - Success
+1 - Unknown error
+2 - Incorrect data format
+3 - Authorization error
+9 - Incorrect or inactive token
+get_departments
+HTTP Method: POST
+Description:
+აბრუნებს განყოფილებების სიას
+Intput:
+{
+}
+Header:
+Key: Authorization
+Value: Bearer_[token]
+Output:
+{
+"status": 0,
+"error_text": "",
+"departments": [
+{
+"id": "ff557a82-1f5a-11e6-86da-f832e4bd592e",
+"name": " department 1",
+"address": ""
+},
+{
+"id": "2319b035-7fd3-11e6-a932-f832e4bd592e",
+"name": " department 2",
+"address": ""
+}
+]
+}
+Status :
+0 - Success
+1 - Unknown error
+2 - Incorrect data format
+9 - Incorrect or inactive token
+get_doctors
+HTTP Method: POST
+Description:
+აბრუნებს ექიმების სიას
+Intput:
+{
+"department_id": "ff557a82-1f5a-11e6-86da-f832e4bd592e",
+"doctor_id": "",
+"with_files": false,
+"doctor_name": ""
+}
+Header:
+Key: Authorization
+Value: Bearer_[token]
+Output:
+{
+"status": 0,
+"error_text": "",
+"doctors": [
+{
+"id": "0dc35168-268f-11e6-8353-f832e4bd592e",
+"jid": "",
+"name": name ",
+"department_id": "ff557a82-1f5a-11e6-86da-f832e4bd592e",
+"picture": "",
+"services": [],
+"consultation_price": 0,
+"name_en": "",
+"degree": "",
+"degree_en": "",
+"specialty": "",
+"specialty_en": "",
+"counterparty": ""
+}
+]
+}
+Status :
+0 - Success
+1 - Unknown error
+2 - Incorrect data format
+9 - Incorrect or inactive token
+get_time_slots
+HTTP Method: POST
+Description:
+აბრუნებს ექიმებზე გაწერილ დროის სლოტებს
+Intput:
+{
+"date_begin": "",
+"date_end": "",
+"department_id": "ff557a82-1f5a-11e6-86da-f832e4bd592e",
+"doctors": [],
+"patient_id": "",
+"organization_id": "b2999820-1c4f-11e6-896b-f832e4bd592e"
+}
+Header:
+Key: Authorization
+Value: Bearer_[token]
+Output:
+{
+"status": 0,
+"error_text": "",
+"doctors": [
+{
+" doctor_id": "",
+"date_begin": ,
+" date_end": ,
+"slot_type": "",
+" patient_id": "",
+" patient_name": "",
+"order_id ": ""
+}
+]
+}
+Status :
+0 - Success
+1 - Unknown error
+2 - Incorrect data format
+9 - Incorrect or inactive token
+booking_without_otac
+HTTP Method: POST
+Description:
+პაციენტის დაჯავშნა
+Intput:
+{
+"doctor_id": "0dc35168-268f-11e6-8353-f832e4bd592e",
+"date_begin": "202010121300",
+"order_id": "",
+"cancelation": false,
+"patient_id": "01234567890",
+"patient_name": "name",
+"patient_surname": " surname ",
+"patient_date_of_birth": "20010102",
+"patient_tel": "",
+"patient_email": "",
+"patient_sex": "Male"
+}
+Header:
+Key: Authorization
+Value: Bearer_[token]
+Output:
+{
+}
+Status :
+0 - Success
+1 - Unknown error
+2 - Incorrect data format
+9 - Incorrect or inactive token

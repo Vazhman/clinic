@@ -1,0 +1,18 @@
+# Exclude from Docker build context to keep COPY fast and the image clean.
+node_modules
+.next
+.git
+.gitignore
+.env.notes.bak
+docs
+blender-work
+test-screenshots
+*.log
+.vercel
+.claude
+README.md
+CLAUDE.md
+AGENTS.md
+.dockerignore
+Dockerfile
+docker-compose.yml

@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ხოზრევანიძის კლინიკის ადმინ-პანელის სახელმძღვანელო</title>
+<style>
+  @font-face {
+    font-family: "FiraGO";
+    font-weight: 400;
+    font-style: normal;
+    src: url("../public/fonts/FiraGO-Regular.woff2") format("woff2");
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "FiraGO";
+    font-weight: 500;
+    font-style: normal;
+    src: url("../public/fonts/FiraGO-Medium.woff2") format("woff2");
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "FiraGO";
+    font-weight: 700;
+    font-style: normal;
+    src: url("../public/fonts/FiraGO-Bold.woff2") format("woff2");
+    font-display: swap;
+  }
+
+  :root {
+    --blackberry: #682149;
+    --blackberry-dark: #4a1735;
+    --blackberry-light: #8c3768;
+    --pink: #DD64A6;
+    --pink-soft: #F7D6E7;
+    --pink-bg: #FDF4F9;
+    --grey: #3D3D3D;
+    --grey-soft: #6E6E6E;
+    --grey-line: #E4E4E4;
+    --cream: #FAFAF8;
+    --green: #2F9E6B;
+    --amber: #C58A23;
+    --red: #C84444;
+    --code-bg: #F4ECF2;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "FiraGO", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Georgian", "Sylfaen", Roboto, sans-serif;
+    color: var(--grey);
+    background: var(--cream);
+    line-height: 1.65;
+    font-size: 14px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px 96px; }
+
+  /* ── Cover page ─────────────────────────────────────────── */
+  .cover {
+    min-height: 100vh;
+    padding: 64px 56px;
+    background: linear-gradient(140deg, var(--blackberry) 0%, var(--blackberry-dark) 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    page-break-after: always;
+  }
+  .cover-logo {
+    height: 64px;
+    width: auto;
+    filter: brightness(0) invert(1);
+    opacity: 0.95;
+  }
+  .cover-title {
+    margin-top: auto;
+  }
+  .cover h1 {
+    font-size: 38px;
+    line-height: 1.2;
+    margin: 0 0 16px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .cover .lead {
+    font-size: 17px;
+    line-height: 1.5;
+    opacity: 0.85;
+    max-width: 620px;
+  }
+  .cover .accent {
+    width: 96px;
+    height: 6px;
+    background: var(--pink);
+    margin: 28px 0 0;
+    border-radius: 3px;
+  }
+  .cover-foot {
+    font-size: 13px;
+    opacity: 0.7;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 18px;
+  }
+
+  /* ── TOC ────────────────────────────────────────────────── */
+  .toc {
+    background: white;
+    border: 1px solid var(--grey-line);
+    border-radius: 14px;
+    padding: 28px 32px;
+    margin: 40px auto;
+    page-break-after: always;
+  }
+  .toc h2 {
+    margin: 0 0 18px;
+    color: var(--blackberry);
+    border: none;
+    padding: 0;
+    font-size: 22px;
+  }
+  .toc ol {
+    list-style: none;
+    counter-reset: toc-item;
+    padding: 0;
+    margin: 0;
+  }
+  .toc li {
+    counter-increment: toc-item;
+    padding: 8px 0;
+    border-bottom: 1px dotted var(--grey-line);
+    display: flex;
+    justify-content: space-between;
+  }
+  .toc li:last-child { border-bottom: none; }
+  .toc li::before {
+    content: counter(toc-item) ".";
+    color: var(--pink);
+    font-weight: 700;
+    margin-right: 12px;
+    min-width: 28px;
+  }
+  .toc a {
+    color: var(--grey);
+    text-decoration: none;
+    flex: 1;
+  }
+  .toc a:hover { color: var(--blackberry); }
+
+  /* ── Sections ───────────────────────────────────────────── */
+  section {
+    page-break-inside: auto;
+    margin-top: 48px;
+  }
+  section.major { page-break-before: always; }
+  h2.section-title {
+    color: var(--blackberry);
+    margin: 0 0 20px;
+    font-size: 26px;
+    font-weight: 700;
+    border-left: 5px solid var(--pink);
+    padding-left: 14px;
+    letter-spacing: -0.3px;
+  }
+  h3 {
+    color: var(--blackberry-dark);
+    margin: 28px 0 8px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  h4 {
+    color: var(--blackberry-light);
+    margin: 20px 0 6px;
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  p { margin: 8px 0; }
+  ul, ol { padding-left: 24px; margin: 8px 0; }
+  ul li, ol li { margin: 4px 0; }
+  ul li::marker { color: var(--pink); }
+  strong { color: var(--blackberry-dark); font-weight: 700; }
+
+  /* ── Inline code / paths ────────────────────────────────── */
+  code {
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    background: var(--code-bg);
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: var(--blackberry-dark);
+    word-break: break-all;
+  }
+
+  /* ── Callout boxes ──────────────────────────────────────── */
+  .callout {
+    background: white;
+    border: 1px solid var(--grey-line);
+    border-left: 4px solid var(--pink);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 13.5px;
+  }
+  .callout.warn   { border-left-color: var(--amber); background: #FCF7EB; }
+  .callout.danger { border-left-color: var(--red);   background: #FCEEEE; }
+  .callout.info   { border-left-color: var(--pink); }
+  .callout-title {
+    font-weight: 700;
+    color: var(--blackberry);
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .callout.warn   .callout-title { color: var(--amber); }
+  .callout.danger .callout-title { color: var(--red); }
+
+  /* ── Tables ─────────────────────────────────────────────── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13.5px;
+    background: white;
+    border: 1px solid var(--grey-line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  thead { background: var(--blackberry); color: white; }
+  th, td {
+    text-align: left;
+    padding: 10px 14px;
+    vertical-align: top;
+  }
+  th { font-weight: 600; font-size: 13px; }
+  tbody tr { border-top: 1px solid var(--grey-line); }
+  tbody tr:nth-child(even) { background: var(--pink-bg); }
+  td code { background: rgba(255,255,255,0.6); }
+
+  /* ── Step lists ─────────────────────────────────────────── */
+  ol.steps {
+    list-style: none;
+    counter-reset: step;
+    padding-left: 0;
+  }
+  ol.steps > li {
+    counter-increment: step;
+    position: relative;
+    padding: 4px 0 4px 38px;
+    margin: 6px 0;
+  }
+  ol.steps > li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 26px;
+    height: 26px;
+    background: var(--pink);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 26px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* ── Screenshot placeholders ───────────────────────────── */
+  .screenshot {
+    margin: 20px 0;
+    border: 2px dashed var(--pink-soft);
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--pink-bg) 0%, white 100%);
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--grey-soft);
+    font-size: 13px;
+    page-break-inside: avoid;
+  }
+  .screenshot::before {
+    content: "🖼";
+    display: block;
+    font-size: 32px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+  .screenshot .label {
+    color: var(--blackberry);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  /* ── Section header chrome ──────────────────────────────── */
+  .section-num {
+    display: inline-block;
+    background: var(--pink);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Foot of document ───────────────────────────────────── */
+  .doc-foot {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 2px solid var(--blackberry);
+    color: var(--grey-soft);
+    font-size: 12.5px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* ── Print rules ────────────────────────────────────────── */
+  @page {
+    size: A4;
+    margin: 18mm 16mm 18mm 16mm;
+  }
+  @media print {
+    body { background: white; font-size: 11pt; }
+    .cover { min-height: 257mm; }
+    .toc { box-shadow: none; }
+    a { color: var(--blackberry-dark); text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ───────────────────────────── COVER ───────────────────────────── -->
+<div class="cover">
+  <img src="../public/images/logo-geo-white.png" alt="ხოზრევანიძის კლინიკა" class="cover-logo" />
+  <div class="cover-title">
+    <h1>ადმინ-პანელის სახელმძღვანელო</h1>
+    <p class="lead">სრული ინსტრუქცია ხოზრევანიძის კლინიკის ვებსაიტის ყოველდღიური მართვისთვის — Payload CMS-ში.</p>
+    <div class="accent"></div>
+  </div>
+  <div class="cover-foot">
+    <div>ხოზრევანიძის კლინიკა · ვერსია 1.0 · 2026-05-13</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ───────────────────────────── TOC ───────────────────────────── -->
+<div class="toc">
+  <h2>შინაარსი</h2>
+  <ol>
+    <li><a href="#s1">შესვლა და 2FA</a></li>
+    <li><a href="#s2">მთავარი პანელი</a></li>
+    <li><a href="#s3">ექიმების მართვა</a></li>
+    <li><a href="#s4">შეფასებების მართვა</a></li>
+    <li><a href="#s5">სერვისების (განყოფილებების) მართვა</a></li>
+    <li><a href="#s6">ჩექაფ პაკეტების მართვა</a></li>
+    <li><a href="#s7">მთავარი გვერდის კონფიგურაცია</a></li>
+    <li><a href="#s8">სხვა ცენტრალური პარამეტრები</a></li>
+    <li><a href="#s9">ფოტოების ატვირთვა (Media)</a></li>
+    <li><a href="#s10">ხშირი ამოცანების სწრაფი ცნობარი</a></li>
+    <li><a href="#s11">პრობლემების მოგვარება</a></li>
+    <li><a href="#s12">უსაფრთხოება</a></li>
+  </ol>
+</div>
+
+<!-- ───────────────────────────── 1. შესვლა ───────────────────────────── -->
+<section id="s1" class="major">
+  <span class="section-num">თავი 01</span>
+  <h2 class="section-title">შესვლა</h2>
+
+  <ol class="steps">
+    <li>ბრაუზერში გახსენით: <code>https://khozrevanidze.ge/admin</code><br />
+      (დემოს ვერსიაზე: <code>https://clinic-one-blush.vercel.app/admin</code>)</li>
+    <li>შეიყვანეთ ელფოსტა და პაროლი (გადაცემული თქვენ პირადად)</li>
+    <li>დააწექით <strong>„Sign In"</strong>-ს</li>
+  </ol>
+
+  <div class="screenshot">
+    <div class="label">[Screenshot: Admin login page]</div>
+    <div>ხოზრევანიძის ლოგო + ფორმა: Email / Password / Sign In ღილაკი</div>
+  </div>
+
+  <p>თუ პაროლი დაგავიწყდათ — დარეკეთ ვებსაიტის ადმინისტრატორთან, ის ხელახლა გენერირებას აკეთებს.</p>
+
+  <h3>1.1. ორფაქტორიანი ავტორიზაცია (2FA / TOTP)</h3>
+  <p>უსაფრთხოებისთვის ადმინ-პანელი მოითხოვს დამატებით 6-ციფრიან კოდს ყოველი შესვლისას.</p>
+
+  <h4>პირველი შესვლა</h4>
+  <ol class="steps">
+    <li>ჩამოტვირთეთ ავტენტიფიკატორის აპლიკაცია მობილურზე:
+      <ul>
+        <li><strong>Google Authenticator</strong> (iOS / Android — ყველაზე გავრცელებული)</li>
+        <li><strong>Microsoft Authenticator</strong> (iOS / Android)</li>
+        <li><strong>Authy</strong> (iOS / Android / Desktop)</li>
+        <li><strong>1Password</strong> (თუ უკვე იყენებთ პაროლების მენეჯერად)</li>
+      </ul>
+    </li>
+    <li>შესვლის შემდეგ პანელი თქვენ ავტომატურად გადაგამისამართებთ <strong>„Setup TOTP"</strong> გვერდზე, სადაც ნაჩვენებია <strong>QR კოდი</strong>.</li>
+    <li>გახსენით ავტენტიფიკატორის აპლიკაცია → <strong>„+"</strong> ღილაკი → <strong>„Scan QR code"</strong> → მიუშვით კამერა ეკრანზე გამოსახულ QR-ს.</li>
+    <li>აპლიკაცია გაჩვენებთ 6-ციფრიან კოდს (ის 30 წამში ერთხელ იცვლება).</li>
+    <li>ჩაწერეთ ეს კოდი ვებსაიტზე და დააწექით <strong>„Verify"</strong>-ს.</li>
+  </ol>
+
+  <div class="screenshot">
+    <div class="label">[Screenshot: Setup TOTP page with QR code]</div>
+    <div>QR კოდი + Enter code ველი + Verify ღილაკი</div>
+  </div>
+
+  <h4>ყოველი მომდევნო შესვლა</h4>
+  <ol class="steps">
+    <li>ჩვეულებრივად შეიყვანეთ ელფოსტა და პაროლი.</li>
+    <li>შემდეგ ეკრანზე გახსენით ავტენტიფიკატორის აპლიკაცია, წაიკითხეთ ახლანდელი 6-ციფრიანი კოდი (<em>Khozrevanidze Clinic</em>-ის ქვეშ) და შეიყვანეთ.</li>
+  </ol>
+
+  <div class="callout danger">
+    <span class="callout-title">⚠ მნიშვნელოვანი</span>
+    <ul>
+      <li>არასოდეს გადასცეთ თქვენი QR კოდი ან 6-ციფრიანი კოდი სხვას.</li>
+      <li>თუ ტელეფონი დაკარგეთ ან გადააყენეთ — დარეკეთ ვებსაიტის ადმინისტრატორთან, ის თქვენი TOTP-ის გადატვირთვას მოახდენს.</li>
+      <li>რეკომენდირებულია ავტენტიფიკატორის სარეზერვო ასლის შენახვა (Authy და 1Password ამას ავტომატურად აკეთებენ).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ───────────────────────────── 2. მთავარი პანელი ───────────────────────────── -->
+<section id="s2" class="major">
+  <span class="section-num">თავი 02</span>
+  <h2 class="section-title">მთავარი პანელი</h2>
+
+  <p>შესვლის შემდეგ ხედავთ პანელის მთავარ ეკრანს. ის შემდეგი ნაწილებისგან შედგება:</p>
+
+  <div class="screenshot">
+    <div class="label">[Screenshot: Admin Dashboard — overview]</div>
+    <div>Welcome banner · Doctra Sync card · 3 Needs-attention tiles · Stats + Quick actions</div>
+  </div>
+
+  <h3>2.1. Doctra სინქრონიზაცია (ვარდისფერი ღილაკი ზემოთ)</h3>
+  <p><strong>როდის გამოიყენოთ:</strong> როცა Doctra-ში დაამატებთ ახალ ექიმს, ან არსებული ექიმის სპეციალობა შეიცვალოს.</p>
+
+  <h4>როგორ</h4>
+  <ol class="steps">
+    <li>დააწექით ღილაკს <strong>„სინქრონიზაცია ახლა"</strong></li>
+    <li>დაელოდეთ 5–15 წამი (გამოჩნდება სპინერი)</li>
+    <li>შედეგი გამოჩნდება მწვანე/ყვითელ ბარათად:
+      <ul>
+        <li><strong>„X ახალი ექიმი დაემატა"</strong> — წარმატებული</li>
+        <li><strong>„Y შეცდომა"</strong> — ნახეთ შეცდომების სია „იხილე შეცდომები" ღილაკით</li>
+      </ul>
+    </li>
+  </ol>
+
+  <div class="screenshot">
+    <div class="label">[Screenshot: Doctra Sync card mid-run]</div>
+    <div>Spinner + step text: „Fetching departments..." → „Fetching doctors..."</div>
+  </div>
+
+  <div class="callout info">
+    <span class="callout-title">მნიშვნელოვანია</span>
+    <ul>
+      <li>სინქრონიზაცია <strong>ვერ წაშლის</strong> თქვენ მიერ ხელით დამატებულ ფოტოს, ბიოგრაფიას ან სხვა სარედაქციო ინფორმაციას</li>
+      <li>ის <strong>მხოლოდ ახალ</strong> ექიმებს დაამატებს Doctra-დან</li>
+      <li>შეგიძლიათ უსაფრთხოდ გაუშვათ რამდენჯერმე — დუბლიკატებს არ შექმნის</li>
+    </ul>
+  </div>
+
+  <h3>2.2. „საჭიროებს ყურადღებას" — 3 ბარათი</h3>
+  <p>ეს ბარათები გიჩვენებენ ექიმებს, რომელთა ინფორმაცია არ არის სრული:</p>
+  <table>
+    <thead><tr><th>ბარათი</th><th>რას ნიშნავს</th></tr></thead>
+    <tbody>
+      <tr><td><strong>🖼 ფოტო აკლია</strong></td><td>ექიმს არ აქვს ფოტო ატვირთული (ნაგულისხმევი ფოტო ჩანს)</td></tr>
+      <tr><td><strong>✏️ სპეციალობა შესავსებია</strong></td><td>სპეციალობა არ არის შევსებული (ჩანს „—")</td></tr>
+      <tr><td><strong>🔇 დამალული ექიმები</strong></td><td>ექიმები რომლებიც დროებით დამალულია საიტიდან</td></tr>
+    </tbody>
+  </table>
+  <p>დააწექით ნებისმიერ ბარათს — გადახვალთ უკვე გაფილტრულ ექიმთა სიაში.</p>
+
+  <h3>2.3. სტატისტიკა და სწრაფი მოქმედებები</h3>
+  <ul>
+    <li><strong>მარცხნივ:</strong> კონტენტის სტატისტიკა (ექიმები, სერვისები, შეფასებები, ა.შ.)</li>
+    <li><strong>მარჯვნივ:</strong> სწრაფი ბმულები — ახალი ექიმის, სიახლის, გვერდის შესაქმნელად</li>
+  </ul>
+</section>
+
+<!-- ───────────────────────────── 3. ექიმების მართვა ───────────────────────────── -->
+<section id="s3" class="major">
+  <span class="section-num">თავი 03</span>
+  <h2 class="section-title">ექიმების მართვა</h2>
+  <p>გვერდის მისამართი: <code>/admin/collections/doctors</code></p>
+
+  <h3>3.1. ექიმთა სია</h3>
+  <p>ზედა ნაწილში გაქვთ <strong>4 ფილტრის ღილაკი</strong>:</p>
+  <ul>
+    <li><strong>ყველა</strong> — სრული სია (146 ექიმი)</li>
+    <li><strong>ფოტო აკლია</strong> — ვისაც ფოტო არ აქვს</li>
+    <li><strong>სპეციალობა შესავსებია</strong> — ვისაც სპეციალობა „—" აქვს</li>
+    <li><strong>დამალული</strong> — ვისი ჩვენებაც გათიშულია</li>
+  </ul>
+
+  <div class="screenshot">
+    <div class="label">[Screenshot: Doctors list with chip filters + table]</div>
+    <div>4 chip-ფილტრი ზევით · ცხრილი: სახელი, სპეციალობა, განყოფილების ხელმძღვანელი, dameuli, view live</div>
+  </div>
+
+  <p>ცხრილში თითო რიგი = ერთი ექიმი. სვეტები:</p>
+  <ul>
+    <li><strong>სახელი</strong> — დააწექით ჩასასწორებლად</li>
+    <li><strong>სპეციალობა</strong></li>
+    <li><strong>განყოფილების ხელმძღვანელი</strong> ✓/✗</li>
+    <li><strong>დამალული</strong> ✓/✗</li>
+    <li><strong>საიტზე ნახვა</strong> (გარე ბმულის ხატულა) — ღია ფანჯარაში ხსნის ექიმის გვერდს</li>
+  </ul>
+
+  <h3>3.2. ექიმის რედაქტირება</h3>
+  <p>დააწექით ექიმის სახელზე → იხსნება სარედაქციო გვერდი 3 ჩანართით:</p>
+
+  <h4>იდენტობა (Identity)</h4>
+  <ul>
+    <li><strong>სახელი</strong> (3 ენაზე — გადართეთ ენა ზედა მარჯვენა კუთხეში)</li>
+    <li><strong>ფოტო</strong> — დააწექით „Add Media" → Upload → აარჩიეთ ფაილი</li>
+  </ul>
+  <div class="callout">
+    <span class="callout-title">ფოტოს რეკომენდაცია</span>
+    ერთხელ იტვირთება და მუშაობს 3-ვე ენაზე. რეკომენდირებული ზომა: <strong>1500×1500 პიქსელი, JPEG, 200KB–1MB</strong>.
+  </div>
+
+  <h4>პროფილი (Profile)</h4>
+  <ul>
+    <li><strong>სპეციალობა</strong> — მთავარი სამედიცინო სპეციალობა</li>
+    <li><strong>ტელეფონი</strong> — ექიმის ნომერი (Doctra-დან მიღებული)</li>
+    <li><strong>ელფოსტა</strong> — Doctra-დან, შეიძლება ცარიელი იყოს</li>
+    <li><strong>ბიოგრაფია</strong> — სრული ტექსტი, შეგიძლიათ გამოიყენოთ მუქი, დახრილი, სათაურები</li>
+    <li><strong>კვალიფიკაცია</strong> — სია (Add Row → მაგ. „კარდიოლოგიის სპეციალისტი")</li>
+    <li><strong>სპეციალიზაცია</strong> — სია (Add Row → მაგ. „დიაგნოსტიკა")</li>
+    <li><strong>გამოცდილების წლები</strong> — რიცხვი</li>
+    <li><strong>ენები</strong> — სია (Add Row → არჩევა dropdown-დან: Georgian, English, Russian, ა.შ.)</li>
+    <li><strong>განყოფილების ხელმძღვანელი</strong> — ჩექბოქსი (ჩაირთვება ჯვარი ვარსკვლავი ექიმის გვერდზე)</li>
+  </ul>
+
+  <div class="screenshot">
+    <div class="label">[Screenshot: Doctor edit form — Profile tab]</div>
+    <div>ფორმის ველები + ლოკალის გადამრთველი ზევით · მარჯვენა სვეტი: slug, doctraId, inactive</div>
+  </div>
+
+  <h4>SEO</h4>
+  <ul>
+    <li><strong>Meta Title / Description</strong> — საძიებო სისტემებისთვის (Google). თუ ცარიელია, ავტომატურად გენერირდება.</li>
+    <li><strong>OG სურათი</strong> — სოციალურ ქსელებში გასაზიარებლად. თუ ცარიელია, ფოტო გამოიყენება.</li>
+  </ul>
+
+  <h4>სიდბარი (გვერდის მარჯვენა მხარე)</h4>
+  <ul>
+    <li><strong>slug</strong> — URL მისამართის ნაწილი. <strong>არ შეცვალოთ</strong> Doctra-დან მიღებულ ექიმებზე (URL-ი დაირღვევა).</li>
+    <li><strong>doctraId</strong> — Doctra სისტემის ID. <strong>არ შეცვალოთ.</strong></li>
+    <li><strong>inactive</strong> — მონიშნეთ, თუ გინდათ ექიმის დროებითი დამალვა (წაშლის გარეშე)</li>
+  </ul>
+
+  <h3>3.3. სამი ენის რედაქტირება</h3>
+  <p>გვერდის ზედა მარჯვენა კუთხეში არის ენის გადამრთველი:</p>
+  <ul>
+    <li><strong>ქართული (ge)</strong> — ნაგულისხმევი</li>
+    <li><strong>English (en)</strong></li>
+    <li><strong>Русский (ru)</strong></li>
+  </ul>
+  <p>გადართეთ ენა → ცვლადი ველები (სახელი, სპეციალობა, ბიოგრაფია, ა.შ.) შეიცვალოს იმ ენაზე. შენახეთ თითო ენაზე ცალ-ცალკე.</p>
+
+  <div class="callout info">
+    <span class="callout-title">მნიშვნელოვანი</span>
+    ფოტო, slug, ტელეფონი, ელფოსტა, doctraId, inactive, გამოცდილების წლები — ეს ველები ერთიანია 3-ვე ენისთვის. სხვა ყველაფერი თარგმნადია.
+  </div>
+
+  <h3>3.4. ექიმის ხელით დამატება (Doctra-ში არ არის)</h3>
+  <p>თუ ექიმი ჯერ Doctra-ში არ არის დამატებული, მაგრამ უნდა გამოჩნდეს საიტზე:</p>
+  <ol class="steps">
+    <li><code>/admin/collections/doctors/create</code></li>
+    <li>შეავსეთ:
+      <ul>
+        <li>სახელი (3 ენაზე)</li>
+        <li>slug (URL-friendly სახელი, მაგ. <code>lado-baziashvili</code>)</li>
+        <li>სპეციალობა</li>
+        <li>ფოტო</li>
+      </ul>
+    </li>
+    <li><strong>doctraId-ს არ შეავსოთ</strong> — დატოვეთ ცარიელი</li>
+    <li>დააწექით <strong>„Save"</strong></li>
+  </ol>
+  <p>ეს ექიმი გამოჩნდება ექიმთა სიაში, მაგრამ <strong>ჩასაწერი ფორმაში არ ჩაჩნდება</strong> რადგან Doctra-ში არ არსებობს. როცა Doctra-ში დაამატებენ, წაშალეთ ხელით შექმნილი რიგი და დააწექით <strong>„სინქრონიზაცია"</strong>-ს.</p>
+</section>
+
+<!-- ───────────────────────────── 4. შეფასებები ───────────────────────────── -->
+<section id="s4" class="major">
+  <span class="section-num">თავი 04</span>
+  <h2 class="section-title">შეფასებების მართვა</h2>
+  <p>გვერდის მისამართი: <code>/admin/collections/reviews</code></p>
+
+  <p>ცხრილში სვეტი <strong>„published"</strong> აქვს ჩექბოქსი:</p>
+  <ul>
+    <li>✓ — ჩანს საიტზე</li>
+    <li>✗ — დამალულია (მაგრამ ჩანაწერი არ წაშლილა)</li>
+  </ul>
+
+  <p>დააწექით ექიმის სახელზე → შეცვალეთ author, rating, ტექსტი, წყარო, თარიღი.</p>
+
+  <div class="screenshot">
+    <div class="label">[Screenshot: Reviews list with published toggles]</div>
+    <div>ცხრილი: author, rating ⭐, source, date, published ჩექბოქსი</div>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-title">შენიშვნა</span>
+    Google-ის შეფასებების ავტომატური ჩამოწერა ჯერ არ არის ჩართული. ხელით დაამატეთ შეფასებები <strong>„Create"</strong> ღილაკით.
+  </div>
+</section>
+
+<!-- ───────────────────────────── 5. სერვისები ───────────────────────────── -->
+<section id="s5" class="major">
+  <span class="section-num">თავი 05</span>
+  <h2 class="section-title">სერვისების (განყოფილებების) მართვა</h2>
+  <p>გვერდის მისამართი: <code>/admin/collections/services</code></p>
+
+  <ul>
+    <li><strong>სახელი</strong> — განყოფილების სახელი (3 ენაზე)</li>
+    <li><strong>slug</strong> — <strong>არ შეცვალოთ</strong> Doctra-დან მიღებულზე</li>
+    <li><strong>სურათი</strong> — განყოფილების სურათი (აიტვირთება Media-ში)</li>
+    <li><strong>აღწერა / მოკლე აღწერა</strong> — სრული და მოკლე ვერსიები</li>
+    <li><strong>კატეგორია</strong> — დაგროვდება (cardiology, neurology, etc.)</li>
+    <li><strong>icon</strong> — ხატულა გვერდისთვის</li>
+  </ul>
+</section>
+
+<!-- ───────────────────────────── 6. ჩექაფ ───────────────────────────── -->
+<section id="s6" class="major">
+  <span class="section-num">თავი 06</span>
+  <h2 class="section-title">ჩექაფ პაკეტების მართვა</h2>
+  <p>გვერდის მისამართი: <code>/admin/collections/checkup-packages</code></p>
+
+  <p>თითო პაკეტისთვის:</p>
+  <ul>
+    <li><strong>სახელი</strong> (მაგ. „ბაზისური ჩექაფი")</li>
+    <li><strong>აღწერა</strong></li>
+    <li><strong>ფასი</strong> (ლარებში)</li>
+    <li><strong>ხანგრძლივობა</strong> (მაგ. „2 საათი")</li>
+    <li><strong>შემავალი სერვისები</strong> — სია (Add Row): „სისხლის ანალიზი", „ულტრაბგერა", ა.შ.</li>
+    <li><strong>გამოყოფილი</strong> (Featured) — მთავარ გვერდზე გავუხატავთ</li>
+  </ul>
+</section>
+
+<!-- ───────────────────────────── 7. მთავარი გვერდი ───────────────────────────── -->
+<section id="s7" class="major">
+  <span class="section-num">თავი 07</span>
+  <h2 class="section-title">მთავარი გვერდის კონფიგურაცია</h2>
+  <p>გვერდის მისამართი: <code>/admin/globals/home-page</code></p>
+
+  <h3>7.1. ჰერო სექცია (ზედა ნაწილი)</h3>
+  <ul>
+    <li><strong>სათაური / ქვესათაური</strong> — მთავარი ტექსტი</li>
+    <li><strong>ღილაკები</strong> — „ჯავშნა" და „კონსულტაცია" ღილაკების ტექსტი</li>
+    <li><strong>სანდოობის ზოლი</strong> — რეიტინგი, ექიმთა რაოდენობა, პაციენტთა რაოდენობა</li>
+  </ul>
+
+  <h3>7.2. გალერეის სლაიდები (კარუსელი)</h3>
+  <ol class="steps">
+    <li>დააწექით <strong>„Add Row"</strong></li>
+    <li>ატვირთეთ სურათი (<strong>1500×1000 px</strong> რეკომენდირებული)</li>
+    <li>დაამატეთ ლეიბლი (3 ენაზე) — გამოჩნდება სლაიდის ქვემოთ</li>
+    <li>ეცადეთ 5 სლაიდი იყოს (მაქს. 8)</li>
+  </ol>
+
+  <div class="screenshot">
+    <div class="label">[Screenshot: Hero slides array editor]</div>
+    <div>Array rows + image upload + per-locale label inputs</div>
+  </div>
+
+  <div class="callout">
+    <span class="callout-title">შენიშვნა</span>
+    თუ არც ერთი სლაიდი არ არის დამატებული, ნაგულისხმევი სურათების კარუსელი ჩაირთვება ავტომატურად.
+  </div>
+</section>
+
+<!-- ───────────────────────────── 8. სხვა globals ───────────────────────────── -->
+<section id="s8" class="major">
+  <span class="section-num">თავი 08</span>
+  <h2 class="section-title">სხვა ცენტრალური პარამეტრები</h2>
+
+  <table>
+    <thead><tr><th>გვერდი</th><th>რას აკონტროლებს</th></tr></thead>
+    <tbody>
+      <tr><td><code>/admin/globals/site-settings</code></td><td>სტატისტიკა (პაციენტთა რაოდენობა, ა.შ.), საკონტაქტო ინფორმაცია</td></tr>
+      <tr><td><code>/admin/globals/about-page</code></td><td>„ჩვენ შესახებ" გვერდის კონტენტი</td></tr>
+      <tr><td><code>/admin/globals/contact-page</code></td><td>„კონტაქტი" გვერდის კონტენტი</td></tr>
+      <tr><td><code>/admin/globals/footer</code></td><td>ფუტერი (გვერდის ქვედა ნაწილი)</td></tr>
+      <tr><td><code>/admin/globals/navigation</code></td><td>ნავიგაცია (ზედა მენიუ)</td></tr>
+      <tr><td><code>/admin/globals/booking-page</code></td><td>ჩაწერის გვერდის ცენტრალური ტექსტი</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ───────────────────────────── 9. Media ───────────────────────────── -->
+<section id="s9" class="major">
+  <span class="section-num">თავი 09</span>
+  <h2 class="section-title">ფოტოების ატვირთვა (Media)</h2>
+  <p>გვერდის მისამართი: <code>/admin/collections/media</code></p>
+
+  <ul>
+    <li>ნებისმიერი ფოტო (ექიმის, განყოფილების, სიახლის) აიტვირთება ერთხელ</li>
+    <li>მერე გამოიყენება ნებისმიერ ადგილზე (აარჩიეთ ფაილ-არჩევის dropdown-დან)</li>
+    <li>ფაილი ინახება <strong>Vercel Blob</strong>-ში (cPanel-ის შემთხვევაში — საიტის სერვერზე)</li>
+    <li><strong>alt</strong> ტექსტი (ფოტოს აღწერა) აუცილებელია 3 ენაზე — Google-სთვის და მუშავი მხედველობის სხვა მკითხველებისთვის</li>
+  </ul>
+
+  <div class="callout info">
+    <span class="callout-title">ფოტოს ზომა</span>
+    Payload ავტომატურად ცვლის სხვადასხვა ზომებზე (thumbnail, card, hero). თქვენ უბრალოდ ატვირთეთ მაღალი ხარისხის ვერსია.
+  </div>
+</section>
+
+<!-- ───────────────────────────── 10. სწრაფი ცნობარი ───────────────────────────── -->
+<section id="s10" class="major">
+  <span class="section-num">თავი 10</span>
+  <h2 class="section-title">ხშირი ამოცანების სწრაფი ცნობარი</h2>
+
+  <table>
+    <thead><tr><th>რაც გინდათ</th><th>რა გააკეთოთ</th></tr></thead>
+    <tbody>
+      <tr><td><strong>ახალი ექიმი Doctra-დან</strong></td><td>მთავარი პანელი → „სინქრონიზაცია ახლა"</td></tr>
+      <tr><td><strong>ექიმის ფოტოს დამატება</strong></td><td>ექიმთა სია → ექიმის სახელი → იდენტობა → Photo → Upload</td></tr>
+      <tr><td><strong>ექიმის ბიოგრაფიის რედაქტირება</strong></td><td>ექიმის სახელი → პროფილი → ბიოგრაფია (გადართეთ ენა საჭიროების მიხედვით)</td></tr>
+      <tr><td><strong>ექიმის დროებითი დამალვა</strong></td><td>ექიმის სახელი → მარჯვენა სვეტი → inactive ✓ → Save</td></tr>
+      <tr><td><strong>შეფასების დამალვა</strong></td><td>შეფასებების სია → published ჩექბოქსი</td></tr>
+      <tr><td><strong>მთავარი გვერდის სლაიდის შეცვლა</strong></td><td><code>/admin/globals/home-page</code> → გალერეის სლაიდები</td></tr>
+      <tr><td><strong>ვებსაიტის ნახვა</strong></td><td>მთავარი პანელი → მარჯვენა მხარეს „საიტის ნახვა" ღილაკი</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ───────────────────────────── 11. პრობლემები ───────────────────────────── -->
+<section id="s11" class="major">
+  <span class="section-num">თავი 11</span>
+  <h2 class="section-title">პრობლემების მოგვარება</h2>
+
+  <table>
+    <thead><tr><th>სიმპტომი</th><th>მიზეზი</th><th>გადაწყვეტა</th></tr></thead>
+    <tbody>
+      <tr><td>ფოტო არ ჩანს საიტზე ატვირთვის შემდეგ</td><td>ბრაუზერის ქეში</td><td>F5 ან Ctrl+F5</td></tr>
+      <tr><td>ექიმი არ ჩანს ჩაწერის გვერდზე</td><td>inactive მონიშნულია, ან doctraId არ აქვს</td><td>ექიმის რედაქტირება → inactive გაუქმება</td></tr>
+      <tr><td>ცვლილებები არ ჩანს საიტზე</td><td>სერვერული ქეში</td><td>დაელოდეთ 30 წამი, შემდეგ Ctrl+F5</td></tr>
+      <tr><td>სინქრონიზაცია „Doctra ვერ პასუხობს"</td><td>Doctra-ს სერვერზე პრობლემაა</td><td>სცადეთ 10 წუთის შემდეგ</td></tr>
+      <tr><td>შესვლა არ ხდება</td><td>პაროლი არასწორი</td><td>დარეკეთ ვებსაიტის ადმინისტრატორთან</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ───────────────────────────── 12. უსაფრთხოება ───────────────────────────── -->
+<section id="s12" class="major">
+  <span class="section-num">თავი 12</span>
+  <h2 class="section-title">უსაფრთხოება</h2>
+
+  <ul>
+    <li><strong>არ გააზიაროთ პაროლი</strong> ვინმესთან, ვინც არ უნდა ჰქონდეს წვდომა</li>
+    <li><strong>არ მონიშნოთ „Stay logged in"</strong> საზიარო კომპიუტერზე</li>
+    <li><strong>გასვლა:</strong> ზედა მარჯვენა კუთხეში → ავატარის ხატულა → Logout</li>
+    <li>ნებისმიერი საეჭვო აქტივობის შემთხვევაში — დარეკეთ ვებსაიტის ადმინისტრატორთან</li>
+  </ul>
+
+  <div class="callout danger">
+    <span class="callout-title">⚠ პაროლების მენეჯერი</span>
+    გამოიყენეთ პაროლების მენეჯერი (1Password, Bitwarden, Apple Passwords). არ შეინახოთ პაროლი ბრაუზერში საზიარო კომპიუტერზე.
+  </div>
+</section>
+
+<div class="doc-foot">
+  <div><strong>ხოზრევანიძის კლინიკა</strong> · ადმინ-პანელის სახელმძღვანელო</div>
+  <div>ვერსია 1.0 · ბოლო განახლება: 2026-05-13</div>
+</div>
+
+</div>
+</body>
+</html>

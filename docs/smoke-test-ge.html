@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Payload CMS — ტესტირების ბარათი</title>
+<style>
+  :root {
+    --blackberry: #682149;
+    --blackberry-dark: #4a1535;
+    --pink: #DD64A6;
+    --pink-light: #FDF2F8;
+    --grey: #3D3D3D;
+    --grey-light: #6B6B6B;
+    --grey-lighter: #E5E5E5;
+    --cream: #FAFAF8;
+    --green: #16A34A;
+    --green-light: #DCFCE7;
+    --red: #DC2626;
+    --red-light: #FEE2E2;
+    --amber: #D97706;
+    --amber-light: #FEF3C7;
+    --white: #FFFFFF;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.06);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,.10);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Sylfaen", "BPG Excelsior Caps", "FiraGO", system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
+    background: linear-gradient(180deg, #FAFAF8 0%, #FDF2F8 100%);
+    color: var(--grey);
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  /* sticky top bar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--grey-lighter);
+    box-shadow: var(--shadow-sm);
+  }
+  .topbar-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .topbar h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--blackberry);
+    flex: 1;
+    min-width: 200px;
+  }
+  .topbar h1 small {
+    font-weight: 400;
+    color: var(--grey-light);
+    font-size: 12px;
+    display: block;
+    margin-top: 2px;
+  }
+  .progress-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px;
+    background: var(--white);
+    border: 1px solid var(--grey-lighter);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blackberry);
+  }
+  .progress-bar {
+    width: 80px;
+    height: 6px;
+    background: var(--grey-lighter);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blackberry), var(--pink));
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .topbar-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--grey-lighter);
+    border-radius: 999px;
+    background: var(--white);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--grey);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn:hover { border-color: var(--blackberry); color: var(--blackberry); }
+  .btn-primary {
+    background: var(--blackberry);
+    color: var(--white);
+    border-color: var(--blackberry);
+  }
+  .btn-primary:hover { background: var(--pink); border-color: var(--pink); color: var(--white); }
+  .btn-danger { color: var(--red); }
+  .btn-danger:hover { border-color: var(--red); }
+
+  /* main content */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+  .hero-card {
+    background: linear-gradient(135deg, var(--blackberry) 0%, var(--blackberry-dark) 100%);
+    color: var(--white);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow-lg);
+  }
+  .hero-card h2 {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .hero-card p {
+    margin: 0;
+    opacity: 0.85;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .hero-card .meta {
+    margin-top: 18px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    opacity: 0.75;
+  }
+  .hero-card .meta b { color: var(--pink); font-weight: 700; }
+  .hero-card a { color: var(--pink); text-decoration: none; border-bottom: 1px dashed rgba(221,100,166,0.4); }
+  .hero-card a:hover { border-bottom-style: solid; }
+
+  /* section */
+  .section {
+    background: var(--white);
+    border: 1px solid var(--grey-lighter);
+    border-radius: 14px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+  .section-header {
+    padding: 20px 26px;
+    border-bottom: 1px solid var(--grey-lighter);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--pink-light);
+    color: var(--blackberry);
+    font-weight: 700;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-header h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--blackberry);
+    flex: 1;
+  }
+  .section-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--grey-lighter);
+    color: var(--grey-light);
+  }
+  .section-status.pass { background: var(--green-light); color: var(--green); }
+  .section-status.fail { background: var(--red-light); color: var(--red); }
+  .section-status.partial { background: var(--amber-light); color: var(--amber); }
+
+  .section-body {
+    padding: 20px 26px;
+  }
+  .section-intro {
+    font-size: 14px;
+    color: var(--grey-light);
+    margin: 0 0 18px 0;
+    padding: 12px 16px;
+    background: var(--pink-light);
+    border-left: 3px solid var(--pink);
+    border-radius: 6px;
+  }
+  .section-intro b { color: var(--blackberry); }
+  .section-intro code {
+    background: rgba(104,33,73,0.08);
+    color: var(--blackberry);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  /* test items */
+  .test {
+    border: 1px solid var(--grey-lighter);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+  }
+  .test:hover { border-color: var(--pink); }
+  .test.pass { background: var(--green-light); border-color: var(--green); }
+  .test.fail { background: var(--red-light); border-color: var(--red); }
+  .test.skip { background: var(--grey-lighter); border-color: var(--grey-light); }
+
+  .test-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .test-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--grey);
+    line-height: 1.5;
+  }
+  .test-desc {
+    font-size: 13px;
+    color: var(--grey-light);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .test-desc code {
+    background: rgba(104,33,73,0.08);
+    color: var(--blackberry);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  .test-desc a {
+    color: var(--blackberry);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px dashed var(--blackberry);
+  }
+  .test-desc a:hover { color: var(--pink); border-bottom-color: var(--pink); }
+
+  /* 3-state toggle */
+  .state-group {
+    display: inline-flex;
+    background: var(--grey-lighter);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .state-btn {
+    border: 0;
+    background: transparent;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--grey-light);
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .state-btn:hover { color: var(--blackberry); }
+  .state-btn.active.pass { background: var(--green); color: var(--white); }
+  .state-btn.active.fail { background: var(--red); color: var(--white); }
+  .state-btn.active.skip { background: var(--grey-light); color: var(--white); }
+
+  /* notes textarea */
+  .test-notes {
+    width: 100%;
+    min-height: 0;
+    max-height: 0;
+    overflow: hidden;
+    margin-top: 0;
+    padding: 0;
+    border: 0;
+    background: rgba(255,255,255,0.6);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--grey);
+    resize: vertical;
+    transition: all 0.3s;
+    box-sizing: border-box;
+  }
+  .test.has-state .test-notes,
+  .test:focus-within .test-notes {
+    max-height: 200px;
+    min-height: 60px;
+    margin-top: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--grey-lighter);
+  }
+  .test-notes:focus {
+    outline: none;
+    border-color: var(--pink);
+    box-shadow: 0 0 0 3px rgba(221,100,166,0.15);
+  }
+
+  /* report modal */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(61,61,61,0.6);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: 14px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  .modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--grey-lighter);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .modal-header h3 { margin: 0; color: var(--blackberry); font-size: 16px; flex: 1; }
+  .modal-body {
+    padding: 0;
+    overflow: auto;
+    flex: 1;
+  }
+  .modal-body textarea {
+    width: 100%;
+    min-height: 400px;
+    border: 0;
+    padding: 18px 24px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.65;
+    color: var(--grey);
+    resize: none;
+    box-sizing: border-box;
+  }
+  .modal-body textarea:focus { outline: none; }
+  .modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid var(--grey-lighter);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    background: var(--blackberry);
+    color: var(--white);
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    z-index: 200;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* helpful kbd / context blocks */
+  details.help {
+    margin-top: 14px;
+    border: 1px dashed var(--grey-lighter);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  details.help[open] { border-style: solid; }
+  details.help summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--blackberry);
+  }
+  details.help p { margin: 10px 0 0; color: var(--grey-light); }
+  details.help code, pre code {
+    background: rgba(104,33,73,0.08);
+    color: var(--blackberry);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  /* free-text overall comment at end */
+  .overall {
+    background: var(--white);
+    border: 1px solid var(--grey-lighter);
+    border-radius: 14px;
+    padding: 22px 26px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-md);
+  }
+  .overall h3 {
+    margin: 0 0 12px;
+    color: var(--blackberry);
+    font-size: 16px;
+  }
+  .overall textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px 14px;
+    border: 1px solid var(--grey-lighter);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--grey);
+    resize: vertical;
+    box-sizing: border-box;
+  }
+  .overall textarea:focus {
+    outline: none;
+    border-color: var(--pink);
+    box-shadow: 0 0 0 3px rgba(221,100,166,0.15);
+  }
+  @media (max-width: 600px) {
+    .topbar-inner { padding: 12px 16px; }
+    main { padding: 16px 14px 60px; }
+    .hero-card { padding: 20px; }
+    .section-header { padding: 16px 18px; }
+    .section-body { padding: 14px 18px; }
+    .test-head { flex-wrap: wrap; }
+    .state-group { width: 100%; justify-content: center; margin-top: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <h1>Payload CMS — ტესტირების ბარათი
+      <small>ხოზრევანიძის კლინიკის ადმინ-პანელის შემოწმება</small>
+    </h1>
+    <div class="progress-pill">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+      <span id="progressText">0 / 0</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-danger" onclick="resetAll()">ყველაფრის გასუფთავება</button>
+      <button class="btn btn-primary" onclick="generateReport()">📋 რეპორტის გენერაცია</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<div class="hero-card">
+  <h2>გამარჯობა! 👋 ეს არის შემოწმების ბარათი.</h2>
+  <p>გადადი თითოეულ ნაბიჯზე, შეცვალე მნიშვნელობა Payload-ში, შემდეგ შეამოწმე საიტი და მონიშნე ✓ წარმატება ან ✗ შეცდომა. შენიშვნებში დაწერე, რა გასწორებაა საჭირო (თუ რამე).</p>
+  <p>ბოლოს დააჭირე <b>📋 რეპორტის გენერაცია</b> — გაგიკეთებს ანგარიშს, რომ დააბრუნო Claude-ში ან გადააგზავნო დეველოპერს.</p>
+  <div class="meta">
+    <span>🌐 ლოკალური საიტი: <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></span>
+    <span>🔑 ადმინი: <a href="http://localhost:3000/admin" target="_blank">/admin</a></span>
+    <span>👤 <b>admin@admin.ge</b> / <b>111111</b></span>
+  </div>
+</div>
+
+<div id="sections"></div>
+
+<div class="overall">
+  <h3>💬 ზოგადი კომენტარი</h3>
+  <textarea id="overallNotes" placeholder="რა მუშაობს კარგად? რა გასაკეთებელია? რა საკითხები წამოვიდა ტესტირებაში?"></textarea>
+</div>
+
+</main>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>ტესტირების რეპორტი</h3>
+      <button class="btn" onclick="copyReport()">📋 დააკოპირე</button>
+      <button class="btn" onclick="closeModal()">დახურვა</button>
+    </div>
+    <div class="modal-body">
+      <textarea id="reportOutput" readonly></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">გასვლა</button>
+      <button class="btn btn-primary" onclick="copyReport()">📋 დააკოპირე და გადააგზავნე</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   Smoke-test data model. Each section has a title and list of
+   tests. Each test has: id (stable for localStorage), title,
+   description (HTML allowed). State is one of: null, 'pass',
+   'fail', 'skip'. Notes are free text.
+   ============================================================ */
+const SECTIONS = [
+  {
+    id: 0,
+    title: 'მომზადება — Dev სერვერი და ადმინში შესვლა',
+    intro: 'პირველ რიგში გავუშვათ dev-სერვერი და დავრწმუნდეთ, რომ ყველაფერი იხსნება. <b>დაახლოებით 1 წუთი.</b>',
+    tests: [
+      { id: '0.1', title: 'Dev-სერვერი გაშვებულია', desc: 'Terminal-ში გავუშვი <code>npm run dev</code> — გამოვიდა "Ready in X ms".' },
+      { id: '0.2', title: 'საიტი იხსნება', desc: 'გავხსენი <a href="http://localhost:3000/ge" target="_blank">http://localhost:3000/ge</a> — მთავარი გვერდი დაიტვირთა ქართულად.' },
+      { id: '0.3', title: 'ენების მუშაობა', desc: '<a href="http://localhost:3000/en" target="_blank">/en</a> ინგლისურია, <a href="http://localhost:3000/ru" target="_blank">/ru</a> რუსულია.' },
+      { id: '0.4', title: 'ადმინი ხსნება', desc: 'გავხსენი <a href="http://localhost:3000/admin" target="_blank">/admin</a> — შესვლის ფანჯარა გამოვიდა.' },
+      { id: '0.5', title: 'ადმინში შესვლა', desc: 'შევედი <code>admin@admin.ge</code> / <code>111111</code> — Dashboard ფურცელი დავინახე.' },
+    ],
+  },
+  {
+    id: 1,
+    title: 'ენების გადამრთველის გაგება',
+    intro: 'Payload-ში ერთი მნიშვნელოვანი dropdown არის — <b>"კონტენტის ლოკალის გადამრთველი"</b>. ის გვაჩვენებს რომელ ენაზე ვცვლით ჩანაწერს. <b>ეს არ არის ადმინ UI-ის ენა</b> — UI ყოველთვის ქართულია.',
+    tests: [
+      { id: '1.1', title: 'ლოკალის გადამრთველი ვხედავ', desc: 'რომელიმე გვერდი/ჩანაწერი გავხსენი ადმინში — ზევით dropdown მაქვს: "ქართული ვერსია / English version / რუსული ვერსია".' },
+      { id: '1.2', title: 'ლეიბლები გასაგებია', desc: 'dropdown ცხადია, რომ ცვლა ცვლის რომელ ენაზე ვცვლი იმავე ჩანაწერს (და არა მთლიანი ადმინის UI-ს).' },
+    ],
+  },
+  {
+    id: 2,
+    title: 'სწრაფი ცოცხალი ტესტი — ContactPage სამივე ენაზე',
+    intro: '<b>ეს არის "თუ ეს მუშაობს, ყველაფერი მუშაობს"-ის ტესტი.</b> 2 წუთი.',
+    tests: [
+      { id: '2.1', title: 'ContactPage გავხსენი ადმინში', desc: 'ნავიგაცია: <code>გვერდები → საკონტაქტო გვერდი</code>.' },
+      { id: '2.2', title: 'ქართულად ცვლილება', desc: 'ლოკალი → ქართული. <code>Address → Value</code> ველში დავწერე <code>ბათუმი, ტესტ ქუჩა, #999</code>. Save.' },
+      { id: '2.3', title: 'საიტი ცვალდა /ge/contact-ზე', desc: '<a href="http://localhost:3000/ge/contact" target="_blank">/ge/contact</a> — მისამართის კარტაში ჩანს <code>ბათუმი, ტესტ ქუჩა, #999</code>.' },
+      { id: '2.4', title: 'ინგლისურად ცვლილება', desc: 'ლოკალი → English. Address.value → <code>Batumi, Test Street, #999</code>. Save.' },
+      { id: '2.5', title: 'საიტი ცვალდა /en/contact-ზე', desc: '<a href="http://localhost:3000/en/contact" target="_blank">/en/contact</a> — Batumi, Test Street, #999.' },
+      { id: '2.6', title: 'რუსულად ცვლილება', desc: 'ლოკალი → Русский. Address.value → <code>Батуми, Тест ул., #999</code>. Save.' },
+      { id: '2.7', title: 'საიტი ცვალდა /ru/contact-ზე', desc: '<a href="http://localhost:3000/ru/contact" target="_blank">/ru/contact</a> — Батуми, Тест ул., #999.' },
+      { id: '2.8', title: 'ენები ერთმანეთს არ ერევა', desc: '/ge ისევ ქართულ ვერსიას ხედავს, /en ისევ ინგლისურს. ცვლილებები იზოლირებულია.' },
+    ],
+  },
+  {
+    id: 3,
+    title: 'მთავარი გვერდი (HomePage)',
+    intro: 'ლოკაცია: <code>გვერდები → მთავარი გვერდი</code>. ცვალე ერთი ველი ერთ ენაზე და დაადასტურე საიტზე.',
+    tests: [
+      { id: '3.1', title: 'hero.headline (დიდი სათაური)', desc: 'შევცვალე → <a href="http://localhost:3000/ge" target="_blank">/ge</a> — h1 ცვალდა.' },
+      { id: '3.2', title: 'hero.subheadline (ქვესათაური)', desc: 'შევცვალე → მთავარ გვერდზე h1-ის ქვემოთ ცვალდა.' },
+      { id: '3.3', title: 'hero.badgeText (პატარა ტექსტი ზემოთ)', desc: '"2015 წლიდან მოქმედი" - ცვალდა მთავარ გვერდზე.' },
+      { id: '3.4', title: 'hero.bookButtonText (ჯავშნის ღილაკი)', desc: 'შავი ღილაკის ტექსტი ცვალდა.' },
+      { id: '3.5', title: 'trustStrip.rating, doctorCount, patientCount', desc: 'h1-ის ქვემოთ "4.9 + ექიმები + 15,000+ პაციენტი" - სამივე ცვალდა.' },
+      { id: '3.6', title: 'symptomNavigator.title', desc: 'შავი სექციის სათაური "სიმპტომების მიხედვით" — ცვალდა.' },
+      { id: '3.7', title: 'symptomNavigator.placeholder', desc: 'ძიების ველის placeholder ცვალდა.' },
+    ],
+  },
+  {
+    id: 4,
+    title: 'ჩვენ შესახებ (AboutPage)',
+    intro: 'ლოკაცია: <code>გვერდები → ჩვენ შესახებ</code>.',
+    tests: [
+      { id: '4.1', title: 'title (პატარა pink ლეიბლი)', desc: '<a href="http://localhost:3000/ge/about" target="_blank">/ge/about</a> — ჰერო თავში pink ტექსტი ცვალდა.' },
+      { id: '4.2', title: 'subtitle (h1)', desc: 'დიდი h1 ცვალდა about გვერდზე.' },
+      { id: '4.3', title: 'description (richText)', desc: 'რედაქტორში ტექსტი დავწერე → about გვერდის ჰერო ქვემოთ ჩანს.' },
+      { id: '4.4', title: 'stats[] (ფაქტების ცხრილი)', desc: '<code>stats[]</code> array-ში დავამატე ფაქტი → about გვერდის სტატისტიკის ცხრილში გამოჩნდა.' },
+    ],
+  },
+  {
+    id: 5,
+    title: 'საკონტაქტო გვერდი (ContactPage) — სრული გადახედვა',
+    intro: 'სრული შემოწმება — ContactPage ცვლის <b>3 ადგილზე</b>: /contact, footer (ყველგან), მთავარი გვერდის ბოლო ContactMap.',
+    tests: [
+      { id: '5.1', title: 'address.value ცვალდა /contact-ზე', desc: '/contact მისამართის კარტა.' },
+      { id: '5.2', title: 'address.value ცვალდა ფუტერში', desc: 'ნებისმიერი გვერდის ფუტერი — "კონტაქტი" კოლონა.' },
+      { id: '5.3', title: 'address.value ცვალდა მთავარ გვერდზე', desc: '<a href="http://localhost:3000/ge" target="_blank">/ge</a> — ბოლო შავი სექცია.' },
+      { id: '5.4', title: 'phone.value-ის tel: ბმული მუშაობს', desc: 'მობილურზე ნომერზე დაჭერისას იხსნება სატელეფონო აპლიკაცია.' },
+      { id: '5.5', title: 'phone.display ჩვენებაშია', desc: 'ვიზუალური ფორმატი (მაგ: "+995 (0422) 22 71 71") ცვალდა.' },
+      { id: '5.6', title: 'email.value mailto: ბმული', desc: 'ემეილზე დაჭერა → იხსნება ფოსტის აპლიკაცია.' },
+      { id: '5.7', title: 'workingHours.weekdays / weekends', desc: 'ფუტერი + /contact — ორივე ცვალდა.' },
+      { id: '5.8', title: 'address.mapLatitude/Longitude (რუკის ცენტრი)', desc: 'შევცვალე კოორდინატები → Google Maps iframe ცენტრი გადატანდა (refresh საჭიროა).' },
+    ],
+  },
+  {
+    id: 6,
+    title: 'ფუტერი (Footer)',
+    intro: 'ლოკაცია: <code>საიტის ელემენტები → ფუტერი</code>.',
+    tests: [
+      { id: '6.1', title: 'description (აღწერა ლოგოს ქვემოთ)', desc: 'ფუტერი მარცხნივ — ცვალდა.' },
+      { id: '6.2', title: 'quickLinks[] (სწრაფი ბმულები)', desc: 'დავამატე ბმული → ფუტერი შუა ცვალდა.' },
+      { id: '6.3', title: 'socialLinks[] — Facebook', desc: 'შევცვალე URL → Facebook ხატულას დააწექი → გავიდა ახალ URL-ზე.' },
+      { id: '6.4', title: 'socialLinks[] — სხვა პლატფორმა (Instagram/YouTube/LinkedIn/TikTok)', desc: 'დავამატე ერთი მაინც — ხატულა გამოვიდა ფუტერში.' },
+      { id: '6.5', title: 'copyright (საავტორო ტექსტი)', desc: 'ფუტერი ბოლო — ცვალდა.' },
+      { id: '6.6', title: 'whatsappNumber (WhatsApp ღილაკი)', desc: 'შევცვალე ნომერი → მცურავი WhatsApp ღილაკზე დაჭერისას ხსნება ახალი ნომერი.' },
+    ],
+  },
+  {
+    id: 7,
+    title: 'ნავიგაცია (Navigation) — Header მენიუ',
+    intro: 'ლოკაცია: <code>საიტის ელემენტები → ნავიგაცია</code>.',
+    tests: [
+      { id: '7.1', title: 'mainMenu[] — ცარიელია → ფიქსირებული მენიუ', desc: 'cms-ში ცარიელია → header-ში ფიქსირებული მენიუ ჩანს (ჩვენ, სერვისები, ექიმები...).' },
+      { id: '7.2', title: 'mainMenu[] — შევსებული → ცვალდა', desc: 'დავამატე ჩემი მენიუ → header გადატანდა CMS-დანი ბმულებზე.' },
+      { id: '7.3', title: 'ctaButton.label (pink CTA ღილაკი)', desc: 'header-ის მარჯვენა pink ღილაკის ტექსტი ცვალდა.' },
+      { id: '7.4', title: 'ctaButton.href', desc: 'pink ღილაკზე დაჭერისას მიდის ახალ მისამართზე.' },
+    ],
+  },
+  {
+    id: 8,
+    title: 'ჯავშნის გვერდი (BookingPage)',
+    intro: 'ლოკაცია: <code>გვერდები → ჯავშნის გვერდი</code>. <b>შენიშვნა:</b> wizard-ის შიდა ნაბიჯების ლეიბლები ჯერ კიდევ <code>next-intl</code>-დან მოდის.',
+    tests: [
+      { id: '8.1', title: 'title (h1)', desc: '<a href="http://localhost:3000/ge/booking" target="_blank">/ge/booking</a> — h1 ცვალდა.' },
+      { id: '8.2', title: 'subtitle (h1-ის ზემოთ pink ტექსტი)', desc: 'ცვალდა.' },
+      { id: '8.3', title: 'form.confirmButton (ბოლო ნაბიჯის "დადასტურება")', desc: 'wizard-ში მე-4 ნაბიჯზე ჩავიდა → ღილაკის ტექსტი ცვალდა.' },
+      { id: '8.4', title: 'form.successMessage', desc: 'ჯავშანი დააფიქსირე → წარმატების შეტყობინებაში ჩემი ტექსტი ჩანს.' },
+    ],
+  },
+  {
+    id: 9,
+    title: 'საიტის პარამეტრები (SiteSettings)',
+    intro: 'ლოკაცია: <code>საიტის ელემენტები → საიტის პარამეტრები</code>.',
+    tests: [
+      { id: '9.1', title: 'stats.patients', desc: 'მთავარ გვერდზე "15,000+" ცვალდა.' },
+      { id: '9.2', title: 'stats.doctors', desc: 'მთავარ გვერდზე "54" ცვალდა.' },
+      { id: '9.3', title: 'stats.operations', desc: 'მთავარ გვერდზე "5,000+" ცვალდა.' },
+      { id: '9.4', title: 'stats.experience', desc: 'მთავარ გვერდზე "9" ცვალდა.' },
+    ],
+  },
+  {
+    id: 10,
+    title: 'კოლექციები — Doctors',
+    intro: 'ლოკაცია: <code>კონტენტი → ექიმები</code>. <b>146 ექიმი Doctra-დან არის სინქით ჩამოღებული.</b>',
+    tests: [
+      { id: '10.1', title: 'ექიმის სია იხსნება', desc: 'სიის გვერდი — ექიმები ჩამოწერილია.' },
+      { id: '10.2', title: 'ექიმის ჩანაწერი იხსნება', desc: 'ერთი ექიმი დავაჭირე — ჩანაწერი იხსნება tabs-ით (Identity / Profile / SEO).' },
+      { id: '10.3', title: 'რუსულად სახელის თარგმნა', desc: 'ლოკალი → Русский, Name ცვალდა → /ru/doctors/<slug> — რუსული სახელი ჩანს.' },
+      { id: '10.4', title: 'ფოტოს ცვლა', desc: 'Photo upload → შენახვა → საიტზე ფოტო ცვალდა.' },
+      { id: '10.5', title: '"ფოტო აკლია" ფილტრი მუშაობს', desc: 'Dashboard-ის ფილტრიდან ან URL: <code>?where[and][0][photo][exists]=false</code>' },
+    ],
+  },
+  {
+    id: 11,
+    title: 'კოლექციები — Services / CheckupPackages / Reviews / News / Pages',
+    intro: 'სხვა კოლექციების სწრაფი შემოწმება.',
+    tests: [
+      { id: '11.1', title: 'Services — name/description ცვალდა სამივე ენაზე', desc: '<a href="http://localhost:3000/ge/services" target="_blank">/ge/services</a> + /en + /ru — სხვადასხვა ენაში.' },
+      { id: '11.2', title: 'CheckupPackages — ცვალდა მთავარ გვერდზე', desc: 'მთავარ გვერდის "ჩექაფ-პაკეტები" სექციაში — ცვალდა.' },
+      { id: '11.3', title: 'Reviews — published checkbox მართავს გამოჩენას', desc: 'შევქმენი → published-ი ჩართე → /ge-ზე გამოვიდა. გათიშე → გაქრა.' },
+      { id: '11.4', title: 'News — სტატია გამოვიდა /blog-ზე', desc: 'ახალი ჩანაწერი → status: published → showOnHomepage ჩართე → /ge → ჩანს.' },
+      { id: '11.5', title: 'Pages — ბლოკიანი გვერდი მუშაობს', desc: 'შევქმენი გვერდი slug-ით "test" → /ge/pages/test — გვერდი ხსნება ბლოკებით.' },
+    ],
+  },
+  {
+    id: 12,
+    title: 'Doctra სინქი',
+    intro: 'ლოკაცია: <code>Dashboard → Doctra სინქი კარტა</code>.',
+    tests: [
+      { id: '12.1', title: 'სინქის ღილაკი მუშაობს', desc: '"სინქი ახლა" ღილაკზე დაჭერა → ლოდინი → წარმატება.' },
+      { id: '12.2', title: 'lastSyncedAt ცვალდა', desc: 'სინქის შემდეგ dashboard-ის "ბოლო სინქი" თარიღი განახლდა.' },
+      { id: '12.3', title: 'ახალი ექიმი ჩაიწერა სამივე ლოკალში', desc: 'ექიმის ჩანაწერი → ლოკალის ცვლა → ქართულად + ინგლისურად + რუსულად რაღაც აქვს (RU = EN placeholder).' },
+      { id: '12.4', title: 'რედაქტირებული ექიმი არ ცვალდა', desc: 'წინასწარ რედაქტირებული name/specialty/bio — სინქის შემდეგ უცვლელია.' },
+    ],
+  },
+  {
+    id: 13,
+    title: '"რუსული თარგმანი აკლია" Widget',
+    intro: 'Dashboard-ის "საჭიროებს ყურადღებას" სექციაში მე-4 კარტა.',
+    tests: [
+      { id: '13.1', title: 'Widget ჩანს Dashboard-ზე', desc: 'მე-4 კარტას ვხედავ ("რუსული თარგმანი აკლია").' },
+      { id: '13.2', title: 'რაოდენობა > 0 (Doctra-დან ჩამოღებული ექიმები)', desc: 'რიცხვი დადებითია (იქნება ~146 თუ Doctra სინქი გავუშვი).' },
+      { id: '13.3', title: 'რედაქტირების შემდეგ რაოდენობა მცირდება', desc: 'ერთი ექიმის RU name შევცვალე → refresh → რიცხვი 1-ით შემცირდა.' },
+      { id: '13.4', title: 'კარტა ბმულია ექიმების სიაზე', desc: 'კარტაზე დაჭერა → ექიმების სია ხსნება.' },
+    ],
+  },
+  {
+    id: 14,
+    title: 'საბოლოო ვერიფიკაცია — სამივე ენაზე',
+    intro: 'მთლიანი საიტის გადახედვა სამივე ენაზე.',
+    tests: [
+      { id: '14.1', title: '/ge — ყველაფერი ქართულად', desc: 'მთავარი, /about, /services, /doctors, /booking, /contact, /blog — ყველგან ქართული.' },
+      { id: '14.2', title: '/en — ყველაფერი ინგლისურად', desc: 'იგივე გვერდები — ინგლისური ვერსია.' },
+      { id: '14.3', title: '/ru — ყველაფერი რუსულად ან English placeholder', desc: 'რუსული გვერდები. სადაც RU თარგმანი არ არის — ჩანს ინგლისური (placeholder).' },
+      { id: '14.4', title: 'ენების გადამრთველი მუშაობს', desc: 'header-ის Language Switcher ცვლის ენას URL-ში და თარგმანში.' },
+      { id: '14.5', title: 'Booking wizard მუშაობს', desc: '/booking — wizard-ის ნაბიჯები გაიარა → ჯავშანი (demo-რეჟიმში ბლოკდება, რაც სწორია).' },
+    ],
+  },
+];
+
+/* ============================================================ */
+
+const STORAGE_KEY = 'cms-smoke-test-v1';
+let state = loadState();
+
+function loadState() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { tests: {}, overall: '' };
+  } catch {
+    return { tests: {}, overall: '' };
+  }
+}
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function render() {
+  const root = document.getElementById('sections');
+  root.innerHTML = '';
+  for (const section of SECTIONS) {
+    const sec = document.createElement('section');
+    sec.className = 'section';
+    sec.innerHTML = `
+      <div class="section-header">
+        <span class="section-num">${section.id}</span>
+        <h2>${escapeHtml(section.title)}</h2>
+        <span class="section-status" data-section="${section.id}">⬜ შესამოწმებელი</span>
+      </div>
+      <div class="section-body">
+        ${section.intro ? `<div class="section-intro">${section.intro}</div>` : ''}
+        ${section.tests.map(renderTest).join('')}
+      </div>
+    `;
+    root.appendChild(sec);
+  }
+  document.getElementById('overallNotes').value = state.overall || '';
+  document.getElementById('overallNotes').addEventListener('input', (e) => {
+    state.overall = e.target.value;
+    saveState();
+  });
+  updateProgress();
+}
+
+function renderTest(test) {
+  const s = state.tests[test.id] || { state: null, notes: '' };
+  return `
+    <div class="test ${s.state || ''} ${s.state ? 'has-state' : ''}" data-test-id="${test.id}">
+      <div class="test-head">
+        <div>
+          <div class="test-title">${escapeHtml(test.title)}</div>
+          ${test.desc ? `<div class="test-desc">${test.desc}</div>` : ''}
+        </div>
+        <div class="state-group">
+          <button class="state-btn pass ${s.state === 'pass' ? 'active' : ''}" onclick="setState('${test.id}', 'pass')">✓ წარმატება</button>
+          <button class="state-btn fail ${s.state === 'fail' ? 'active' : ''}" onclick="setState('${test.id}', 'fail')">✗ შეცდომა</button>
+          <button class="state-btn skip ${s.state === 'skip' ? 'active' : ''}" onclick="setState('${test.id}', 'skip')">⏭ გამოტოვება</button>
+        </div>
+      </div>
+      <textarea class="test-notes" placeholder="შენიშვნა (არასავალდებულო) — რა შეიცვალა? რა არ მუშაობდა?" oninput="setNotes('${test.id}', this.value)">${escapeHtml(s.notes || '')}</textarea>
+    </div>
+  `;
+}
+
+function setState(id, newState) {
+  const cur = state.tests[id] || { state: null, notes: '' };
+  cur.state = cur.state === newState ? null : newState;
+  state.tests[id] = cur;
+  saveState();
+  rerenderTest(id);
+  updateProgress();
+}
+
+function setNotes(id, notes) {
+  state.tests[id] = state.tests[id] || { state: null, notes: '' };
+  state.tests[id].notes = notes;
+  saveState();
+}
+
+function rerenderTest(id) {
+  const el = document.querySelector(`.test[data-test-id="${id}"]`);
+  if (!el) return;
+  const s = state.tests[id] || { state: null, notes: '' };
+  el.className = `test ${s.state || ''} ${s.state ? 'has-state' : ''}`;
+  for (const btn of el.querySelectorAll('.state-btn')) {
+    btn.classList.toggle('active', btn.classList.contains(s.state || 'NONE'));
+  }
+}
+
+function updateProgress() {
+  let total = 0, done = 0;
+  for (const section of SECTIONS) {
+    let pass = 0, fail = 0, skip = 0, untouched = 0;
+    for (const test of section.tests) {
+      total++;
+      const s = (state.tests[test.id] || {}).state;
+      if (s) done++;
+      if (s === 'pass') pass++;
+      else if (s === 'fail') fail++;
+      else if (s === 'skip') skip++;
+      else untouched++;
+    }
+    const badge = document.querySelector(`.section-status[data-section="${section.id}"]`);
+    if (badge) {
+      if (untouched === section.tests.length) {
+        badge.className = 'section-status';
+        badge.textContent = '⬜ შესამოწმებელი';
+      } else if (fail > 0) {
+        badge.className = 'section-status fail';
+        badge.textContent = `✗ ${fail} ვერ მუშაობს`;
+      } else if (untouched > 0) {
+        badge.className = 'section-status partial';
+        badge.textContent = `⚠ ${section.tests.length - untouched} / ${section.tests.length}`;
+      } else {
+        badge.className = 'section-status pass';
+        badge.textContent = '✓ ყველაფერი მუშაობს';
+      }
+    }
+  }
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${done} / ${total}`;
+}
+
+function resetAll() {
+  if (!confirm('ნამდვილად გსურს ყველაფრის გასუფთავება? ეს მოქმედება შეუქცევადია.')) return;
+  state = { tests: {}, overall: '' };
+  saveState();
+  render();
+}
+
+function generateReport() {
+  let pass = 0, fail = 0, skip = 0, total = 0;
+  const sectionReports = [];
+  for (const section of SECTIONS) {
+    const rows = [];
+    let sFail = 0, sPass = 0, sSkip = 0;
+    for (const test of section.tests) {
+      total++;
+      const s = state.tests[test.id] || { state: null, notes: '' };
+      let mark = '⬜';
+      if (s.state === 'pass') { mark = '✓'; pass++; sPass++; }
+      else if (s.state === 'fail') { mark = '✗'; fail++; sFail++; }
+      else if (s.state === 'skip') { mark = '⏭'; skip++; sSkip++; }
+      const noteLine = s.notes ? `\n     💬 ${s.notes.replace(/\n/g, '\n     ')}` : '';
+      rows.push(`  ${mark} ${test.id} ${test.title}${noteLine}`);
+    }
+    let sStatus;
+    if (sFail > 0) sStatus = `${sFail} შეცდომა`;
+    else if (sPass === section.tests.length) sStatus = 'ყველაფერი მუშაობს';
+    else sStatus = `${sPass}/${section.tests.length}`;
+    sectionReports.push(
+      `## სექცია ${section.id}: ${section.title}\n` +
+      `_${sStatus}_\n\n` +
+      rows.join('\n')
+    );
+  }
+  const date = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  const summary =
+    `# Payload CMS — ტესტირების რეპორტი\n\n` +
+    `**თარიღი:** ${date}\n` +
+    `**შედეგი:** ${pass} ✓ / ${fail} ✗ / ${skip} ⏭ / ${total - pass - fail - skip} ⬜  (სულ ${total})\n` +
+    `**წარმატება:** ${total > 0 ? Math.round(pass / total * 100) : 0}%\n\n` +
+    (state.overall ? `## ზოგადი კომენტარი\n\n${state.overall}\n\n---\n\n` : '---\n\n') +
+    sectionReports.join('\n\n');
+  document.getElementById('reportOutput').value = summary;
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+}
+
+function copyReport() {
+  const textarea = document.getElementById('reportOutput');
+  textarea.select();
+  textarea.setSelectionRange(0, 99999);
+  try {
+    navigator.clipboard.writeText(textarea.value).then(() => toast('რეპორტი დაკოპირდა — ჩასვი Claude-ში'));
+  } catch {
+    document.execCommand('copy');
+    toast('რეპორტი დაკოპირდა — ჩასვი Claude-ში');
+  }
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+render();
+</script>
+
+</body>
+</html>

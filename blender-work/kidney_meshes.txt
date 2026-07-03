@@ -1,0 +1,59 @@
+Anterior surface of kidney.j
+Anterior surface of suprarenal gland.j
+Apex of bladder.j
+Body of bladder.j
+Body of gallbladder.j
+Fossa for gallbladder.j
+Fundus of bladder.j
+Fundus of gallbladder.j
+Gallbladder
+Hilum of kidney.j
+Hilum of suprarenal gland.j
+Inferior pole of kidney.j
+Infundibulum of gallbladder.j
+Kidney.l
+Kidney.r
+Lateral border of kidney.j
+Medial border of kidney.j
+Medial border of suprarenal gland.j
+Neck of gallbladder.j
+Renal impression of spleen.j
+Posterior surface of kidney.j
+Posterior surface of suprarenal gland.j
+Renal impression of liver.j
+Renal pelvis.l
+Renal pelvis.r
+Renal sinus.j
+Renal surface of suprarenal gland.j
+Superior border of suprarenal gland.j
+Superior pole of kidney.j
+Suprarenal gland.l
+Suprarenal gland.r
+Suprarenal impression of liver.j
+Urinary bladder
+
+Total: 33
+
+--- COLLECTIONS WITH KIDNEY ---
+Collection: Anterior branch of renal artery' (0 objects)
+Collection: Cortex of kidney lobe (0 objects)
+Collection: Inrarenal veins of kidney' (0 objects)
+Collection: Intrarenal arteries' (0 objects)
+Collection: Intrarenal veins of left kidney' (0 objects)
+Collection: Kidney (0 objects)
+Collection: Kidney lobe (0 objects)
+Collection: Left renal vein' (0 objects)
+Collection: Left suprarenal vein' (0 objects)
+Collection: Medial border of kidney (0 objects)
+Collection: Posterior branch of renal artery' (0 objects)
+Collection: Renal artery' (0 objects)
+Collection: Renal fascia (0 objects)
+Collection: Renal papilla (0 objects)
+Collection: Renal pelvis (0 objects)
+Collection: Renal plexus (0 objects)
+Collection: Renal pyramid (0 objects)
+Collection: Right renal vein' (0 objects)
+Collection: Right suprarenal vein' (0 objects)
+Collection: Suprarenal gland (0 objects)
+Collection: Urinary bladder (0 objects)
+Collection: Urinary system (9 objects)

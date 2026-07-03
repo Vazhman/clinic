@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Booking Architecture — Doctra ↔ Payload ↔ Clinic Site</title>
+<style>
+  :root {
+    --blackberry: #682149;
+    --blackberry-dark: #4a1735;
+    --pink: #DD64A6;
+    --pink-soft: #F7D6E7;
+    --pink-bg: #FDF4F9;
+    --grey: #3D3D3D;
+    --grey-soft: #6E6E6E;
+    --grey-line: #E4E4E4;
+    --cream: #FAFAF8;
+    --green: #2F9E6B;
+    --amber: #C58A23;
+    --red: #C84444;
+    --code-bg: #F4ECF2;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--grey);
+    background: var(--cream);
+    line-height: 1.55;
+    font-size: 15px;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px 96px; }
+  header.page {
+    border-bottom: 2px solid var(--blackberry);
+    padding-bottom: 18px;
+    margin-bottom: 32px;
+  }
+  header.page h1 {
+    margin: 0 0 6px;
+    color: var(--blackberry);
+    font-size: 30px;
+    letter-spacing: -0.5px;
+  }
+  header.page p.lead {
+    margin: 0;
+    color: var(--grey-soft);
+    font-size: 15px;
+  }
+  h2 {
+    color: var(--blackberry);
+    margin: 56px 0 16px;
+    font-size: 22px;
+    border-left: 4px solid var(--pink);
+    padding-left: 12px;
+  }
+  h3 {
+    color: var(--blackberry-dark);
+    margin: 28px 0 8px;
+    font-size: 17px;
+  }
+  p { margin: 8px 0; }
+  code, pre {
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    font-size: 13px;
+  }
+  code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; color: var(--blackberry-dark); }
+  pre {
+    background: #1f1419;
+    color: #f3e9ee;
+    padding: 14px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 10px 0;
+  }
+  pre code { background: transparent; padding: 0; color: inherit; }
+
+  /* ── Endpoint cards ──────────────────────────────────────────────────── */
+  .endpoint-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .endpoint {
+    background: white;
+    border: 1px solid var(--grey-line);
+    border-radius: 12px;
+    padding: 16px 18px;
+    border-left: 4px solid var(--blackberry);
+  }
+  .endpoint.read { border-left-color: var(--pink); }
+  .endpoint.write { border-left-color: var(--amber); }
+  .endpoint .verb {
+    display: inline-block;
+    background: var(--blackberry);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .endpoint .verb.get { background: var(--pink); }
+  .endpoint .verb.post { background: var(--blackberry); }
+  .endpoint h4 {
+    margin: 8px 0 6px;
+    font-size: 15px;
+    color: var(--blackberry-dark);
+    font-family: "JetBrains Mono", monospace;
+    word-break: break-all;
+  }
+  .endpoint .desc {
+    color: var(--grey);
+    font-size: 13.5px;
+    margin: 0 0 8px;
+  }
+  .endpoint .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .chip {
+    display: inline-block;
+    background: var(--pink-bg);
+    color: var(--blackberry);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--pink-soft);
+  }
+  .chip.warn { background: #FFF6E5; color: var(--amber); border-color: #F0D9A0; }
+  .chip.good { background: #E5F7EE; color: var(--green); border-color: #BFE5D0; }
+  .chip.bad  { background: #FCE7E7; color: var(--red);   border-color: #F0B5B5; }
+
+  /* ── Architecture diagram ────────────────────────────────────────────── */
+  .diagram {
+    background: white;
+    border: 1px solid var(--grey-line);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 16px 0;
+    overflow-x: auto;
+  }
+  .diagram svg { display: block; max-width: 100%; height: auto; }
+
+  /* ── Comparison table ────────────────────────────────────────────────── */
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; background: white; }
+  th, td { padding: 10px 14px; border-bottom: 1px solid var(--grey-line); text-align: left; vertical-align: top; }
+  th { background: var(--blackberry); color: white; font-size: 13px; font-weight: 600; }
+  tr:nth-child(even) td { background: var(--pink-bg); }
+  td.tight { white-space: nowrap; font-family: "JetBrains Mono", monospace; font-size: 13px; }
+
+  /* ── Callouts ────────────────────────────────────────────────────────── */
+  .callout {
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-left: 4px solid var(--pink);
+    background: var(--pink-bg);
+  }
+  .callout.warn { background: #FFF6E5; border-left-color: var(--amber); }
+  .callout.good { background: #E5F7EE; border-left-color: var(--green); }
+  .callout strong { color: var(--blackberry); }
+
+  /* ── Step list ───────────────────────────────────────────────────────── */
+  ol.steps { padding-left: 0; counter-reset: step; list-style: none; }
+  ol.steps li {
+    counter-increment: step;
+    background: white;
+    border: 1px solid var(--grey-line);
+    border-radius: 10px;
+    padding: 14px 18px 14px 56px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  ol.steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    width: 30px;
+    height: 30px;
+    background: var(--blackberry);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-family: "JetBrains Mono", monospace;
+  }
+  ol.steps li.doctra::before { background: var(--amber); }
+  ol.steps li.payload::before { background: var(--pink); }
+  ol.steps li strong { color: var(--blackberry); }
+
+  /* ── Legend ──────────────────────────────────────────────────────────── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--grey-soft);
+  }
+  .legend .swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .legend > span { display: inline-flex; align-items: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page">
+  <h1>Booking architecture — what calls what</h1>
+  <p class="lead">
+    Doctra is the clinic's HIS (1C:Enterprise). Payload CMS is our editorial layer.
+    The website talks to both, but only one is hot-path. Below: the actual API surface,
+    where each call lives, and what changes when.
+  </p>
+</header>
+
+<!-- ─────────────────────── DOCTRA ENDPOINTS ─────────────────────── -->
+<h2>1. Doctra REST API — what the clinic exposes</h2>
+<p>
+  All endpoints are <code>POST</code> to
+  <code>http://31.146.167.162:9090/doctra/hs/portal_exchange/v1/&lt;method&gt;</code>.
+  Implementation lives in <code>src/lib/doctra-api.ts</code>.
+</p>
+
+<div class="callout warn">
+  <strong>Doctra quirks (learned the hard way):</strong>
+  <ul style="margin: 6px 0 0 18px; padding: 0;">
+    <li>Every body must include <code>"hash": ""</code> — undocumented but required.</li>
+    <li>Auth header uses an underscore: <code>Authorization: Bearer_&lt;token&gt;</code>, not <code>Bearer &lt;token&gt;</code>.</li>
+    <li>Token TTL is 60 seconds — we cache + auto-refresh on <code>status: 9</code>.</li>
+    <li><code>get_time_slots</code> with <code>date_end = date + 1</code> returns ZERO slots — must pass at least <code>date + 2</code> and filter client-side.</li>
+    <li>Slot dates are ISO (<code>2026-04-28</code>); booking submission needs compact (<code>202604281300</code>).</li>
+  </ul>
+</div>
+
+<div class="endpoint-grid">
+
+  <div class="endpoint">
+    <span class="verb post">POST</span>
+    <h4>/token</h4>
+    <p class="desc">Auth. Returns <code>token</code> + <code>token_active_time</code> (minutes).</p>
+    <div class="meta">
+      <span class="chip">cached 60s</span>
+      <span class="chip">auto-refresh on 9</span>
+    </div>
+  </div>
+
+  <div class="endpoint read">
+    <span class="verb post">POST</span>
+    <h4>/get_departments</h4>
+    <p class="desc">Returns the catalogue of bookable departments (services). Each item: <code>id</code>, <code>name</code>, <code>name_en</code>, <code>address</code>, <code>type</code>.</p>
+    <div class="meta">
+      <span class="chip">imported once</span>
+      <span class="chip">→ Payload services</span>
+    </div>
+  </div>
+
+  <div class="endpoint read">
+    <span class="verb post">POST</span>
+    <h4>/get_doctors</h4>
+    <p class="desc">Doctors filtered by <code>department_id</code>. Each: <code>id</code>, <code>name</code>, <code>name_en</code>, <code>specialty</code>, <code>specialty_en</code>, <code>degree</code>, <code>picture</code>, <code>email</code>, <code>phone</code>.</p>
+    <div class="meta">
+      <span class="chip">imported once</span>
+      <span class="chip">→ Payload doctors</span>
+    </div>
+  </div>
+
+  <div class="endpoint read">
+    <span class="verb post">POST</span>
+    <h4>/get_time_slots</h4>
+    <p class="desc">Slot grid for one department + date range. Returns rows for ALL doctors in that dept; we filter to the picked doctor client-side.</p>
+    <div class="meta">
+      <span class="chip warn">live — not cached</span>
+      <span class="chip warn">slow (~500–2000ms)</span>
+    </div>
+  </div>
+
+  <div class="endpoint write">
+    <span class="verb post">POST</span>
+    <h4>/booking_without_otac</h4>
+    <p class="desc">Submit appointment. Body: doctor_id, date_begin (yyyyMMddHHmm), patient details. Returns <code>status: 0</code> on success.</p>
+    <div class="meta">
+      <span class="chip bad">DO NOT TEST</span>
+      <span class="chip">writes real bookings</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─────────────────────── ARCHITECTURE DIAGRAM ─────────────────────── -->
+<h2>2. Where Payload sits — the full picture</h2>
+
+<div class="legend">
+  <span><span class="swatch" style="background: var(--pink);"></span> hot path (every page load / user action)</span>
+  <span><span class="swatch" style="background: var(--amber);"></span> live Doctra call (slow, only when needed)</span>
+  <span><span class="swatch" style="background: var(--blackberry);"></span> admin-triggered, runs once per import</span>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 1140 660" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow-pink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#DD64A6"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#C58A23"/>
+    </marker>
+    <marker id="arrow-blackberry" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#682149"/>
+    </marker>
+    <marker id="arrow-grey" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6E6E6E"/>
+    </marker>
+  </defs>
+
+  <!-- ── COLUMN 1: Browser ── -->
+  <g>
+    <rect x="20" y="40" width="220" height="180" rx="14" fill="white" stroke="#682149" stroke-width="2"/>
+    <text x="130" y="68" font-family="sans-serif" font-size="15" font-weight="700" fill="#682149" text-anchor="middle">Patient browser</text>
+    <text x="130" y="88" font-family="sans-serif" font-size="11" fill="#6E6E6E" text-anchor="middle">khozrevanidze.ge/{ge|en|ru}/booking</text>
+
+    <rect x="40" y="100" width="180" height="46" rx="8" fill="#FDF4F9" stroke="#DD64A6"/>
+    <text x="130" y="120" font-family="sans-serif" font-size="12" font-weight="700" fill="#682149" text-anchor="middle">BookingWizard</text>
+    <text x="130" y="136" font-family="monospace" font-size="11" fill="#3D3D3D" text-anchor="middle">5-step flow</text>
+
+    <rect x="40" y="156" width="180" height="46" rx="8" fill="#FDF4F9" stroke="#DD64A6"/>
+    <text x="130" y="176" font-family="sans-serif" font-size="12" font-weight="700" fill="#682149" text-anchor="middle">DateTimeStep</text>
+    <text x="130" y="192" font-family="monospace" font-size="11" fill="#3D3D3D" text-anchor="middle">calendar + slot grid</text>
+  </g>
+
+  <!-- ── COLUMN 1B: Admin browser ── -->
+  <g>
+    <rect x="20" y="450" width="220" height="120" rx="14" fill="white" stroke="#682149" stroke-width="2"/>
+    <text x="130" y="478" font-family="sans-serif" font-size="15" font-weight="700" fill="#682149" text-anchor="middle">Clinic admin</text>
+    <text x="130" y="498" font-family="sans-serif" font-size="11" fill="#6E6E6E" text-anchor="middle">/admin (Payload UI)</text>
+
+    <rect x="40" y="514" width="180" height="40" rx="8" fill="#F4ECF2" stroke="#682149"/>
+    <text x="130" y="538" font-family="sans-serif" font-size="11" font-weight="700" fill="#682149" text-anchor="middle">Edits doctors / services</text>
+  </g>
+
+  <!-- ── COLUMN 2: Next.js (clinic app) ── -->
+  <g>
+    <rect x="320" y="20" width="380" height="600" rx="14" fill="white" stroke="#682149" stroke-width="2"/>
+    <text x="510" y="48" font-family="sans-serif" font-size="15" font-weight="700" fill="#682149" text-anchor="middle">Next.js 16 app (Vercel)</text>
+
+    <!-- SSR -->
+    <rect x="340" y="68" width="340" height="100" rx="10" fill="#FDF4F9" stroke="#DD64A6"/>
+    <text x="510" y="90" font-family="sans-serif" font-size="13" font-weight="700" fill="#682149" text-anchor="middle">/booking page (Server Component)</text>
+    <text x="510" y="110" font-family="monospace" font-size="11" fill="#3D3D3D" text-anchor="middle">getBookingServicesFromPayload()</text>
+    <text x="510" y="126" font-family="monospace" font-size="11" fill="#3D3D3D" text-anchor="middle">getBookingDoctorsFromPayload(locale)</text>
+    <text x="510" y="148" font-family="sans-serif" font-size="11" font-style="italic" fill="#2F9E6B" text-anchor="middle">~50ms — Postgres only, no Doctra</text>
+
+    <!-- timeslots route -->
+    <rect x="340" y="190" width="340" height="74" rx="10" fill="#FFF6E5" stroke="#C58A23"/>
+    <text x="510" y="212" font-family="monospace" font-size="12" font-weight="700" fill="#C58A23" text-anchor="middle">GET /api/booking/timeslots</text>
+    <text x="510" y="230" font-family="sans-serif" font-size="11" fill="#3D3D3D" text-anchor="middle">?summary=1 → 180-day availability for doctor</text>
+    <text x="510" y="246" font-family="sans-serif" font-size="11" fill="#3D3D3D" text-anchor="middle">?date=YYYY-MM-DD → slot grid for one day</text>
+    <text x="510" y="259" font-family="sans-serif" font-size="10" font-style="italic" fill="#C58A23" text-anchor="middle">live Doctra proxy — only fires when user picks a doctor</text>
+
+    <!-- submit route -->
+    <rect x="340" y="284" width="340" height="60" rx="10" fill="#FCE7E7" stroke="#C84444"/>
+    <text x="510" y="306" font-family="monospace" font-size="12" font-weight="700" fill="#C84444" text-anchor="middle">POST /api/booking/submit</text>
+    <text x="510" y="324" font-family="sans-serif" font-size="11" fill="#3D3D3D" text-anchor="middle">writes booking via Doctra booking_without_otac</text>
+    <text x="510" y="338" font-family="sans-serif" font-size="10" font-style="italic" fill="#C84444" text-anchor="middle">untouched by this refactor</text>
+
+    <!-- import route -->
+    <rect x="340" y="378" width="340" height="74" rx="10" fill="#F4ECF2" stroke="#682149"/>
+    <text x="510" y="400" font-family="monospace" font-size="12" font-weight="700" fill="#682149" text-anchor="middle">POST /api/import-doctra</text>
+    <text x="510" y="418" font-family="sans-serif" font-size="11" fill="#3D3D3D" text-anchor="middle">admin-only · upserts Doctra → Payload</text>
+    <text x="510" y="432" font-family="sans-serif" font-size="11" fill="#3D3D3D" text-anchor="middle">idempotent · never overwrites editorial fields</text>
+    <text x="510" y="446" font-family="sans-serif" font-size="10" font-style="italic" fill="#682149" text-anchor="middle">run once at setup, again when new doctor added in Doctra</text>
+
+    <!-- thin wrappers -->
+    <rect x="340" y="476" width="160" height="60" rx="10" fill="#FAFAF8" stroke="#E4E4E4"/>
+    <text x="420" y="497" font-family="monospace" font-size="11" font-weight="700" fill="#682149" text-anchor="middle">/api/booking/services</text>
+    <text x="420" y="514" font-family="sans-serif" font-size="10" fill="#6E6E6E" text-anchor="middle">thin wrapper</text>
+    <text x="420" y="527" font-family="sans-serif" font-size="10" fill="#6E6E6E" text-anchor="middle">→ Payload</text>
+
+    <rect x="520" y="476" width="160" height="60" rx="10" fill="#FAFAF8" stroke="#E4E4E4"/>
+    <text x="600" y="497" font-family="monospace" font-size="11" font-weight="700" fill="#682149" text-anchor="middle">/api/booking/all-doctors</text>
+    <text x="600" y="514" font-family="sans-serif" font-size="10" fill="#6E6E6E" text-anchor="middle">thin wrapper</text>
+    <text x="600" y="527" font-family="sans-serif" font-size="10" fill="#6E6E6E" text-anchor="middle">→ Payload</text>
+
+    <text x="510" y="572" font-family="sans-serif" font-size="11" font-style="italic" fill="#6E6E6E" text-anchor="middle">(used by mini-booking widget on doctor profiles)</text>
+  </g>
+
+  <!-- ── COLUMN 3: Payload + Doctra ── -->
+  <g>
+    <!-- Payload box -->
+    <rect x="780" y="40" width="340" height="240" rx="14" fill="white" stroke="#DD64A6" stroke-width="2"/>
+    <text x="950" y="68" font-family="sans-serif" font-size="15" font-weight="700" fill="#DD64A6" text-anchor="middle">Payload CMS</text>
+    <text x="950" y="86" font-family="sans-serif" font-size="11" fill="#6E6E6E" text-anchor="middle">Postgres (Neon) — source of truth for display</text>
+
+    <rect x="800" y="100" width="300" height="74" rx="8" fill="#FDF4F9" stroke="#DD64A6"/>
+    <text x="950" y="120" font-family="sans-serif" font-size="13" font-weight="700" fill="#682149" text-anchor="middle">services collection</text>
+    <text x="950" y="138" font-family="monospace" font-size="10" fill="#3D3D3D" text-anchor="middle">doctraBranchId · name (3 locales)</text>
+    <text x="950" y="152" font-family="monospace" font-size="10" fill="#3D3D3D" text-anchor="middle">category · description · icon · slug</text>
+    <text x="950" y="166" font-family="sans-serif" font-size="10" font-style="italic" fill="#6E6E6E" text-anchor="middle">filter: doctraBranchId exists</text>
+
+    <rect x="800" y="184" width="300" height="86" rx="8" fill="#FDF4F9" stroke="#DD64A6"/>
+    <text x="950" y="204" font-family="sans-serif" font-size="13" font-weight="700" fill="#682149" text-anchor="middle">doctors collection</text>
+    <text x="950" y="222" font-family="monospace" font-size="10" fill="#3D3D3D" text-anchor="middle">doctraId · doctraBranchId · inactive</text>
+    <text x="950" y="236" font-family="monospace" font-size="10" fill="#3D3D3D" text-anchor="middle">name · specialty (3 locales) · slug</text>
+    <text x="950" y="250" font-family="monospace" font-size="10" fill="#3D3D3D" text-anchor="middle">photo (Media) · biography · qualifications</text>
+    <text x="950" y="264" font-family="sans-serif" font-size="10" font-style="italic" fill="#6E6E6E" text-anchor="middle">filter: doctraId exists AND inactive ≠ true</text>
+
+    <!-- Doctra box -->
+    <rect x="780" y="320" width="340" height="280" rx="14" fill="white" stroke="#C58A23" stroke-width="2"/>
+    <text x="950" y="348" font-family="sans-serif" font-size="15" font-weight="700" fill="#C58A23" text-anchor="middle">Doctra (1C:Enterprise HIS)</text>
+    <text x="950" y="366" font-family="sans-serif" font-size="11" fill="#6E6E6E" text-anchor="middle">31.146.167.162:9090 — clinic-managed, slow</text>
+
+    <rect x="800" y="380" width="300" height="44" rx="8" fill="#FFF6E5" stroke="#C58A23"/>
+    <text x="950" y="398" font-family="monospace" font-size="11" font-weight="700" fill="#C58A23" text-anchor="middle">/get_departments</text>
+    <text x="950" y="414" font-family="sans-serif" font-size="10" fill="#3D3D3D" text-anchor="middle">read once → seeds Payload services</text>
+
+    <rect x="800" y="432" width="300" height="44" rx="8" fill="#FFF6E5" stroke="#C58A23"/>
+    <text x="950" y="450" font-family="monospace" font-size="11" font-weight="700" fill="#C58A23" text-anchor="middle">/get_doctors (department_id)</text>
+    <text x="950" y="466" font-family="sans-serif" font-size="10" fill="#3D3D3D" text-anchor="middle">read once → seeds Payload doctors</text>
+
+    <rect x="800" y="484" width="300" height="44" rx="8" fill="#FFF6E5" stroke="#C58A23"/>
+    <text x="950" y="502" font-family="monospace" font-size="11" font-weight="700" fill="#C58A23" text-anchor="middle">/get_time_slots</text>
+    <text x="950" y="518" font-family="sans-serif" font-size="10" fill="#3D3D3D" text-anchor="middle">live — only path that hits Doctra on every booking</text>
+
+    <rect x="800" y="536" width="300" height="44" rx="8" fill="#FCE7E7" stroke="#C84444"/>
+    <text x="950" y="554" font-family="monospace" font-size="11" font-weight="700" fill="#C84444" text-anchor="middle">/booking_without_otac</text>
+    <text x="950" y="570" font-family="sans-serif" font-size="10" fill="#3D3D3D" text-anchor="middle">write — appointment submission</text>
+  </g>
+
+  <!-- ── ARROWS ── -->
+  <!-- browser → SSR (pink) -->
+  <line x1="240" y1="118" x2="340" y2="118" stroke="#DD64A6" stroke-width="2.5" marker-end="url(#arrow-pink)"/>
+  <text x="290" y="110" font-family="sans-serif" font-size="10" fill="#DD64A6" text-anchor="middle">page load</text>
+
+  <!-- browser → timeslots (amber) -->
+  <line x1="240" y1="179" x2="340" y2="227" stroke="#C58A23" stroke-width="2.5" marker-end="url(#arrow-amber)"/>
+  <text x="298" y="195" font-family="sans-serif" font-size="10" fill="#C58A23" text-anchor="middle">pick doctor / date</text>
+
+  <!-- browser → submit -->
+  <line x1="240" y1="200" x2="340" y2="314" stroke="#C84444" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow-amber)"/>
+  <text x="294" y="278" font-family="sans-serif" font-size="10" fill="#C84444" text-anchor="middle">submit form</text>
+
+  <!-- admin → import-doctra (blackberry) -->
+  <line x1="240" y1="510" x2="340" y2="415" stroke="#682149" stroke-width="2.5" marker-end="url(#arrow-blackberry)"/>
+  <text x="290" y="475" font-family="sans-serif" font-size="10" fill="#682149" text-anchor="middle">trigger import</text>
+
+  <!-- admin → Payload UI (writes) -->
+  <line x1="240" y1="534" x2="800" y2="232" stroke="#682149" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arrow-blackberry)"/>
+  <text x="540" y="430" font-family="sans-serif" font-size="10" fill="#682149" text-anchor="middle">edits photo / bio / specialty</text>
+
+  <!-- SSR → Payload services (pink, hot) -->
+  <line x1="680" y1="118" x2="800" y2="138" stroke="#DD64A6" stroke-width="2.5" marker-end="url(#arrow-pink)"/>
+  <!-- SSR → Payload doctors -->
+  <line x1="680" y1="138" x2="800" y2="220" stroke="#DD64A6" stroke-width="2.5" marker-end="url(#arrow-pink)"/>
+
+  <!-- timeslots route → Doctra get_time_slots (amber, live) -->
+  <line x1="680" y1="227" x2="800" y2="500" stroke="#C58A23" stroke-width="2.5" marker-end="url(#arrow-amber)"/>
+
+  <!-- submit → Doctra booking -->
+  <line x1="680" y1="314" x2="800" y2="556" stroke="#C84444" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow-amber)"/>
+
+  <!-- import-doctra → Doctra get_departments + get_doctors (blackberry, once) -->
+  <line x1="680" y1="408" x2="800" y2="402" stroke="#682149" stroke-width="2" marker-end="url(#arrow-blackberry)"/>
+  <line x1="680" y1="425" x2="800" y2="450" stroke="#682149" stroke-width="2" marker-end="url(#arrow-blackberry)"/>
+
+  <!-- import-doctra writes → Payload services + doctors (blackberry) -->
+  <line x1="680" y1="385" x2="800" y2="138" stroke="#682149" stroke-width="2" stroke-dasharray="2 3" marker-end="url(#arrow-blackberry)"/>
+  <line x1="680" y1="395" x2="800" y2="220" stroke="#682149" stroke-width="2" stroke-dasharray="2 3" marker-end="url(#arrow-blackberry)"/>
+
+  <!-- thin wrappers also read Payload -->
+  <line x1="500" y1="500" x2="800" y2="170" stroke="#6E6E6E" stroke-width="1" stroke-dasharray="2 3" marker-end="url(#arrow-grey)"/>
+  <line x1="600" y1="500" x2="800" y2="220" stroke="#6E6E6E" stroke-width="1" stroke-dasharray="2 3" marker-end="url(#arrow-grey)"/>
+</svg>
+</div>
+
+<!-- ─────────────────────── REQUEST FLOW ─────────────────────── -->
+<h2>3. What happens when a patient opens /booking</h2>
+
+<ol class="steps">
+  <li class="payload">
+    <strong>Page request hits the Server Component.</strong>
+    <code>src/app/(frontend)/[locale]/booking/page.tsx</code> calls
+    <code>getBookingServicesFromPayload()</code> + <code>getBookingDoctorsFromPayload(locale)</code> in parallel.
+    Two Postgres queries. <strong>~50ms total. Zero Doctra calls.</strong>
+  </li>
+  <li class="payload">
+    <strong>HTML ships with the wizard already populated.</strong>
+    <code>BookingWizard</code> mounts with <code>initialServices</code> + <code>initialDoctors</code>.
+    Step 1 (service picker) and step 2 (doctor picker) render instantly — no spinner.
+  </li>
+  <li class="doctra">
+    <strong>Patient picks a doctor.</strong> <code>DateTimeStep</code> fires
+    <code>GET /api/booking/timeslots?summary=1&amp;branchId=…&amp;operatorId=…&amp;dateBegin=…&amp;dateEnd=…</code>.
+    This proxies to Doctra's <code>get_time_slots</code> for a 180-day window and returns the dates with availability.
+    Live Doctra call — typically 500–2000ms. We use the result to grey-out unavailable days in the calendar.
+  </li>
+  <li class="doctra">
+    <strong>Patient picks a date.</strong> <code>DateTimeStep</code> fires
+    <code>GET /api/booking/timeslots?date=YYYY-MM-DD&amp;branchId=…&amp;operatorId=…</code>.
+    Single-day slot grid (with the 2-day workaround for Doctra's 1-day-window bug). Renders the time chips.
+  </li>
+  <li>
+    <strong>Patient enters details and submits.</strong> <code>POST /api/booking/submit</code> →
+    Doctra's <code>booking_without_otac</code>. Untouched by this work; do not test against the live endpoint.
+  </li>
+</ol>
+
+<!-- ─────────────────────── DATA OWNERSHIP ─────────────────────── -->
+<h2>4. Who owns what data</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Source of truth</th>
+      <th>How it gets there</th>
+      <th>How website reads it</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Department list (services)</td>
+      <td>Payload <code>services</code></td>
+      <td>Imported from Doctra <code>get_departments</code> via <code>/api/import-doctra</code> (admin-triggered, idempotent)</td>
+      <td>Postgres SELECT, ~50ms</td>
+    </tr>
+    <tr>
+      <td>Doctor list</td>
+      <td>Payload <code>doctors</code></td>
+      <td>Imported from Doctra <code>get_doctors</code> via <code>/api/import-doctra</code></td>
+      <td>Postgres SELECT, ~50ms</td>
+    </tr>
+    <tr>
+      <td>Doctor photo, bio, qualifications, languages</td>
+      <td>Payload <code>doctors</code> (admin-curated)</td>
+      <td>Uploaded / written in Payload admin UI — never overwritten by re-import</td>
+      <td>Postgres + Media URL</td>
+    </tr>
+    <tr>
+      <td>Doctor name, specialty (Georgian + English)</td>
+      <td>Payload (seeded from Doctra)</td>
+      <td>First import: copied from Doctra <code>name</code>/<code>name_en</code>/<code>specialty</code>. Re-imports never touch these.</td>
+      <td>Postgres, locale-aware</td>
+    </tr>
+    <tr>
+      <td>Doctor inactive flag</td>
+      <td>Payload (admin-controlled)</td>
+      <td>Admin checks the <code>inactive</code> box to hide a doctor without deleting</td>
+      <td>Filter: <code>inactive ≠ true</code></td>
+    </tr>
+    <tr>
+      <td>Doctor ↔ department link</td>
+      <td>Doctra (refreshed on each import)</td>
+      <td>Re-import updates <code>doctraBranchId</code> if the doctor moved specialties in Doctra</td>
+      <td>Stored on Payload doctor record</td>
+    </tr>
+    <tr>
+      <td><strong>Time slots / availability</strong></td>
+      <td><strong>Doctra (live)</strong></td>
+      <td>Never cached, never copied — the clinic's own scheduling system</td>
+      <td><strong>Live HTTP call to Doctra on doctor pick + date pick</strong></td>
+    </tr>
+    <tr>
+      <td>Booking submission</td>
+      <td>Doctra (write target)</td>
+      <td>Direct POST to <code>booking_without_otac</code></td>
+      <td>(write only)</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ─────────────────────── PERFORMANCE ─────────────────────── -->
+<h2>5. Performance — before vs. after the refactor</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>Before</th>
+      <th>After</th>
+      <th>Why</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Open <code>/booking</code> (cold)</td>
+      <td class="tight">~5000ms</td>
+      <td class="tight">~50–200ms</td>
+      <td>Used to fan out to Doctra for every department. Now Postgres SELECT × 2.</td>
+    </tr>
+    <tr>
+      <td>Wizard renders services + doctors</td>
+      <td class="tight">after second client fetch</td>
+      <td class="tight">already in HTML</td>
+      <td>SSR pre-loads. <code>BookingWizard</code> mounts populated.</td>
+    </tr>
+    <tr>
+      <td>Calendar greys-out unavailable days</td>
+      <td class="tight">~5000ms (state hop)</td>
+      <td class="tight">~500–2000ms</td>
+      <td>One Doctra call for the picked doctor only — not all departments.</td>
+    </tr>
+    <tr>
+      <td>Pick a date → see time chips</td>
+      <td class="tight">~500–1500ms</td>
+      <td class="tight">~500–1500ms</td>
+      <td>Unchanged — must be live (real availability).</td>
+    </tr>
+    <tr>
+      <td>Submit appointment</td>
+      <td class="tight">~700ms</td>
+      <td class="tight">~700ms</td>
+      <td>Unchanged — Doctra write.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout good">
+  <strong>Net effect:</strong> page paint went from "5+ second freeze" to instant. The only Doctra latency
+  the patient ever feels is the calendar/slots fetch — and that only fires after they have actively picked
+  a doctor, which is already a moment where some loading is acceptable.
+</div>
+
+<!-- ─────────────────────── KEEPING IT FRESH ─────────────────────── -->
+<h2>6. Keeping Payload in sync with Doctra</h2>
+
+<p>Payload caches the catalogue, Doctra owns it. Sync is <strong>manual and on-demand</strong>:</p>
+
+<ol class="steps">
+  <li>
+    <strong>New doctor added in Doctra</strong> → admin signs into <code>/admin</code>,
+    triggers <code>POST /api/import-doctra</code> (curl, button, or manual fetch from the admin UI).
+  </li>
+  <li>
+    <strong>Import endpoint:</strong>
+    <ul>
+      <li>Fetches <code>get_departments</code> + <code>get_doctors</code> for each department.</li>
+      <li>For each Doctra doctor: if no Payload row matches <code>doctraId</code>, <strong>create</strong>
+          with seeded name/specialty. If a row exists, <strong>only refresh the department link</strong> —
+          editorial fields (photo, bio, qualifications) stay untouched.</li>
+      <li>Same for departments → Payload <code>services</code>.</li>
+      <li>Returns a per-collection summary: <code>{ created, updated, skipped, errors }</code>.</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Admin opens the new doctor in Payload</strong>, uploads a photo, fills bio, polishes the
+    Georgian/English name. Editorial work happens once, never blown away by future re-imports.
+  </li>
+  <li>
+    <strong>Doctor leaves the clinic</strong> → admin checks the <code>inactive</code> checkbox.
+    They disappear from the booking form and the website without losing the row (so old appointments still resolve).
+  </li>
+</ol>
+
+<div class="callout warn">
+  <strong>Operational caveat:</strong> on a fresh database the booking page will be empty until someone runs
+  the import. This is by design — Payload is the source of truth for what shows up on the site.
+  In production, the <code>inactive</code> column also needs a one-time migration since
+  <code>push: true</code> is disabled outside dev.
+</div>
+
+<!-- ─────────────────────── FILE MAP ─────────────────────── -->
+<h2>7. File map (where the code lives)</h2>
+
+<table>
+  <thead>
+    <tr><th>Concern</th><th>File</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Doctra REST client (auth, fetch, all 5 endpoints)</td><td class="tight">src/lib/doctra-api.ts</td></tr>
+    <tr><td>Payload helpers (services + doctors for booking)</td><td class="tight">src/lib/payload-data.ts</td></tr>
+    <tr><td>Booking page (SSR pre-load)</td><td class="tight">src/app/(frontend)/[locale]/booking/page.tsx</td></tr>
+    <tr><td>Wizard (5-step UI)</td><td class="tight">src/components/booking/BookingWizard.tsx</td></tr>
+    <tr><td>Calendar + slot grid (only Doctra-live consumer)</td><td class="tight">src/components/booking/DateTimeStep.tsx</td></tr>
+    <tr><td>Service picker</td><td class="tight">src/components/booking/CombinedSelectionStep.tsx</td></tr>
+    <tr><td>Live time-slot proxy</td><td class="tight">src/app/api/booking/timeslots/route.ts</td></tr>
+    <tr><td>Booking submission</td><td class="tight">src/app/api/booking/submit/route.ts</td></tr>
+    <tr><td>Doctra → Payload importer (admin-only)</td><td class="tight">src/app/api/import-doctra/route.ts</td></tr>
+    <tr><td>Doctors collection schema</td><td class="tight">src/collections/Doctors.ts</td></tr>
+    <tr><td>Services collection schema</td><td class="tight">src/collections/Services.ts</td></tr>
+    <tr><td>Thin Payload wrapper (used by mini-booking widget)</td><td class="tight">src/app/api/booking/all-doctors/route.ts</td></tr>
+    <tr><td>Thin Payload wrapper (services JSON)</td><td class="tight">src/app/api/booking/services/route.ts</td></tr>
+  </tbody>
+</table>
+
+<footer style="margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--grey-line); color: var(--grey-soft); font-size: 12px;">
+  Generated 2026-05-10 · Khozrevanidze Clinic · Doctra ↔ Payload bridge architecture
+</footer>
+
+</div>
+</body>
+</html>

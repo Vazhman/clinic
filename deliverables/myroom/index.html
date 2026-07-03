@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<!--
+  ხოზრევანიძის კლინიკა — პაციენტის პორტალი ("ჩემი ოთახი") · login
+  Drop-in restyle of /myroom/. Stays wire-compatible with the existing PHP
+  backend: posts to api.php (method=auth / method=verify), uses securitycode.php
+  for the captcha, redirects to lab.php on success. Self-contained — only
+  external dependency is the jQuery CDN (kept identical to the original).
+
+  To swap in the clinic's FiraGO webfont, add a @font-face for it and it will
+  win automatically (it's first in every font stack below).
+-->
+<html lang="ka">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>ჩემი ოთახი — ხოზრევანიძის კლინიკა</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@500;600;700&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --blackberry: #682149;
+      --blackberry-deep: #4a1735;
+      --pink: #dd64a6;
+      --pink-soft: #f4c9e0;
+      --grey: #3d3d3d;
+      --cream: #fafaf8;
+      --line: #ece6ea;
+      --ok: #2f8f5b;
+      --danger: #c2334d;
+
+      --serif: "Noto Serif Georgian", "Noto Serif", Georgia, serif;
+      --sans: "FiraGO", "Noto Sans Georgian", system-ui, -apple-system, Segoe UI, sans-serif;
+
+      --radius: 18px;
+      --shadow: 0 30px 80px -40px rgba(74, 23, 53, 0.55);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--grey);
+      background: var(--cream);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* ── Shell: split layout ───────────────────────────────────────────── */
+    .shell {
+      min-height: 100%;
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+    }
+    @media (max-width: 920px) {
+      .shell { grid-template-columns: 1fr; }
+    }
+
+    /* ── Brand panel ───────────────────────────────────────────────────── */
+    .brand {
+      position: relative;
+      overflow: hidden;
+      color: #fff;
+      padding: clamp(2rem, 5vw, 4.5rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        radial-gradient(120% 90% at 85% 8%, rgba(221, 100, 166, 0.42), transparent 55%),
+        radial-gradient(90% 70% at 0% 100%, rgba(221, 100, 166, 0.18), transparent 60%),
+        linear-gradient(155deg, var(--blackberry) 0%, var(--blackberry-deep) 100%);
+    }
+    /* fine grain for depth */
+    .brand::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.5;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    }
+    .brand > * { position: relative; z-index: 1; }
+
+    .wordmark { display: flex; align-items: center; gap: 0.75rem; }
+    .wordmark .mark {
+      width: 44px; height: 44px; border-radius: 13px;
+      display: grid; place-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(6px);
+    }
+    .wordmark .mark svg { width: 24px; height: 24px; }
+    .wordmark b { font-family: var(--serif); font-weight: 600; font-size: 1.12rem; letter-spacing: 0.2px; }
+    .wordmark span { display: block; font-size: 0.72rem; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+
+    .brand-hero { max-width: 26ch; }
+    .brand-hero h1 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: clamp(2.1rem, 4.2vw, 3.3rem);
+      line-height: 1.08;
+      margin: 0 0 1.1rem;
+      letter-spacing: -0.5px;
+    }
+    .brand-hero p { font-size: 1.02rem; line-height: 1.65; opacity: 0.82; margin: 0; max-width: 34ch; }
+
+    .features { list-style: none; padding: 0; margin: 1.8rem 0 0; display: grid; gap: 0.85rem; }
+    .features li { display: flex; align-items: center; gap: 0.7rem; font-size: 0.95rem; opacity: 0.92; }
+    .features .tick {
+      flex: none; width: 26px; height: 26px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: rgba(221, 100, 166, 0.25);
+      border: 1px solid rgba(244, 201, 224, 0.4);
+    }
+    .features .tick svg { width: 13px; height: 13px; }
+
+    /* animated ECG line */
+    .ecg { margin-top: 2.4rem; opacity: 0.6; }
+    .ecg svg { width: 100%; max-width: 340px; height: 46px; display: block; }
+    .ecg path {
+      fill: none; stroke: var(--pink-soft); stroke-width: 2.2;
+      stroke-linecap: round; stroke-linejoin: round;
+      stroke-dasharray: 560; stroke-dashoffset: 560;
+      animation: draw 4.5s var(--ease) infinite;
+    }
+    @keyframes draw {
+      0% { stroke-dashoffset: 560; }
+      55% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -560; }
+    }
+
+    @media (max-width: 920px) {
+      .brand { padding: 1.6rem 1.4rem 2rem; }
+      .brand-hero { max-width: none; }
+      .brand-hero h1 { font-size: 1.9rem; margin-bottom: 0.5rem; }
+      .brand-hero p, .features, .ecg { display: none; }
+    }
+
+    /* ── Auth side ─────────────────────────────────────────────────────── */
+    .auth {
+      display: flex; flex-direction: column;
+      padding: clamp(1.6rem, 4vw, 3.5rem);
+      position: relative;
+    }
+    .auth-top { display: flex; justify-content: flex-end; }
+
+    /* language switch */
+    .lang { display: inline-flex; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 4px; gap: 2px; box-shadow: 0 6px 20px -16px rgba(74,23,53,.5); }
+    .lang button {
+      border: 0; background: transparent; cursor: pointer;
+      font-family: var(--sans); font-size: 0.82rem; font-weight: 600; color: var(--grey);
+      padding: 6px 13px; border-radius: 999px; transition: all 0.25s var(--ease);
+    }
+    .lang button[aria-pressed="true"] { background: var(--blackberry); color: #fff; }
+    .lang button:not([aria-pressed="true"]):hover { color: var(--blackberry); }
+
+    .card-wrap { flex: 1; display: grid; place-items: center; padding: 2.2rem 0; }
+    .card {
+      position: relative;
+      width: 100%; max-width: 430px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(1.6rem, 3vw, 2.6rem);
+      overflow: hidden;
+    }
+    .card::before {
+      content: ""; position: absolute; inset: 0 0 auto 0; height: 4px;
+      background: linear-gradient(90deg, var(--blackberry), var(--pink));
+    }
+
+    .card h2 { font-family: var(--serif); font-weight: 600; font-size: 1.7rem; color: var(--blackberry); margin: 0.4rem 0 0.3rem; }
+    .card .sub { margin: 0 0 1.6rem; font-size: 0.92rem; line-height: 1.55; color: #7a6b73; }
+
+    /* step indicator */
+    .steps { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.6rem; }
+    .steps .dot {
+      flex: none; width: 26px; height: 26px; border-radius: 50%;
+      display: grid; place-items: center; font-size: 0.78rem; font-weight: 700;
+      background: var(--cream); color: #b3a4ac; border: 1.5px solid var(--line);
+      transition: all 0.3s var(--ease);
+    }
+    .steps .seg { flex: 1; height: 2px; background: var(--line); border-radius: 2px; overflow: hidden; }
+    .steps .seg i { display: block; height: 100%; width: 0; background: var(--pink); transition: width 0.45s var(--ease); }
+    .steps .label { font-size: 0.78rem; font-weight: 600; color: #b3a4ac; transition: color 0.3s var(--ease); }
+    .steps[data-step="1"] .dot.s1,
+    .steps[data-step="2"] .dot.s1 { background: var(--blackberry); color: #fff; border-color: var(--blackberry); }
+    .steps[data-step="1"] .label.s1 { color: var(--blackberry); }
+    .steps[data-step="2"] .dot.s2 { background: var(--blackberry); color: #fff; border-color: var(--blackberry); }
+    .steps[data-step="2"] .label.s2 { color: var(--blackberry); }
+    .steps[data-step="2"] .seg i { width: 100%; }
+
+    /* fields */
+    .field { position: relative; margin-bottom: 1.1rem; }
+    .field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--grey); margin-bottom: 0.4rem; }
+    .field input {
+      width: 100%; font-family: var(--sans); font-size: 1rem; color: var(--grey);
+      padding: 0.85rem 1rem; border: 1.5px solid var(--line); border-radius: 12px;
+      background: var(--cream); transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; outline: none;
+    }
+    .field input::placeholder { color: #b3a4ac; }
+    .field input:hover { border-color: #d9cdd4; }
+    .field input:focus {
+      border-color: var(--pink); background: #fff;
+      box-shadow: 0 0 0 4px rgba(221, 100, 166, 0.16);
+    }
+
+    /* captcha row */
+    .captcha-row { display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; align-items: stretch; }
+    .captcha-box { display: flex; align-items: center; gap: 0.4rem; }
+    .captcha-box img {
+      height: 52px; width: 118px; object-fit: cover; border-radius: 12px;
+      border: 1.5px solid var(--line); background: #fff;
+    }
+    .reload {
+      flex: none; width: 40px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff;
+      cursor: pointer; color: var(--blackberry); display: grid; place-items: center; transition: all 0.2s var(--ease);
+    }
+    .reload:hover { border-color: var(--pink); color: var(--pink); transform: rotate(-30deg); }
+    .reload svg { width: 18px; height: 18px; }
+
+    /* OTP single input, styled big */
+    .otp-input {
+      text-align: center; letter-spacing: 0.7em; font-size: 1.5rem; font-weight: 700;
+      padding-left: 0.7em; font-variant-numeric: tabular-nums;
+    }
+
+    /* button */
+    .btn {
+      width: 100%; border: 0; cursor: pointer; font-family: var(--sans);
+      font-size: 1rem; font-weight: 700; color: #fff; letter-spacing: 0.2px;
+      padding: 0.95rem 1rem; border-radius: 12px; margin-top: 0.4rem;
+      background: linear-gradient(135deg, var(--blackberry), #7c2a59);
+      box-shadow: 0 16px 30px -16px rgba(104, 33, 73, 0.8);
+      transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease), filter 0.18s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 22px 38px -16px rgba(104, 33, 73, 0.85); filter: brightness(1.06); }
+    .btn:active { transform: translateY(0); }
+    .btn svg { width: 17px; height: 17px; }
+
+    .linkbtn {
+      display: inline-block; margin-top: 1.1rem; background: none; border: 0; cursor: pointer;
+      font-family: var(--sans); font-size: 0.86rem; font-weight: 600; color: var(--blackberry);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .linkbtn:hover { color: var(--pink); }
+
+    /* alerts */
+    .alert { border-radius: 12px; padding: 0.75rem 0.95rem; font-size: 0.88rem; line-height: 1.45; margin-bottom: 1rem; }
+    .alert.err { background: #fdeef0; color: var(--danger); border: 1px solid #f5cdd4; }
+    [id="authError"]:empty, [id="verifyError"]:empty { display: none; }
+
+    /* loader overlay (shown/hidden by backend's $('.loader').show()/.hide()) */
+    .loader {
+      display: flex; /* visible state; hidden via inline style="display:none" */
+      position: absolute; inset: 0; z-index: 5;
+      align-items: center; justify-content: center; flex-direction: column; gap: 0.8rem;
+      background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(3px);
+    }
+    .spinner { width: 42px; height: 42px; border-radius: 50%; border: 3px solid var(--pink-soft); border-top-color: var(--blackberry); animation: spin 0.8s linear infinite; }
+    .loader span { font-size: 0.85rem; font-weight: 600; color: var(--blackberry); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .otp-hint { font-size: 0.85rem; color: #7a6b73; margin: -0.4rem 0 1.2rem; line-height: 1.5; }
+
+    .foot { text-align: center; font-size: 0.78rem; color: #a5969e; margin-top: 1.4rem; }
+    .foot a { color: var(--blackberry); text-decoration: none; }
+
+    /* page-load reveal */
+    .reveal { opacity: 0; transform: translateY(14px); animation: rise 0.7s var(--ease) forwards; }
+    .reveal.d1 { animation-delay: 0.08s; }
+    .reveal.d2 { animation-delay: 0.16s; }
+    .reveal.d3 { animation-delay: 0.24s; }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <!-- ── Brand panel ─────────────────────────────────────────────────── -->
+    <section class="brand">
+      <div class="wordmark reveal">
+        <span class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/>
+          </svg>
+        </span>
+        <span>
+          <b>ხოზრევანიძის კლინიკა</b>
+          <span data-i18n="kicker">PATIENT PORTAL</span>
+        </span>
+      </div>
+
+      <div class="brand-hero reveal d1">
+        <h1 data-i18n="brandTitle">თქვენი ჯანმრთელობა — ერთ სივრცეში</h1>
+        <p data-i18n="brandSub">ლაბორატორიული კვლევის პასუხები ხელმისაწვდომია ნებისმიერ დროს, უსაფრთხო პირადი კაბინეტიდან.</p>
+
+        <ul class="features">
+          <li class="reveal d2"><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span data-i18n="f1">ლაბორატორიული პასუხები ონლაინ</span></li>
+          <li class="reveal d2"><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span data-i18n="f2">SMS-ით დაცული ავტორიზაცია</span></li>
+          <li class="reveal d3"><span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span data-i18n="f3">წვდომა 24/7, ნებისმიერი მოწყობილობიდან</span></li>
+        </ul>
+      </div>
+
+      <div class="ecg reveal d3" aria-hidden="true">
+        <svg viewBox="0 0 340 46" preserveAspectRatio="none">
+          <path d="M0 23 H120 l8 -16 l10 32 l9 -28 l8 12 H200 l7 -7 l6 7 H340" />
+        </svg>
+      </div>
+    </section>
+
+    <!-- ── Auth side ───────────────────────────────────────────────────── -->
+    <section class="auth">
+      <div class="auth-top">
+        <div class="lang" role="group" aria-label="ენა / Language">
+          <button type="button" data-lang="ge" aria-pressed="true">ქარ</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+          <button type="button" data-lang="ru" aria-pressed="false">RU</button>
+        </div>
+      </div>
+
+      <div class="card-wrap">
+        <div class="card reveal d1">
+          <!-- step indicator -->
+          <div class="steps" data-step="1" aria-hidden="true">
+            <span class="dot s1">1</span>
+            <span class="label s1" data-i18n="step1">იდენტიფიკაცია</span>
+            <span class="seg"><i></i></span>
+            <span class="label s2" data-i18n="step2">დადასტურება</span>
+            <span class="dot s2">2</span>
+          </div>
+
+          <h2 data-i18n="title">ჩემი ოთახი</h2>
+          <p class="sub" data-i18n="subtitle">შემოდით ლაბორატორიული კვლევის პასუხების სანახავად.</p>
+
+          <!-- ── STEP 1: identify ──────────────────────────────────────── -->
+          <form id="pcform" autocomplete="off" novalidate>
+            <div id="authError" class="alert err" role="alert" aria-live="polite"></div>
+
+            <div class="field">
+              <label for="user_id" data-i18n="userIdLabel">პირადი ნომერი</label>
+              <input id="user_id" name="user_id" type="text" inputmode="numeric"
+                     maxlength="11" required placeholder="5-11 ციფრი" data-i18n-ph="userIdPh" />
+            </div>
+
+            <div class="field">
+              <label for="securityCode" data-i18n="captchaLabel">უსაფრთხოების კოდი</label>
+              <div class="captcha-row">
+                <input id="securityCode" name="securityCode" type="text" required
+                       placeholder="შეიყვანეთ კოდი" data-i18n-ph="captchaPh" autocomplete="off" />
+                <div class="captcha-box">
+                  <img id="captcha" src="securitycode.php?rand=init" alt="captcha" />
+                  <button type="button" id="reloadCaptcha" class="reload" title="განახლება" aria-label="captcha reload">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v5h-5"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" id="authBtn" class="btn" data-i18n="continueBtn">
+              გაგრძელება
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </button>
+          </form>
+
+          <!-- ── STEP 2: verify OTP ────────────────────────────────────── -->
+          <form id="pcsuccess" autocomplete="off" novalidate style="display:none">
+            <div id="verifyError" class="alert err" role="alert" aria-live="polite"></div>
+
+            <p class="otp-hint" data-i18n="otpHint">თქვენს მობილურ ნომერზე გამოგზავნილია 4-ნიშნა ერთჯერადი კოდი.</p>
+
+            <div class="field">
+              <label for="otp" data-i18n="otpLabel">ერთჯერადი კოდი</label>
+              <input id="otp" name="otp" class="otp-input" type="text" inputmode="numeric"
+                     pattern="\d{4}" maxlength="4" required placeholder="••••" autocomplete="one-time-code" />
+            </div>
+
+            <button type="submit" id="verifyBtn" class="btn" data-i18n="loginBtn">
+              შესვლა
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg>
+            </button>
+
+            <button type="button" id="backBtn" class="linkbtn" data-i18n="backBtn">← უკან, ნომრის შესწორება</button>
+          </form>
+
+          <!-- loader overlay; backend toggles via $('.loader').show()/.hide() -->
+          <div class="loader" style="display:none" aria-live="assertive">
+            <div class="spinner" aria-hidden="true"></div>
+            <span data-i18n="loading">მუშავდება…</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="foot" data-i18n-html="foot">
+        დახმარება გჭირდებათ? დაგვირეკეთ <a href="tel:+995577777777">+995 577 77 77 77</a>
+      </p>
+    </section>
+  </main>
+
+  <!-- jQuery — kept identical to the original page -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+          integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+          crossorigin="anonymous"></script>
+  <script>
+    /* ─────────────────────────────────────────────────────────────────────
+       BACKEND WIRING — unchanged contract with api.php / lab.php.
+       (Same method names, same payload shape as the original page.)
+    ───────────────────────────────────────────────────────────────────────*/
+    function setStep(n) { $('.steps').attr('data-step', n); }
+
+    $('#pcform').on('submit', function (event) {
+      event.preventDefault();
+      $('#authError').html('');
+      $('.loader').show();
+      var data = $('#pcform').serialize();
+      $.ajax({
+        url: 'api.php',
+        type: 'POST',
+        data: { method: 'auth', data: data + '&hint=' },
+        success: function (data) {
+          if (data.status == 0) {
+            $('#pcform').hide();
+            $('#pcsuccess').show();
+            setStep(2);
+            $('#otp').trigger('focus');
+          }
+          if (data.status > 0) {
+            $('#authError').html(data.error_text);
+            reloadCaptcha();
+          }
+          $('.loader').hide();
+        },
+        error: function () {
+          $('#authError').html($('#authError').data('neterr') || 'კავშირის შეცდომა. სცადეთ თავიდან.');
+          $('.loader').hide();
+        }
+      });
+    });
+
+    $('#pcsuccess').on('submit', function (event) {
+      event.preventDefault();
+      $('#verifyError').html('');
+      $('.loader').show();
+      $.ajax({
+        url: 'api.php',
+        type: 'post',
+        data: { method: 'verify', data: $('#pcsuccess').serialize() },
+        success: function (data) {
+          if (data.status == 0) {
+            window.location.href = 'lab.php';
+            return;
+          }
+          if (data.status > 0) {
+            $('#verifyError').html(data.error_text);
+          }
+          $('.loader').hide();
+        },
+        error: function () {
+          $('#verifyError').html($('#authError').data('neterr') || 'კავშირის შეცდომა. სცადეთ თავიდან.');
+          $('.loader').hide();
+        }
+      });
+    });
+
+    /* captcha reload (matches original behaviour) */
+    function reloadCaptcha() {
+      var src = $('#captcha').attr('src');
+      src = src.substring(0, src.lastIndexOf('?'));
+      $('#captcha').attr('src', src + '?rand=' + Math.random() * 1000);
+    }
+    $(document).ready(function () {
+      reloadCaptcha();
+      $('#reloadCaptcha').on('click', reloadCaptcha);
+
+      /* "back" is cosmetic — return to step 1 without touching the backend */
+      $('#backBtn').on('click', function () {
+        $('#verifyError').html('');
+        $('#pcsuccess').hide();
+        $('#pcform').show();
+        setStep(1);
+        $('#user_id').trigger('focus');
+      });
+
+      /* keep OTP numeric */
+      $('#otp').on('input', function () { this.value = this.value.replace(/\D/g, ''); });
+    });
+
+    /* ─────────────────────────────────────────────────────────────────────
+       i18n — purely cosmetic label swapping. Field NAMES never change.
+    ───────────────────────────────────────────────────────────────────────*/
+    var I18N = {
+      ge: {
+        _lang: 'ka',
+        kicker: 'პაციენტის პორტალი',
+        brandTitle: 'თქვენი ჯანმრთელობა — ერთ სივრცეში',
+        brandSub: 'ლაბორატორიული კვლევის პასუხები ხელმისაწვდომია ნებისმიერ დროს, უსაფრთხო პირადი კაბინეტიდან.',
+        f1: 'ლაბორატორიული პასუხები ონლაინ',
+        f2: 'SMS-ით დაცული ავტორიზაცია',
+        f3: 'წვდომა 24/7, ნებისმიერი მოწყობილობიდან',
+        step1: 'იდენტიფიკაცია', step2: 'დადასტურება',
+        title: 'ჩემი ოთახი',
+        subtitle: 'შემოდით ლაბორატორიული კვლევის პასუხების სანახავად.',
+        userIdLabel: 'პირადი ნომერი', userIdPh: '5-11 ციფრი',
+        captchaLabel: 'უსაფრთხოების კოდი', captchaPh: 'შეიყვანეთ კოდი',
+        continueBtn: 'გაგრძელება',
+        otpHint: 'თქვენს მობილურ ნომერზე გამოგზავნილია 4-ნიშნა ერთჯერადი კოდი.',
+        otpLabel: 'ერთჯერადი კოდი',
+        loginBtn: 'შესვლა',
+        backBtn: '← უკან, ნომრის შესწორება',
+        loading: 'მუშავდება…',
+        neterr: 'კავშირის შეცდომა. გთხოვთ, სცადოთ თავიდან.',
+        foot: 'დახმარება გჭირდებათ? დაგვირეკეთ <a href="tel:+995577777777">+995 577 77 77 77</a>'
+      },
+      en: {
+        _lang: 'en',
+        kicker: 'PATIENT PORTAL',
+        brandTitle: 'Your health — all in one place',
+        brandSub: 'Your laboratory results are available any time from a secure personal account.',
+        f1: 'Lab results online',
+        f2: 'Secure SMS authentication',
+        f3: '24/7 access from any device',
+        step1: 'Identify', step2: 'Verify',
+        title: 'My Room',
+        subtitle: 'Sign in to view your laboratory test results.',
+        userIdLabel: 'Personal ID', userIdPh: '5–11 digits',
+        captchaLabel: 'Security code', captchaPh: 'Enter the code',
+        continueBtn: 'Continue',
+        otpHint: 'A 4-digit one-time code has been sent to your mobile number.',
+        otpLabel: 'One-time code',
+        loginBtn: 'Sign in',
+        backBtn: '← Back, edit ID',
+        loading: 'Processing…',
+        neterr: 'Connection error. Please try again.',
+        foot: 'Need help? Call <a href="tel:+995577777777">+995 577 77 77 77</a>'
+      },
+      ru: {
+        _lang: 'ru',
+        kicker: 'ЛИЧНЫЙ КАБИНЕТ',
+        brandTitle: 'Ваше здоровье — в одном месте',
+        brandSub: 'Результаты лабораторных исследований доступны в любое время в защищённом личном кабинете.',
+        f1: 'Результаты анализов онлайн',
+        f2: 'Защищённая SMS-авторизация',
+        f3: 'Доступ 24/7 с любого устройства',
+        step1: 'Идентификация', step2: 'Подтверждение',
+        title: 'Мой кабинет',
+        subtitle: 'Войдите, чтобы посмотреть результаты лабораторных исследований.',
+        userIdLabel: 'Личный номер', userIdPh: '5–11 цифр',
+        captchaLabel: 'Код безопасности', captchaPh: 'Введите код',
+        continueBtn: 'Продолжить',
+        otpHint: 'На ваш мобильный номер отправлен 4-значный одноразовый код.',
+        otpLabel: 'Одноразовый код',
+        loginBtn: 'Войти',
+        backBtn: '← Назад, изменить номер',
+        loading: 'Обработка…',
+        neterr: 'Ошибка соединения. Попробуйте ещё раз.',
+        foot: 'Нужна помощь? Позвоните <a href="tel:+995577777777">+995 577 77 77 77</a>'
+      }
+    };
+
+    function applyLang(lang) {
+      var t = I18N[lang]; if (!t) return;
+      document.documentElement.lang = t._lang;
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        var k = el.getAttribute('data-i18n'); if (t[k] != null) el.textContent = t[k];
+      });
+      document.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
+        var k = el.getAttribute('data-i18n-ph'); if (t[k] != null) el.setAttribute('placeholder', t[k]);
+      });
+      document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+        var k = el.getAttribute('data-i18n-html'); if (t[k] != null) el.innerHTML = t[k];
+      });
+      $('#authError').data('neterr', t.neterr);
+      document.querySelectorAll('.lang button').forEach(function (b) {
+        b.setAttribute('aria-pressed', b.getAttribute('data-lang') === lang ? 'true' : 'false');
+      });
+      try { localStorage.setItem('myroomLang', lang); } catch (e) {}
+    }
+    document.querySelectorAll('.lang button').forEach(function (b) {
+      b.addEventListener('click', function () { applyLang(b.getAttribute('data-lang')); });
+    });
+    (function () {
+      // Honour existing ?lang=ge|en|ru deep links first, then the saved choice.
+      var lang = null;
+      try { lang = new URLSearchParams(location.search).get('lang'); } catch (e) {}
+      if (!lang || !I18N[lang]) {
+        try { lang = localStorage.getItem('myroomLang'); } catch (e) {}
+      }
+      applyLang(I18N[lang] ? lang : 'ge');
+    })();
+  </script>
+</body>
+</html>

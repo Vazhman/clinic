@@ -1,0 +1,998 @@
+// Khozrevanidze Clinic - Payload Admin Brand Theme
+
+// ============================================
+// HIDE DEFAULT DASHBOARD (we use beforeDashboard)
+// ============================================
+// Our custom Dashboard component is injected via beforeDashboard.
+// Hide Payload's default dashboard cards so content doesn't repeat.
+.dashboard__card-list,
+.dashboard__bg {
+  display: none !important;
+}
+
+// ============================================
+// CSS CUSTOM PROPERTIES
+// ============================================
+:root {
+  --theme-success-100: #D1FAE5;
+  --theme-success-500: #10B981;
+  --theme-error-100: #FEE2E2;
+  --theme-error-500: #EF4444;
+  --theme-warning-100: #FEF3C7;
+  --theme-warning-500: #F59E0B;
+}
+
+// ============================================
+// SIDEBAR NAV
+// ============================================
+[data-theme="light"] {
+  .nav {
+    background: #4A1433;
+    border-right: none;
+    padding-top: 8px;
+  }
+
+  // Nav group headers (კონტენტი, ადმინი)
+  .nav-group__toggle {
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-size: 0.7rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 10px 16px 4px !important;
+    margin: 8px 0 0 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.6) !important;
+      background: none !important;
+    }
+
+    svg {
+      color: rgba(255, 255, 255, 0.3) !important;
+    }
+  }
+
+  // Nav links (individual items)
+  .nav__link {
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    margin: 1px 10px;
+    padding: 8px 12px !important;
+    font-size: 13px;
+
+    &:hover {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    &--active,
+    &.active {
+      color: #FFFFFF !important;
+      background: #E84B8A !important;
+      font-weight: 600;
+
+      &:hover {
+        background: #d43d7a !important;
+      }
+    }
+  }
+
+  // Indent nav links under groups
+  .nav-group__content .nav__link {
+    padding-left: 20px !important;
+  }
+
+  // Nav header area (logo)
+  .nav__header {
+    padding: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 4px;
+  }
+
+  // Menu toggle
+  .template-default__nav-toggler {
+    color: #6B1D4A;
+  }
+}
+
+// ============================================
+// LOGIN PAGE
+// ============================================
+.login {
+  background: linear-gradient(135deg, #6B1D4A 0%, #4A1433 50%, #3B0F29 100%);
+
+  .form-submit .btn {
+    background: #E84B8A;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #d43d7a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(232, 75, 138, 0.3);
+    }
+  }
+
+  .login__form {
+    background: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 2.5rem;
+  }
+}
+
+// ============================================
+// BUTTONS
+// ============================================
+.btn {
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &--style-primary {
+    background: #E84B8A;
+    border-color: #E84B8A;
+
+    &:hover {
+      background: #d43d7a;
+      border-color: #d43d7a;
+    }
+  }
+
+  &--style-secondary {
+    border-color: #E84B8A;
+    color: #E84B8A;
+
+    &:hover {
+      background: #FDF2F7;
+    }
+  }
+}
+
+// ============================================
+// PILLS / BADGES
+// ============================================
+.pill {
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+// ============================================
+// BREADCRUMB / STEP NAV (back button)
+// ============================================
+.step-nav {
+  a, span {
+    color: #6B1D4A !important;
+    font-weight: 500;
+  }
+
+  a:hover {
+    color: #E84B8A !important;
+  }
+}
+
+// ============================================
+// FORM INPUTS
+// ============================================
+// Every fillable field gets a clearly visible pink border at rest (not just
+// on hover/focus) so editors can spot every input on a page at a glance —
+// previously a near-invisible pale grey-pink border made fields blend into
+// the white page. Covers plain inputs/textarea/select, react-select
+// (relationship/select fields), the Monaco code field, and Lexical rich-text
+// editing surfaces — i.e. every place text is actually typed.
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select,
+.react-select__control,
+.code-editor,
+.rich-text-lexical .ContentEditable__root,
+.rich-text-lexical [contenteditable="true"] {
+  background: #FDF9FB !important;
+  border-radius: 8px !important;
+  border: 2px solid #E8A0C4 !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+
+  &:focus,
+  &:focus-within {
+    background: #FFFFFF !important;
+    border-color: #E84B8A !important;
+    box-shadow: 0 0 0 3px rgba(232, 75, 138, 0.1) !important;
+  }
+}
+
+// Required-field asterisk — pink and bold everywhere (previously only
+// styled inside .field-news-title), so required fields are unmistakable
+// across every collection/global form.
+.field-label .required,
+.field-type .label .required {
+  color: #E84B8A !important;
+  font-weight: 700;
+}
+
+.checkbox-input:checked {
+  background: #E84B8A;
+  border-color: #E84B8A;
+}
+
+// ============================================
+// TABS (locale switcher)
+// ============================================
+.tabs-field__tab-button {
+  &--active {
+    border-color: #E84B8A;
+    color: #6B1D4A;
+  }
+}
+
+// ============================================
+// FIELD LABELS
+// ============================================
+.field-type .label {
+  font-weight: 500;
+  color: #4A1433;
+}
+
+// ============================================
+// TABLES
+// ============================================
+.table .row-1:hover {
+  background: #FDF2F7;
+}
+
+// ============================================
+// COLLECTION HEADERS
+// ============================================
+.collection-list__header h1 {
+  color: #6B1D4A;
+  font-weight: 700;
+  font-size: 22px;
+}
+
+// ============================================
+// UPLOAD FIELDS (Services.image, News.featuredImage, etc.)
+// ============================================
+// Default Payload behavior: when an upload field is empty, the dropzone shows
+// "Create New | or | Choose from existing" side-by-side, both as identical
+// small pills, plus a "or drag and drop" hint. Editors instinctively click
+// the FIRST button (Create New) and end up in an upload form drawer, when
+// 9 times out of 10 they meant to pick something that already exists in the
+// media library.
+//
+// We can't reorder the buttons in JSX from CSS alone, but `flex-direction:
+// row-reverse` on the button row visually swaps them so "Choose from existing"
+// is on the left and styled as the primary action. The "Create New" pill is
+// pushed right and demoted to a quiet outline button — still one click away
+// when the editor really does need to upload something new.
+.upload__dropzoneContent__buttons {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: 8px;
+
+  // "Choose from existing" — primary action (pink pill)
+  .upload__listToggler {
+    background: #E84B8A !important;
+    border-color: #E84B8A !important;
+    color: #FFFFFF !important;
+    font-weight: 600;
+    padding: 10px 18px !important;
+
+    &:hover {
+      background: #d43d7a !important;
+      border-color: #d43d7a !important;
+    }
+  }
+
+  // "Create New" — secondary outline action
+  .upload__createNewToggler {
+    background: transparent !important;
+    border: 1px solid #E5E7EB !important;
+    color: #6B1D4A !important;
+    font-weight: 500;
+
+    &:hover {
+      background: #FDF2F7 !important;
+      border-color: #E84B8A !important;
+      color: #E84B8A !important;
+    }
+  }
+
+  // Tone down the "or" connector so the eye lands on the primary button first
+  .upload__dropzoneContent__orText {
+    color: #9CA3AF;
+    font-size: 12px;
+    align-self: center;
+  }
+}
+
+// ============================================
+// DRAWERS (upload picker, document edit, list picker)
+// ============================================
+// Backdrop is a soft white frosted-glass veil rather than a dark overlay.
+// The page behind stays visible and recognizable — the drawer feels like a
+// side panel resting on top of the workspace, not a takeover modal. A subtle
+// pink-tinted ring on the panel itself keeps the modal status clear.
+//
+// Width: Payload sets drawer width inline via JS (defaults to ~80vw — which
+// makes a "create new media" drawer feel like a full-page takeover). Clamp
+// it to ~720px so it reads as a side panel. On narrow viewports (<768px) we
+// fall back to 92vw so it's still usable on mobile/tablet admin.
+.drawer {
+  &__content {
+    max-width: min(720px, 92vw) !important;
+    width: min(720px, 92vw) !important;
+    box-shadow: -12px 0 40px rgba(74, 20, 51, 0.08), -2px 0 0 rgba(232, 75, 138, 0.06) !important;
+  }
+
+  &__blur-bg {
+    background: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(6px) saturate(110%);
+    -webkit-backdrop-filter: blur(6px) saturate(110%);
+  }
+
+  // The transparent strip to the left of the panel — clicking it closes the
+  // drawer. Give it a subtle hover so editors discover it.
+  &__close {
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(232, 75, 138, 0.03);
+    }
+  }
+
+  // Header X button — make it big, pink, and obviously a close control
+  &__header {
+    border-bottom: 1px solid #F3E8EE;
+    padding-bottom: 12px;
+
+    &__close {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: #6B1D4A;
+      transition: all 0.15s ease;
+
+      &:hover {
+        background: #FDF2F7;
+        color: #E84B8A;
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    &__title {
+      color: #4A1433;
+      font-weight: 600;
+    }
+  }
+}
+
+// ============================================
+// BLOCK SELECTOR
+// ============================================
+.blocks-drawer__block-selection {
+  border-radius: 10px;
+
+  &:hover {
+    background: #FDF2F7;
+    border-color: #E84B8A;
+  }
+}
+
+// ============================================
+// STATUS INDICATORS
+// ============================================
+.status--draft {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+.status--published {
+  background: #D1FAE5;
+  color: #059669;
+}
+
+// ============================================
+// LAYOUT — COMPACT SPACING
+// ============================================
+
+// Remove max-width constraints so content fills space
+.document-fields,
+.render-fields,
+.doc-controls {
+  max-width: 100%;
+}
+
+// ============================================
+// SCROLLBAR
+// ============================================
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(107, 29, 74, 0.2);
+  border-radius: 3px;
+
+  &:hover {
+    background: rgba(107, 29, 74, 0.4);
+  }
+}
+
+// ============================================
+// EDITORIAL CALM — DOCUMENT EDIT FORM
+// ============================================
+// The default Payload edit form stacks chrome on chrome: each field has a
+// label, each collapsible has a heavy border, the Lexical editor sits in
+// its own bordered card *inside* a collapsible. Editors writing long-form
+// content (News, Pages) feel like they're filling out a tax form instead
+// of writing.
+//
+// This block targets the document edit form specifically and dials chrome
+// back so the body editor becomes the visual hero — like Substack/Ghost
+// drafting surfaces — while form metadata fades into quiet rows.
+
+// ---------- Headline title field ----------
+// News.title and any field with .field-news-title renders as a true page
+// headline: large display type, no resting border, just a soft focus ring
+// on entry. The label still exists for screen readers but is visually
+// hidden — the placeholder + size make the purpose unmistakable.
+.field-news-title {
+  margin-bottom: 18px;
+
+  > .field-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #9CA3AF;
+    font-weight: 500;
+    margin-bottom: 6px;
+
+    .required {
+      color: #E84B8A;
+    }
+  }
+
+  input[type="text"] {
+    font-size: 28px !important;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #1F0715;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid transparent !important;
+    border-radius: 0 !important;
+    padding: 6px 0 !important;
+    box-shadow: none !important;
+    transition: border-color 0.2s ease;
+
+    &::placeholder {
+      color: #C9B8C0;
+      font-weight: 500;
+    }
+
+    &:focus {
+      border-bottom-color: #E84B8A !important;
+      box-shadow: none !important;
+    }
+  }
+}
+
+// ---------- Lexical body — flush writing surface ----------
+// Strip the outer border/shadow that Payload wraps around .rich-text-lexical.
+// The toolbar still sits inside, but the editing area looks like the page
+// itself rather than an inset card. Internal Lexical chrome (toolbar
+// dividers, slash menu) is untouched — only the outermost frame.
+.field-news-body {
+  margin-top: 8px;
+
+  > .field-label {
+    display: none;  // label:false in the field config; this is belt-and-braces
+  }
+
+  > .field-description,
+  .field-description {
+    font-size: 12px;
+    color: #9CA3AF;
+    margin: 0 0 10px 2px;
+    font-style: normal;
+  }
+
+  .rich-text-lexical,
+  .rich-text {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+
+    // Inner editable surface gets a single hairline + generous padding so
+    // it reads as a sheet of paper, not a textarea.
+    .ContentEditable__root,
+    [contenteditable="true"] {
+      min-height: 420px;
+      padding: 24px 28px !important;
+      font-size: 16px;
+      line-height: 1.75;
+      color: #1F0715;
+      background: #FFFFFF;
+      border: 1px solid #F0E6EA;
+      border-radius: 12px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+      &:focus,
+      &:focus-within {
+        border-color: #E5D2DC;
+        box-shadow: 0 0 0 3px rgba(232, 75, 138, 0.05);
+        outline: none;
+      }
+    }
+
+    // Toolbar — flush against the editor sheet, no double border.
+    .toolbar,
+    [class*="ToolbarPlugin"],
+    [class*="FixedToolbar"] {
+      background: #FAFAF8 !important;
+      border: 1px solid #F0E6EA !important;
+      border-bottom: 0 !important;
+      border-radius: 12px 12px 0 0 !important;
+      margin-bottom: -1px;
+    }
+  }
+}
+
+// ---------- Quiet collapsibles ----------
+// `.collapsible-quiet` (added in News.ts to the SEO section) demotes the
+// collapsible from a card to a divider-led section. No heavy border, no
+// inner padding doubling — just a line above the toggle and breathing
+// room below.
+.collapsible-field.collapsible-quiet,
+.collapsible.collapsible-quiet {
+  border: 0 !important;
+  background: transparent !important;
+  border-top: 1px solid #F0E6EA !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin-top: 28px;
+  box-shadow: none !important;
+
+  .collapsible__toggle-wrap,
+  .collapsible__toggle {
+    padding: 14px 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+
+    .collapsible__row-label,
+    .collapsible__label {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #6B1D4A;
+      font-weight: 600;
+    }
+  }
+
+  .collapsible__content {
+    padding: 4px 0 16px 0 !important;
+    background: transparent !important;
+
+    // Group inside the collapsible (SEO is a `type: 'group'`) — strip its
+    // own border so we don't stack two cards.
+    .group-field,
+    .field-type.group {
+      border: 0 !important;
+      background: transparent !important;
+      padding: 0 !important;
+
+      > .group-field__header,
+      > h3 {
+        display: none;
+      }
+    }
+  }
+}
+
+// ---------- Field rhythm ----------
+// Tighten vertical spacing across the edit form so the page doesn't feel
+// stretched, and lighten the italic field-description style which currently
+// reads louder than the input it describes.
+.collection-default-edit,
+.doc-default-edit {
+  .field-type {
+    margin-bottom: 16px;
+  }
+
+  .field-description {
+    color: #9CA3AF;
+    font-style: normal;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .field-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6B1D4A;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+}
+
+// ============================================
+// DARK MODE
+// ============================================
+[data-theme="dark"] {
+  .nav {
+    background: #1F0715;
+  }
+
+  .nav__link {
+    color: rgba(255, 255, 255, 0.6);
+
+    &:hover {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    &--active,
+    &.active {
+      background: #E84B8A !important;
+      color: #FFFFFF !important;
+    }
+  }
+
+  .nav-group__toggle {
+    color: rgba(255, 255, 255, 0.3) !important;
+  }
+
+  .btn--style-primary {
+    background: #E84B8A;
+    border-color: #E84B8A;
+  }
+
+  // Hide default dashboard in dark mode too
+  .dashboard__card-list,
+  .dashboard__bg {
+    display: none !important;
+  }
+}
+
+// ============================================
+// LEXICAL EDITOR — COLUMNS BLOCK + RESIZABLE UPLOAD
+// ============================================
+// Custom Lexical features (defined in src/lexical/features/ and
+// src/blocks/lexical/ColumnsBlock.ts) need a few admin-canvas styles:
+//  1. Lay out the columns-block cells side-by-side instead of stacked.
+//  2. Inject float CSS so floated images preview wrap-around in the editor
+//     just like they do on the published page (WYSIWYG parity).
+//  3. Resize-handle and selection styles for the custom upload node.
+//
+// Selectors below are verified against the bundled Payload source. Where a
+// selector remains a best-guess (e.g. depends on a className the matching
+// ColumnsBlock.ts field is expected to opt into), it's noted inline.
+
+// --------------------------------------------
+// 1. Columns block — inline grid for richText cells
+// --------------------------------------------
+// The block container is rendered by BlockContent.js (see node_modules
+// /@payloadcms/richtext-lexical/dist/features/blocks/client/component/
+// index.js line 373-374):
+//
+//   <div className="LexicalEditorTheme__block__container
+//                    LexicalEditorTheme__block-${blockType}">
+//
+// So `.LexicalEditorTheme__block-columns` is the reliable handle for the
+// columns block specifically. The block's RenderFields wrapper (rendered
+// in BlockContent.js via @payloadcms/ui/.../RenderFields/index.js line 12)
+// carries the `.render-fields` class.
+//
+// To put the three richText cells side-by-side, we grid the `.render-fields`
+// container that sits inside `.LexicalEditorTheme__block-columns`. The cell
+// fields are expected to set `admin.className = 'columns-block-cell'` in
+// src/blocks/lexical/ColumnsBlock.ts (Payload renders that className onto
+// the outer `.field-type` wrapper for each field). The grid here is keyed
+// off the block-type class only, so it activates whether or not the cells
+// carry the marker class — but the marker class is still used as a safety
+// fallback selector for nested edit-drawer contexts.
+
+.LexicalEditorTheme__block-columns {
+  // Inside the collapsible's content area, find the RenderFields wrapper
+  // that holds the cell fields and grid them. We use `.render-fields` as a
+  // descendant rather than direct child because Payload wraps it in a
+  // RenderIfInViewport + Collapsible content shell of varying depth.
+  .render-fields {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+
+    @media (min-width: 768px) {
+      // Default to 2 columns (covers 50-50, 33-67, 67-33 layouts).
+      // ColumnsBlock.ts can override per-instance by setting
+      // `--columns-block-cols: 3` inline on the block container for the
+      // 33-33-33 layout. v1 ships with the 2-col default.
+      grid-template-columns: repeat(var(--columns-block-cols, 2), 1fr);
+    }
+  }
+}
+
+// Fallback: if the columns block ends up nested somewhere we didn't
+// anticipate (e.g. inside a drawer-rendered preview), the marker class on
+// the cell fields lets us grid them via their parent .render-fields too.
+// `:has()` is supported in all modern Chromium/Firefox/Safari that Payload
+// admin targets (admin requires evergreen browsers).
+.render-fields:has(> .columns-block-cell) {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(var(--columns-block-cols, 2), 1fr);
+  }
+}
+
+// The marker class itself doesn't need its own styles — it's just a hook
+// for the parent grid above. Reset any inherited width constraint so the
+// grid track decides the cell's width.
+.columns-block-cell {
+  min-width: 0;  // prevent rich-text overflow from blowing out the track
+  max-width: 100%;
+}
+
+// --------------------------------------------
+// 2. WYSIWYG: float-wrap parity in the Lexical editor canvas
+// --------------------------------------------
+// The Lexical UploadComponent (node_modules/@payloadcms/richtext-lexical/
+// dist/features/upload/client/component/index.js lines 121-125) renders:
+//
+//   <div className="LexicalEditorTheme__upload__contents
+//                    LexicalEditorTheme__upload__contents--${aspectRatio}"
+//        data-align="${format || undefined}"
+//        data-filename="..." >
+//
+// where `format` is set from the Lexical node's ElementFormatType — i.e.
+// 'left' | 'center' | 'right' | 'justify' | '' (see UploadNode.js line 46
+// `node.setFormat(serializedNode.format)`).
+//
+// On the public site, StyledUpload.tsx applies `md:float-left` /
+// `md:float-right` based on the same format. Mirror that here so writers
+// see the wrap as they compose.
+
+.rich-text-lexical {
+  .LexicalEditorTheme__upload__contents[data-align="left"] {
+    float: left;
+    margin: 0.25rem 1.5rem 1rem 0;
+    max-width: 50%;
+
+    @media (max-width: 767px) {
+      // Mobile: don't float (matches the `md:` prefix on the public site).
+      float: none;
+      max-width: 100%;
+      margin: 0 0 1rem 0;
+    }
+  }
+
+  .LexicalEditorTheme__upload__contents[data-align="right"] {
+    float: right;
+    margin: 0.25rem 0 1rem 1.5rem;
+    max-width: 50%;
+
+    @media (max-width: 767px) {
+      float: none;
+      max-width: 100%;
+      margin: 0 0 1rem 0;
+    }
+  }
+
+  .LexicalEditorTheme__upload__contents[data-align="center"] {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  // Belt-and-suspenders: paragraphs inside the editable surface should wrap
+  // around the floated upload by default (browser default is `clear: none`,
+  // but some themes set `clear: both` on block elements — neutralise that).
+  .editor-paragraph,
+  p {
+    clear: none;
+  }
+}
+
+// --------------------------------------------
+// 3. Resize handles + canvas-level guarantees for ResizableUploadComponent
+// --------------------------------------------
+// The replacement upload node (Agent 3) wraps its figure in
+// `[data-resizable-upload="true"]` and emits 8 handle divs each carrying
+// `data-direction="n|ne|e|se|s|sw|w|nw"`. Tailwind utility classes provide
+// the per-handle visual treatment; this block adds the canvas-level
+// guarantees (stacking, pointer events, drag suppression) that Tailwind
+// can't reach through Payload's editor styles.
+
+[data-resizable-upload="true"] {
+  position: relative;
+
+  &:focus,
+  &:focus-within {
+    outline: none;  // figure draws its own outline via Tailwind
+  }
+
+  // Handles must sit above the surrounding contenteditable layer and
+  // stay clickable even when overlapping text.
+  & > div[data-direction] {
+    position: absolute;
+    z-index: 10;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;  // pointer events drive the resize, not gestures
+  }
+}
+
+// Disable native image drag inside the editor — Chrome's blue-tinted drag
+// ghost interferes with the resize handle hit-testing.
+.rich-text-lexical img {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+// ============================================
+// PUCK BUILDER FIELD — TRIGGER + FULL-SCREEN OVERLAY
+// ============================================
+/* The builder opens as a full-screen overlay portaled to <body>, so it is NOT
+   nested inside Payload's <form> (avoids the invalid nested-<form> hydration
+   error) and gets the whole viewport (the in-column embed overflowed and
+   scrolled the page). The field itself is just a launch button + block count. */
+.puck-builder-trigger {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.puck-open-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid #682149;
+  background: #682149;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.puck-open-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.puck-block-count {
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+/* Full-screen overlay (portaled to body). Fixed + inset:0 bounds Puck to the
+   viewport so its panels scroll internally instead of scrolling the page. */
+.puck-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+/* Puck's root fills the overlay; min-height:0 lets the flex child scroll. */
+.puck-overlay > div {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+// ============================================
+// DOCTOR REORDER OVERLAY (drag-and-drop)
+// ============================================
+// Full-screen overlay, portaled to <body> — same reasoning as the Puck
+// builder overlay above (needs the whole viewport, must not nest inside
+// Payload's list-view chrome).
+.clinic-reorder-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--clinic-grey-border);
+    flex-shrink: 0;
+  }
+
+  &__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 20px;
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+// ============================================
+// SHARED ADMIN UTILITIES
+// ============================================
+// Brand palette mirrored from src/components/admin/tokens.ts as CSS custom
+// properties, so SCSS and the inline-styled React components share ONE source
+// of truth. Keep these values in sync with tokens.ts if the palette changes.
+:root {
+  --clinic-blackberry: #682149;
+  --clinic-blackberry-dark: #4A1735;
+  --clinic-pink: #DD64A6;
+  --clinic-pink-soft: #FDF4F9;
+  --clinic-pink-border: #F7D6E7;
+  --clinic-grey-border: #E4E4E4;
+  --clinic-focus-ring: 0 0 0 2px #fff, 0 0 0 4px #DD64A6;
+}
+
+// Single spinner keyframe for ALL admin components. Previously each sync card
+// injected its own inline @keyframes (gReviewSpin / spin) which could collide
+// when both mounted. Components now reference this shared animation.
+@keyframes clinic-spin {
+  to { transform: rotate(360deg); }
+}
+
+.clinic-spinner {
+  display: inline-block;
+  border-radius: 50%;
+  border: 2px solid var(--clinic-pink);
+  border-top-color: transparent;
+  animation: clinic-spin 0.7s linear infinite;
+}
+
+// Keyboard focus ring for custom admin controls. Uses :focus-visible so the
+// ring shows for keyboard/AT users without firing on mouse click. Apply by
+// adding `class="clinic-focusable"` to any button/link/role=button element
+// rendered by our inline-styled components (they can't use Tailwind here).
+.clinic-focusable {
+  &:focus { outline: none; }              // suppress UA ring...
+  &:focus-visible {                        // ...replace with brand ring
+    outline: none;
+    box-shadow: var(--clinic-focus-ring);
+    border-radius: 8px;
+  }
+}
+
+// Hover/press lift for interactive tiles & cards. Animates transform/opacity
+// only (no layout reflow) and is disabled under reduced-motion.
+.clinic-lift {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  &:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(104, 33, 73, 0.12); }
+  &:active { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clinic-spinner { animation-duration: 0s; }
+  .clinic-lift { transition: none; }
+  .clinic-lift:hover { transform: none; }
+}
+
+// Dashboard two-column grid (content list + quick actions / recent activity).
+// Inline styles can't express media queries, so the Dashboard component uses
+// this class. Stacks to a single column on narrow/tablet admin windows.
+.clinic-dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 1023px) {
+  .clinic-dash-grid { grid-template-columns: 1fr; }
+}
+

@@ -1,0 +1,272 @@
+{
+  "1": {
+    "ge": { "name": "ვასილ ხოზრევანიძე", "specialty": "ოტორინოლარინგოლოგი" },
+    "en": { "name": "Vasil Khozrevanidze", "specialty": "Otolaryngologist" },
+    "ru": { "name": "Васил Хозреванидзе", "specialty": "Оториноларинголог" }
+  },
+  "2": {
+    "ge": { "name": "მაკა ხოზრევანიძე", "specialty": "ოტორინოლარინგოლოგი" },
+    "en": { "name": "Maka Khozrevanidze", "specialty": "Otolaryngologist" },
+    "ru": { "name": "Мака Хозреванидзе", "specialty": "Оториноларинголог" }
+  },
+  "3": {
+    "ge": { "name": "გრიგოლ ჩახვაძე", "specialty": "ზოგადი ქირურგი / პროქტოლოგი" },
+    "en": { "name": "Grigol Chakhvadze", "specialty": "General Surgeon / Proctologist" },
+    "ru": { "name": "Григол Чахвадзе", "specialty": "Хирург общего профиля / Проктолог" }
+  },
+  "4": {
+    "ge": { "name": "გენო ქურიძე", "specialty": "ზოგადი ქირურგი" },
+    "en": { "name": "Geno Kuridze", "specialty": "General Surgeon" },
+    "ru": { "name": "Гено Куридзе", "specialty": "Хирург общего профиля" }
+  },
+  "5": {
+    "ge": { "name": "არჩილ ძნელაძე", "specialty": "ენდოკრინოლოგი" },
+    "en": { "name": "Archil Dzneladze", "specialty": "Endocrinologist" },
+    "ru": { "name": "Арчил Дзнеладзе", "specialty": "Эндокринолог" }
+  },
+  "6": {
+    "ge": { "name": "ირინა ხვადაგიანი", "specialty": "ალერგოლოგ-იმუნოლოგი" },
+    "en": { "name": "Irina Khvadagiani", "specialty": "Allergologist-Immunologist" },
+    "ru": { "name": "Ирина Хвадагиани", "specialty": "Аллерголог-иммунолог" }
+  },
+  "7": {
+    "ge": { "name": "ჯამილა ქარჩხაძე", "specialty": "ალერგოლოგ-იმუნოლოგი" },
+    "en": { "name": "Jamila Karchkhadze", "specialty": "Allergologist-Immunologist" },
+    "ru": { "name": "Джамила Карчхадзе", "specialty": "Аллерголог-иммунолог" }
+  },
+  "8": {
+    "ge": { "name": "რატი მუხაშავრია", "specialty": "ანესთეზიოლოგი" },
+    "en": { "name": "Rati Mukhasavria", "specialty": "Anesthesiologist" },
+    "ru": { "name": "Рати Мухашаврия", "specialty": "Анестезиолог" }
+  },
+  "9": {
+    "ge": { "name": "ლელა ქურიძე", "specialty": "გასტროენტეროლოგი" },
+    "en": { "name": "Lela Kuridze", "specialty": "Gastroenterologist" },
+    "ru": { "name": "Лела Куридзе", "specialty": "Гастроэнтеролог" }
+  },
+  "10": {
+    "ge": { "name": "ნატალია ქოროღლიშვილი", "specialty": "გინეკოლოგი" },
+    "en": { "name": "Natalia Koroghlishvili", "specialty": "Gynecologist" },
+    "ru": { "name": "Наталия Короглишвили", "specialty": "Гинеколог" }
+  },
+  "11": {
+    "ge": { "name": "ზურაბ გულბანი", "specialty": "თვალის ექიმი / ოფთალმოლოგი" },
+    "en": { "name": "Zurab Gulbani", "specialty": "Ophthalmologist" },
+    "ru": { "name": "Зураб Гулбани", "specialty": "Офтальмолог" }
+  },
+  "12": {
+    "ge": { "name": "მამუკა კობალაძე", "specialty": "ორთოპედ-ტრავმატოლოგი" },
+    "en": { "name": "Mamuka Kobaladze", "specialty": "Orthopedic Traumatologist" },
+    "ru": { "name": "Мамука Кобаладзе", "specialty": "Ортопед-травматолог" }
+  },
+  "13": {
+    "ge": { "name": "ბეჟან ხელაშვილი", "specialty": "ორთოპედ-ტრავმატოლოგი" },
+    "en": { "name": "Bezhan Khelashvili", "specialty": "Orthopedic Traumatologist" },
+    "ru": { "name": "Бежан Хелашвили", "specialty": "Ортопед-травматолог" }
+  },
+  "14": {
+    "ge": { "name": "ლალი ხომერიკი", "specialty": "კარდიოლოგი" },
+    "en": { "name": "Lali Khomeriki", "specialty": "Cardiologist" },
+    "ru": { "name": "Лали Хомерики", "specialty": "Кардиолог" }
+  },
+  "15": {
+    "ge": { "name": "გელა მელაძე", "specialty": "ნევროლოგი" },
+    "en": { "name": "Gela Meladze", "specialty": "Neurologist" },
+    "ru": { "name": "Гела Меладзе", "specialty": "Невролог" }
+  },
+  "16": {
+    "ge": { "name": "ნინო გოთუა", "specialty": "ნეფროლოგი" },
+    "en": { "name": "Nino Gotua", "specialty": "Nephrologist" },
+    "ru": { "name": "Нино Готуа", "specialty": "Нефролог" }
+  },
+  "17": {
+    "ge": { "name": "თამარ ამირეზაშვილი", "specialty": "პედიატრი" },
+    "en": { "name": "Tamar Amirezashvili", "specialty": "Pediatrician" },
+    "ru": { "name": "Тамар Амирезашвили", "specialty": "Педиатр" }
+  },
+  "18": {
+    "ge": { "name": "ნანა მამისეიშვილი", "specialty": "პედიატრი" },
+    "en": { "name": "Nana Mamiseishvili", "specialty": "Pediatrician" },
+    "ru": { "name": "Нана Мамисеишвили", "specialty": "Педиатр" }
+  },
+  "19": {
+    "ge": { "name": "ნანი კუტალია", "specialty": "ფსიქიატრი" },
+    "en": { "name": "Nani Kutalia", "specialty": "Psychiatrist" },
+    "ru": { "name": "Нани Куталиа", "specialty": "Психиатр" }
+  },
+  "20": {
+    "ge": { "name": "ვახტანგ სარუხანიშვილი", "specialty": "რადიოლოგი" },
+    "en": { "name": "Vakhtang Sarukhanishvili", "specialty": "Radiologist" },
+    "ru": { "name": "Вахтанг Саруханишвили", "specialty": "Радиолог" }
+  },
+  "21": {
+    "ge": { "name": "ბადრი ქამადაძე", "specialty": "რადიოლოგი" },
+    "en": { "name": "Badri Kamadaze", "specialty": "Radiologist" },
+    "ru": { "name": "Бадри Камадазе", "specialty": "Радиолог" }
+  },
+  "22": {
+    "ge": { "name": "ირაკლი შონია", "specialty": "სისხლძარღვთა ქირურგი" },
+    "en": { "name": "Irakli Shonia", "specialty": "Vascular Surgeon" },
+    "ru": { "name": "Иракли Шониа", "specialty": "Сосудистый хирург" }
+  },
+  "23": {
+    "ge": { "name": "ელენე კაკაბაძე", "specialty": "თვალის ექიმი" },
+    "en": { "name": "Elene Kakabadze", "specialty": "Ophthalmologist" },
+    "ru": { "name": "Элене Какабадзе", "specialty": "Офтальмолог" }
+  },
+  "24": {
+    "ge": { "name": "ნოდარ ონიანი", "specialty": "უროლოგი" },
+    "en": { "name": "Nodar Oniani", "specialty": "Urologist" },
+    "ru": { "name": "Нодар Ониани", "specialty": "Уролог" }
+  },
+  "25": {
+    "ge": { "name": "მანანა ხოზრევანიძე", "specialty": "თერაპევტი" },
+    "en": { "name": "Manana Khozrevanidze", "specialty": "Therapist / Internist" },
+    "ru": { "name": "Манана Хозреванидзе", "specialty": "Терапевт" }
+  },
+  "26": {
+    "ge": { "name": "ქეთევან ნიშნიანიძე", "specialty": "ფიზიკური მედიცინა და რეაბილიტაცია" },
+    "en": { "name": "Ketevan Nishnianidze", "specialty": "Physical Medicine and Rehabilitation" },
+    "ru": { "name": "Кетеван Нишнианидзе", "specialty": "Физическая медицина и реабилитация" }
+  },
+  "27": {
+    "ge": { "name": "თეონა ბოლქვაძე", "specialty": "დერმატო-ვენეროლოგი" },
+    "en": { "name": "Teona Bolkvadze", "specialty": "Dermatovenereologist" },
+    "ru": { "name": "Теона Болквадзе", "specialty": "Дерматовенеролог" }
+  },
+  "28": {
+    "ge": { "name": "ლელა ხვადაგიანი", "specialty": "პედიატრი / ნეონატოლოგი" },
+    "en": { "name": "Lela Khvadagiani", "specialty": "Pediatrician / Neonatologist" },
+    "ru": { "name": "Лела Хвадагиани", "specialty": "Педиатр / Неонатолог" }
+  },
+  "29": {
+    "ge": { "name": "თინათინ ნიჟარაძე", "specialty": "ბავშვთა ინფექციონისტი" },
+    "en": { "name": "Tinatin Nizharadze", "specialty": "Pediatric Infectious Disease Specialist" },
+    "ru": { "name": "Тинатин Нижарадзе", "specialty": "Детский инфекционист" }
+  },
+  "30": {
+    "ge": { "name": "თემურ ორაგველიძე", "specialty": "ბარიატრიული ქირურგი" },
+    "en": { "name": "Temur Oragvelidze", "specialty": "Bariatric Surgeon" },
+    "ru": { "name": "Темур Орагвелидзе", "specialty": "Бариатрический хирург" }
+  },
+  "31": {
+    "ge": { "name": "ფატიმა ჩხაიძე", "specialty": "გინეკოლოგი" },
+    "en": { "name": "Patima Chkhaidze", "specialty": "Gynecologist" },
+    "ru": { "name": "Патима Чхаидзе", "specialty": "Гинеколог" }
+  },
+  "32": {
+    "ge": { "name": "ზურაბ ქუთელია", "specialty": "ნეიროქირურგი" },
+    "en": { "name": "Zurab Kutelia", "specialty": "Neurosurgeon" },
+    "ru": { "name": "Зураб Кутелиа", "specialty": "Нейрохирург" }
+  },
+  "33": {
+    "ge": { "name": "მაია ბერიაშვილი", "specialty": "ფსიქოლოგი" },
+    "en": { "name": "Maia Beriashvili", "specialty": "Psychologist" },
+    "ru": { "name": "Майа Бериашвили", "specialty": "Психолог" }
+  },
+  "34": {
+    "ge": { "name": "ცირა ხვადაგიანი", "specialty": "პულმონოლოგი" },
+    "en": { "name": "Tsira Khvadagiani", "specialty": "Pulmonologist" },
+    "ru": { "name": "Цира Хвадагиани", "specialty": "Пульмонолог" }
+  },
+  "35": {
+    "ge": { "name": "თამარ ლომიძე", "specialty": "ბავშვთა ოტორინოლარინგოლოგი" },
+    "en": { "name": "Tamar Lomidze", "specialty": "Pediatric Otolaryngologist" },
+    "ru": { "name": "Тамар Ломидзе", "specialty": "Детский оториноларинголог" }
+  },
+  "36": {
+    "ge": { "name": "რუსუდან ზაალიშვილი", "specialty": "ფსიქიატრი" },
+    "en": { "name": "Rusudan Zaalishvili", "specialty": "Psychiatrist" },
+    "ru": { "name": "Русудан Заалишвили", "specialty": "Психиатр" }
+  },
+  "37": {
+    "ge": { "name": "ანა ჩიკვაიძე", "specialty": "ენდოკრინოლოგი" },
+    "en": { "name": "Ana Chikvaidze", "specialty": "Endocrinologist" },
+    "ru": { "name": "Ана Чикваидзе", "specialty": "Эндокринолог" }
+  },
+  "38": {
+    "ge": { "name": "ჯაბა ცხოვრებაშვილი", "specialty": "ოტორინოლარინგოლოგი" },
+    "en": { "name": "Jaba Tskhovrebashvili", "specialty": "Otolaryngologist" },
+    "ru": { "name": "Джаба Цховребашвили", "specialty": "Оториноларинголог" }
+  },
+  "39": {
+    "ge": { "name": "ია ხარაზიშვილი", "specialty": "გინეკოლოგი" },
+    "en": { "name": "Ia Kharazishvili", "specialty": "Gynecologist" },
+    "ru": { "name": "Иа Харазишвили", "specialty": "Гинеколог" }
+  },
+  "40": {
+    "ge": { "name": "ირმა ხვადაგიანი", "specialty": "ოჯახის ექიმი" },
+    "en": { "name": "Irma Khvadagiani", "specialty": "Family Medicine Physician" },
+    "ru": { "name": "Ирма Хвадагиани", "specialty": "Врач общей практики" }
+  },
+  "41": {
+    "ge": { "name": "ლია ვარშალომიძე", "specialty": "ფსიქოთერაპევტი" },
+    "en": { "name": "Lia Varshalomidze", "specialty": "Psychotherapist" },
+    "ru": { "name": "Лиа Варшаломидзе", "specialty": "Психотерапевт" }
+  },
+  "42": {
+    "ge": { "name": "ელგუჯა ბოლქვაძე", "specialty": "ანგიოქირურგი" },
+    "en": { "name": "Elguja Bolkvadze", "specialty": "Angiosurgeon / Vascular Surgeon" },
+    "ru": { "name": "Элгуджа Болквадзе", "specialty": "Ангиохирург" }
+  },
+  "43": {
+    "ge": { "name": "ელენე ლომთათიძე", "specialty": "პედიატრი" },
+    "en": { "name": "Elene Lomtatidze", "specialty": "Pediatrician" },
+    "ru": { "name": "Элене Ломтатидзе", "specialty": "Педиатр" }
+  },
+  "44": {
+    "ge": { "name": "ნანა ამირეზაშვილი", "specialty": "თერაპევტი" },
+    "en": { "name": "Nana Amirezashvili", "specialty": "Therapist / Internist" },
+    "ru": { "name": "Нана Амирезашвили", "specialty": "Терапевт" }
+  },
+  "45": {
+    "ge": { "name": "მალხაზ ელიაშვილი", "specialty": "პედიატრი / ოჯახის ექიმი" },
+    "en": { "name": "Malkhaz Eliashvili", "specialty": "Pediatrician / Family Medicine Physician" },
+    "ru": { "name": "Малхаз Елиашвили", "specialty": "Педиатр / Врач общей практики" }
+  },
+  "46": {
+    "ge": { "name": "ვიოლა ბასილაძე", "specialty": "ბავშვთა ნევროლოგი" },
+    "en": { "name": "Viola Basiladze", "specialty": "Pediatric Neurologist" },
+    "ru": { "name": "Виола Басиладзе", "specialty": "Детский невролог" }
+  },
+  "47": {
+    "ge": { "name": "მაია ბერიძე", "specialty": "ბავშვთა ნევროლოგი" },
+    "en": { "name": "Maia Beridze", "specialty": "Pediatric Neurologist" },
+    "ru": { "name": "Майа Беридзе", "specialty": "Детский невролог" }
+  },
+  "48": {
+    "ge": { "name": "ირინა ზამთარაძე", "specialty": "ნევროლოგი" },
+    "en": { "name": "Irina Zamtaradze", "specialty": "Neurologist" },
+    "ru": { "name": "Ирина Замтарадзе", "specialty": "Невролог" }
+  },
+  "49": {
+    "ge": { "name": "თინათინ ჯაში", "specialty": "რადიოლოგი" },
+    "en": { "name": "Tinatin Jashi", "specialty": "Radiologist" },
+    "ru": { "name": "Тинатин Джаши", "specialty": "Радиолог" }
+  },
+  "50": {
+    "ge": { "name": "მერი თევზაძე", "specialty": "რადიოლოგი" },
+    "en": { "name": "Meri Tevzadze", "specialty": "Radiologist" },
+    "ru": { "name": "Мери Тевзадзе", "specialty": "Радиолог" }
+  },
+  "51": {
+    "ge": { "name": "ხათუნა ქურიძე", "specialty": "ლაბორატორიის სამსახურის ხელმძღვანელი" },
+    "en": { "name": "Khatuna Kuridze", "specialty": "Head of Laboratory Services" },
+    "ru": { "name": "Хатуна Куридзе", "specialty": "Руководитель лабораторной службы" }
+  },
+  "52": {
+    "ge": { "name": "ლია ჯორბენაძე", "specialty": "ექიმი-ლაბორანტი" },
+    "en": { "name": "Lia Jorbenadze", "specialty": "Laboratory Physician" },
+    "ru": { "name": "Лиа Джорбенадзе", "specialty": "Врач-лаборант" }
+  },
+  "53": {
+    "ge": { "name": "რამაზ ღლონტი", "specialty": "კარდიოინტერვენციის მიმართულების ხელმძღვანელი" },
+    "en": { "name": "Ramaz Ghlonti", "specialty": "Head of Cardiology Intervention" },
+    "ru": { "name": "Рамаз Глонти", "specialty": "Руководитель направления кардиоинтервенции" }
+  },
+  "54": {
+    "ge": { "name": "მიხეილ მეტრეველი MD, PHD", "specialty": "კარდიოქირურგი, პროფესორი" },
+    "en": { "name": "Mikheil Metreveli MD, PhD", "specialty": "Cardiac Surgeon, Professor" },
+    "ru": { "name": "Михеил Метревели MD, PhD", "specialty": "Кардиохирург, профессор" }
+  }
+}

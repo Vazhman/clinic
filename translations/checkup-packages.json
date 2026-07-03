@@ -1,0 +1,14 @@
+{
+  "1": {
+    "name": { "en": "Basic Checkup", "ru": "Базовый чекап" },
+    "description": { "en": "Fundamental health screening", "ru": "Базовое обследование здоровья" }
+  },
+  "2": {
+    "name": { "en": "Standard Checkup", "ru": "Стандартный чекап" },
+    "description": { "en": "Extended health screening", "ru": "Расширенное обследование здоровья" }
+  },
+  "3": {
+    "name": { "en": "Premium Checkup", "ru": "Премиум чекап" },
+    "description": { "en": "Comprehensive health screening", "ru": "Комплексное обследование здоровья" }
+  }
+}
