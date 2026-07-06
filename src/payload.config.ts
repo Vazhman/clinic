@@ -357,6 +357,11 @@ export default buildConfig({
     vercelBlobStorage({
       enabled: !!process.env.BLOB_READ_WRITE_TOKEN,
       addRandomSuffix: true,
+      // Vercel serverless functions hard-cap request bodies at 4.5MB — real
+      // doctor/news photos routinely exceed that and 413 before reaching
+      // Payload. clientUploads sends the file straight from the browser to
+      // Vercel Blob instead of proxying it through the server function.
+      clientUploads: true,
       collections: {
         media: true,
       },
