@@ -1,0 +1,846 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e58]:
+    - button "Open Menu" [ref=e60] [cursor=pointer]:
+      - generic "Open" [ref=e62]:
+        - img [ref=e63]
+    - generic [ref=e65]:
+      - complementary [ref=e66]:
+        - navigation [ref=e68]:
+          - generic [ref=e69]:
+            - link "მთავარი — Dashboard" [ref=e70] [cursor=pointer]:
+              - /url: /admin
+              - img [ref=e71]
+              - generic [ref=e75]: მთავარი — Dashboard
+            - link "საიტის ნახვა" [ref=e76] [cursor=pointer]:
+              - /url: /
+              - img [ref=e77]
+              - generic [ref=e80]: საიტის ნახვა
+              - img [ref=e82]
+          - generic [ref=e86]:
+            - button "კონტენტი" [ref=e87] [cursor=pointer]:
+              - generic [ref=e88]: კონტენტი
+              - img [ref=e90]
+            - generic [ref=e94]:
+              - link "მედია" [ref=e95] [cursor=pointer]:
+                - /url: /admin/collections/media
+                - generic [ref=e96]: მედია
+              - link "სერვისები" [ref=e97] [cursor=pointer]:
+                - /url: /admin/collections/services
+                - generic [ref=e98]: სერვისები
+              - link "ექიმები" [ref=e99] [cursor=pointer]:
+                - /url: /admin/collections/doctors
+                - generic [ref=e100]: ექიმები
+              - link "ჩექაფ პაკეტები" [ref=e101] [cursor=pointer]:
+                - /url: /admin/collections/checkup-packages
+                - generic [ref=e102]: ჩექაფ პაკეტები
+              - link "შეფასებები" [ref=e103] [cursor=pointer]:
+                - /url: /admin/collections/reviews
+                - generic [ref=e104]: შეფასებები
+              - link "სიახლეები" [ref=e105] [cursor=pointer]:
+                - /url: /admin/collections/news
+                - generic [ref=e106]: სიახლეები
+              - link "გვერდები" [ref=e107] [cursor=pointer]:
+                - /url: /admin/collections/pages
+                - generic [ref=e108]: გვერდები
+              - link "ანალიზები" [ref=e109] [cursor=pointer]:
+                - /url: /admin/collections/lab-tests
+                - generic [ref=e110]: ანალიზები
+          - generic [ref=e111]:
+            - button "ადმინი" [ref=e112] [cursor=pointer]:
+              - generic [ref=e113]: ადმინი
+              - img [ref=e115]
+            - link "მომხმარებლები" [ref=e120] [cursor=pointer]:
+              - /url: /admin/collections/users
+              - generic [ref=e121]: მომხმარებლები
+          - generic [ref=e122]:
+            - button "საიტის ელემენტები" [ref=e123] [cursor=pointer]:
+              - generic [ref=e124]: საიტის ელემენტები
+              - img [ref=e126]
+            - generic [ref=e130]:
+              - link "საიტის პარამეტრები" [ref=e131] [cursor=pointer]:
+                - /url: /admin/globals/site-settings
+                - generic [ref=e132]: საიტის პარამეტრები
+              - link "ფუტერი" [ref=e133] [cursor=pointer]:
+                - /url: /admin/globals/footer
+                - generic [ref=e134]: ფუტერი
+              - link "ნავიგაცია" [ref=e135] [cursor=pointer]:
+                - /url: /admin/globals/navigation
+                - generic [ref=e136]: ნავიგაცია
+          - generic [ref=e137]:
+            - button "გვერდები" [ref=e138] [cursor=pointer]:
+              - generic [ref=e139]: გვერდები
+              - img [ref=e141]
+            - generic [ref=e145]:
+              - generic [ref=e148]: მთავარი გვერდი
+              - link "ჩვენ შესახებ" [ref=e149] [cursor=pointer]:
+                - /url: /admin/globals/about-page
+                - generic [ref=e150]: ჩვენ შესახებ
+              - link "საკონტაქტო გვერდი" [ref=e151] [cursor=pointer]:
+                - /url: /admin/globals/contact-page
+                - generic [ref=e152]: საკონტაქტო გვერდი
+              - link "ჯავშნის გვერდი" [ref=e153] [cursor=pointer]:
+                - /url: /admin/globals/booking-page
+                - generic [ref=e154]: ჯავშნის გვერდი
+              - link "სერვისების გვერდი" [ref=e155] [cursor=pointer]:
+                - /url: /admin/globals/services-page
+                - generic [ref=e156]: სერვისების გვერდი
+              - link "ექიმების გვერდი" [ref=e157] [cursor=pointer]:
+                - /url: /admin/globals/doctors-page
+                - generic [ref=e158]: ექიმების გვერდი
+              - link "წესები და პოლიტიკა (Policies)" [ref=e159] [cursor=pointer]:
+                - /url: /admin/globals/policies
+                - generic [ref=e160]: წესები და პოლიტიკა (Policies)
+          - link "Log out" [ref=e162] [cursor=pointer]:
+            - /url: /admin/logout
+            - img [ref=e163]
+      - generic [ref=e167]:
+        - banner [ref=e168]:
+          - generic [ref=e171]:
+            - navigation [ref=e173]:
+              - link "მთავარი" [ref=e174] [cursor=pointer]:
+                - /url: /admin
+                - generic "Dashboard" [ref=e175]:
+                  - generic [ref=e176]: მთავარი
+              - generic [ref=e177]: /
+              - generic [ref=e178]: მთავარი გვერდი
+            - link "Account" [ref=e179] [cursor=pointer]:
+              - /url: /admin/account
+              - img "yas" [ref=e180]
+          - button "Locale" [ref=e184] [cursor=pointer]:
+            - generic "Locale" [ref=e185]:
+              - generic [ref=e186]: "Locale:"
+              - generic [ref=e187]:
+                - generic [ref=e188]: ქართული ვერსია (საიტი /ge)
+                - img [ref=e189]
+        - generic [ref=e191]:
+          - generic [ref=e192]:
+            - heading "მთავარი გვერდი" [level=1] [ref=e193]
+            - list [ref=e196]:
+              - generic "Edit" [ref=e197]:
+                - generic:
+                  - generic:
+                    - generic: Edit
+              - link "API" [ref=e198] [cursor=pointer]:
+                - /url: /admin/globals/home-page/api
+                - generic:
+                  - generic:
+                    - generic: API
+          - generic [ref=e200]: "მთავარი გვერდის კონტენტის მართვა: ჰერო სექცია, გალერეა, CTA ტექსტები, სტატისტიკის რიცხვები."
+        - main [ref=e201]:
+          - generic [ref=e202]:
+            - generic [ref=e204]:
+              - generic [ref=e205]:
+                - list
+              - generic [ref=e206]:
+                - button "Save" [disabled] [ref=e209]:
+                  - generic:
+                    - generic: Save
+                - button [ref=e212] [cursor=pointer]
+            - generic [ref=e223]:
+              - generic [ref=e225]:
+                - heading "ჰერო სექცია" [level=3] [ref=e228]
+                - generic [ref=e229]:
+                  - generic [ref=e230]:
+                    - generic [ref=e231]:
+                      - text: Headline
+                      - generic [ref=e232]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e233]:
+                      - textbox "Headline — ქართული ვერსია (საიტი /ge)" [ref=e234]: მრავალპროფილური კლინიკა ბათუმში
+                      - generic [ref=e235]: მთავარი სათაური (ცარიელი = ნაგულისხმევი ტექსტი)
+                  - generic [ref=e236]:
+                    - generic [ref=e237]:
+                      - text: Subheadline
+                      - generic [ref=e238]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e239]:
+                      - textbox "Subheadline — ქართული ვერსია (საიტი /ge)" [ref=e240]: სრული სამედიცინო მომსახურება ერთ სივრცეში
+                      - generic [ref=e241]: ქვესათაური (ცარიელი = ნაგულისხმევი ტექსტი)
+                  - generic [ref=e242]:
+                    - generic [ref=e243]:
+                      - text: Book Button Text
+                      - generic [ref=e244]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e245]:
+                      - textbox "Book Button Text — ქართული ვერსია (საიტი /ge)" [ref=e246]: დაჯავშნე ვიზიტი
+                      - generic [ref=e247]: ჯავშნის ღილაკის ტექსტი (ცარიელი = ნაგულისხმევი)
+                  - generic [ref=e248]:
+                    - generic [ref=e249]:
+                      - text: Badge Text
+                      - generic [ref=e250]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e251]:
+                      - textbox "Badge Text — ქართული ვერსია (საიტი /ge)" [ref=e252]: 2015 წლიდან მოქმედი
+                      - generic [ref=e253]: "პატარა ტექსტი ზემოთ (მაგ: 2015 წლიდან მოქმედი)"
+              - generic [ref=e255]:
+                - generic [ref=e257]:
+                  - heading "სექციების ჩვენება/დამალვა (თითო ენაზე ცალკე)" [level=3] [ref=e258]
+                  - generic [ref=e259]: გადართეთ ენა ზემოთ მარჯვენა კუთხეში (ge / en / ru) და შემდეგ ჩართეთ ან გამორთეთ სექცია — ცვლილება მხოლოდ იმ ენის ვერსიაზე გავრცელდება.
+                - generic [ref=e260]:
+                  - generic [ref=e262]:
+                    - generic [ref=e263]:
+                      - checkbox "ჰერო სექცია" [checked] [ref=e264]
+                      - img [ref=e266]
+                    - generic [ref=e268]: ჰერო სექცია
+                  - generic [ref=e270]:
+                    - generic [ref=e271]:
+                      - checkbox "სიმპტომების ნავიგატორი" [checked] [ref=e272]
+                      - img [ref=e274]
+                    - generic [ref=e276]: სიმპტომების ნავიგატორი
+                  - generic [ref=e278]:
+                    - generic [ref=e279]:
+                      - checkbox "სტატისტიკის მრიცხველი" [checked] [ref=e280]
+                      - img [ref=e282]
+                    - generic [ref=e284]: სტატისტიკის მრიცხველი
+                  - generic [ref=e286]:
+                    - generic [ref=e287]:
+                      - checkbox "სერვისების ბადე" [checked] [ref=e288]
+                      - img [ref=e290]
+                    - generic [ref=e292]: სერვისების ბადე
+                  - generic [ref=e294]:
+                    - generic [ref=e295]:
+                      - checkbox "ჩვენი ექიმები" [checked] [ref=e296]
+                      - img [ref=e298]
+                    - generic [ref=e300]: ჩვენი ექიმები
+                  - generic [ref=e302]:
+                    - checkbox "საპაკეტო შემოწმებები (checkup packages)" [ref=e304]
+                    - generic [ref=e305]: საპაკეტო შემოწმებები (checkup packages)
+                  - generic [ref=e307]:
+                    - generic [ref=e308]:
+                      - checkbox "სიახლეები" [checked] [ref=e309]
+                      - img [ref=e311]
+                    - generic [ref=e313]: სიახლეები
+                  - generic [ref=e315]:
+                    - generic [ref=e316]:
+                      - checkbox "შეფასებები" [checked] [ref=e317]
+                      - img [ref=e319]
+                    - generic [ref=e321]: შეფასებები
+                  - generic [ref=e323]:
+                    - generic [ref=e324]:
+                      - checkbox "ხშირად დასმული კითხვები (FAQ)" [checked] [ref=e325]
+                      - img [ref=e327]
+                    - generic [ref=e329]: ხშირად დასმული კითხვები (FAQ)
+                  - generic [ref=e331]:
+                    - generic [ref=e332]:
+                      - checkbox "კონტაქტი / რუკა" [checked] [ref=e333]
+                      - img [ref=e335]
+                    - generic [ref=e337]: კონტაქტი / რუკა
+              - generic [ref=e338]:
+                - generic [ref=e339]: მთავარი გვერდის ექიმების სია
+                - generic [ref=e340]:
+                  - generic [ref=e341]:
+                    - generic [ref=e343]:
+                      - log [ref=e345]
+                      - generic [ref=e346]:
+                        - generic [ref=e348]:
+                          - button "მირანდა შერვაშიძე Edit მირანდა შერვაშიძე Remove" [ref=e349]:
+                            - generic "მირანდა შერვაშიძე" [ref=e350]:
+                              - generic [ref=e352]: მირანდა შერვაშიძე
+                              - button "Edit მირანდა შერვაშიძე" [ref=e353] [cursor=pointer]:
+                                - img [ref=e354]
+                            - button "Remove" [ref=e356] [cursor=pointer]:
+                              - img [ref=e357]
+                          - button "ჯამილა ფარტენაძე Edit ჯამილა ფარტენაძე Remove" [ref=e359]:
+                            - generic "ჯამილა ფარტენაძე" [ref=e360]:
+                              - generic [ref=e362]: ჯამილა ფარტენაძე
+                              - button "Edit ჯამილა ფარტენაძე" [ref=e363] [cursor=pointer]:
+                                - img [ref=e364]
+                            - button "Remove" [ref=e366] [cursor=pointer]:
+                              - img [ref=e367]
+                          - button "ელენე ლომთათიძე Edit ელენე ლომთათიძე Remove" [ref=e369]:
+                            - generic "ელენე ლომთათიძე" [ref=e370]:
+                              - generic [ref=e372]: ელენე ლომთათიძე
+                              - button "Edit ელენე ლომთათიძე" [ref=e373] [cursor=pointer]:
+                                - img [ref=e374]
+                            - button "Remove" [ref=e376] [cursor=pointer]:
+                              - img [ref=e377]
+                          - combobox [ref=e380]
+                        - generic [ref=e381]:
+                          - button [ref=e382] [cursor=pointer]:
+                            - img [ref=e383]
+                          - button [ref=e385] [cursor=pointer]:
+                            - img [ref=e386]
+                    - status [ref=e388]
+                  - generic [ref=e389]: აირჩიეთ რომელი ექიმები იყვნენ დაშვებული მთავარი გვერდის „ჩვენი ექიმები" სექციაში. ცარიელი დატოვებისას — ყველა ექიმი. შევსებისას მხოლოდ ამ სიის ექიმები გამოჩნდება (რამდენი და თანმიმდევრობა/შემთხვევითობა ქვემოთ პარამეტრებით იმართება).
+              - generic [ref=e390]:
+                - generic [ref=e391]:
+                  - generic [ref=e392]:
+                    - checkbox "ექიმები შემთხვევითად აირჩეს" [checked] [ref=e393]
+                    - img [ref=e395]
+                  - generic [ref=e397]: ექიმები შემთხვევითად აირჩეს
+                - generic [ref=e398]: ჩართვისას მთავარ გვერდზე ექიმები ყოველ ჩატვირთვაზე შემთხვევითად აირჩევა (აქტიური ექიმებიდან). გამორთულია — ნაჩვენებია განყოფილების ხელმძღვანელები ფიქსირებული რიგით.
+              - generic [ref=e399]:
+                - generic [ref=e400]:
+                  - generic [ref=e401]:
+                    - heading "ჰერო კარუსელის სლაიდები" [level=3] [ref=e403]
+                    - list [ref=e404]:
+                      - listitem [ref=e405]:
+                        - button "Collapse All" [ref=e406] [cursor=pointer]
+                      - listitem [ref=e407]:
+                        - button "Show All" [ref=e408] [cursor=pointer]
+                      - listitem [ref=e409]:
+                        - button [ref=e412] [cursor=pointer]:
+                          - img [ref=e413]
+                  - generic [ref=e417]: მთავარი გვერდის ჰერო კარუსელი. თითო სლაიდს აქვს თავისი სურათი, სათაური, ქვესათაური და ღილაკი — ყველაფერი ერთად, თანმიმდევრობით იცვლება. (3–5 სლაიდი რეკომენდებულია)
+                - generic [ref=e418]:
+                  - generic [ref=e420]:
+                    - generic [ref=e421]:
+                      - button "Toggle block" [ref=e422] [cursor=pointer]
+                      - button [ref=e423]:
+                        - img [ref=e424]
+                      - generic:
+                        - generic:
+                          - generic: სლაიდი 01
+                      - generic:
+                        - button [ref=e434] [cursor=pointer]:
+                          - img [ref=e435]
+                        - generic:
+                          - img
+                    - generic [ref=e442]:
+                      - generic [ref=e443]:
+                        - generic [ref=e444]: სურათი
+                        - generic [ref=e447]:
+                          - generic [ref=e448]:
+                            - img "endoscopic hearing restoration surgery" [ref=e450]
+                            - generic [ref=e451]:
+                              - paragraph [ref=e452]:
+                                - link "img_bg_2-XsYelNz6KvwCiY5Wa78LCasoS0FQ4H.jpg" [ref=e453] [cursor=pointer]:
+                                  - /url: /api/media/file/img_bg_2-XsYelNz6KvwCiY5Wa78LCasoS0FQ4H.jpg
+                              - paragraph [ref=e454]: 175KB — 1169x699 — image/jpeg
+                          - generic [ref=e455]:
+                            - button [ref=e456] [cursor=pointer]:
+                              - generic:
+                                - generic:
+                                  - img
+                            - button [ref=e457] [cursor=pointer]:
+                              - generic:
+                                - generic:
+                                  - img
+                        - generic [ref=e458]: მარჯვენა მხარის სურათი — სრულ სიმაღლეზე, მარცხნივ თეთრ ფონში გადადის.
+                      - generic [ref=e459]:
+                        - generic [ref=e460]:
+                          - text: სათაური
+                          - generic [ref=e461]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e462]:
+                          - textbox "სათაური — ქართული ვერსია (საიტი /ge)" [ref=e463]: მრავალპროფილური კლინიკა ბათუმში
+                          - generic [ref=e464]: მთავარი ტექსტი (მარცხენა მხარეს). ცარიელი = ნაგულისხმევი ჰერო სათაური.
+                      - generic [ref=e465]:
+                        - generic [ref=e466]:
+                          - text: ქვესათაური
+                          - generic [ref=e467]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e468]:
+                          - textbox "ქვესათაური — ქართული ვერსია (საიტი /ge)" [ref=e470]: სრული სამედიცინო მომსახურება ერთ სივრცეში — გამოცდილი ექიმები და თანამედროვე აღჭურვილობა.
+                          - generic [ref=e471]: სათაურის ქვემოთ მცირე ტექსტი.
+                      - generic [ref=e472]:
+                        - generic [ref=e473]:
+                          - text: ღილაკის ტექსტი
+                          - generic [ref=e474]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e475]:
+                          - textbox "ღილაკის ტექსტი — ქართული ვერსია (საიტი /ge)" [ref=e476]: დაჯავშნე ვიზიტი
+                          - generic [ref=e477]: ცარიელი დატოვებისას ღილაკი არ გამოჩნდება.
+                      - generic [ref=e478]:
+                        - generic [ref=e479]: ღილაკის ბმული
+                        - generic [ref=e480]:
+                          - textbox "ღილაკის ბმული" [ref=e481]: /booking
+                          - generic [ref=e482]: "სად გადავიდეს ღილაკი — მაგ: /booking, /servisebi, /eqimebi/[slug], ან სრული მისამართი https://..."
+                  - generic [ref=e484]:
+                    - generic [ref=e485]:
+                      - button "Toggle block" [ref=e486] [cursor=pointer]
+                      - button [ref=e487]:
+                        - img [ref=e488]
+                      - generic:
+                        - generic:
+                          - generic: სლაიდი 02
+                      - generic:
+                        - button [ref=e498] [cursor=pointer]:
+                          - img [ref=e499]
+                        - generic:
+                          - img
+                    - generic [ref=e506]:
+                      - generic [ref=e507]:
+                        - generic [ref=e508]: სურათი
+                        - generic [ref=e511]:
+                          - generic [ref=e512]:
+                            - img "monitor your health with lab tests" [ref=e514]
+                            - generic [ref=e515]:
+                              - paragraph [ref=e516]:
+                                - link "img_bg_1-8GpxOjNeWjQvjp2HiXvgqAhtQDFf3W.jpg" [ref=e517] [cursor=pointer]:
+                                  - /url: /api/media/file/img_bg_1-8GpxOjNeWjQvjp2HiXvgqAhtQDFf3W.jpg
+                              - paragraph [ref=e518]: 173KB — 1310x845 — image/jpeg
+                          - generic [ref=e519]:
+                            - button [ref=e520] [cursor=pointer]:
+                              - generic:
+                                - generic:
+                                  - img
+                            - button [ref=e521] [cursor=pointer]:
+                              - generic:
+                                - generic:
+                                  - img
+                        - generic [ref=e522]: მარჯვენა მხარის სურათი — სრულ სიმაღლეზე, მარცხნივ თეთრ ფონში გადადის.
+                      - generic [ref=e523]:
+                        - generic [ref=e524]:
+                          - text: სათაური
+                          - generic [ref=e525]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e526]:
+                          - textbox "სათაური — ქართული ვერსია (საიტი /ge)" [ref=e527]: თანამედროვე დიაგნოსტიკა
+                          - generic [ref=e528]: მთავარი ტექსტი (მარცხენა მხარეს). ცარიელი = ნაგულისხმევი ჰერო სათაური.
+                      - generic [ref=e529]:
+                        - generic [ref=e530]:
+                          - text: ქვესათაური
+                          - generic [ref=e531]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e532]:
+                          - textbox "ქვესათაური — ქართული ვერსია (საიტი /ge)" [ref=e534]: ზუსტი კვლევები და სწრაფი შედეგი — ერთ სახურავქვეშ.
+                          - generic [ref=e535]: სათაურის ქვემოთ მცირე ტექსტი.
+                      - generic [ref=e536]:
+                        - generic [ref=e537]:
+                          - text: ღილაკის ტექსტი
+                          - generic [ref=e538]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e539]:
+                          - textbox "ღილაკის ტექსტი — ქართული ვერსია (საიტი /ge)" [ref=e540]: სერვისები
+                          - generic [ref=e541]: ცარიელი დატოვებისას ღილაკი არ გამოჩნდება.
+                      - generic [ref=e542]:
+                        - generic [ref=e543]: ღილაკის ბმული
+                        - generic [ref=e544]:
+                          - textbox "ღილაკის ბმული" [ref=e545]: /services
+                          - generic [ref=e546]: "სად გადავიდეს ღილაკი — მაგ: /booking, /servisebi, /eqimebi/[slug], ან სრული მისამართი https://..."
+                  - generic [ref=e548]:
+                    - generic [ref=e549]:
+                      - button "Toggle block" [ref=e550] [cursor=pointer]
+                      - button [ref=e551]:
+                        - img [ref=e552]
+                      - generic:
+                        - generic:
+                          - generic: სლაიდი 03
+                      - generic:
+                        - button [ref=e562] [cursor=pointer]:
+                          - img [ref=e563]
+                        - generic:
+                          - img
+                    - generic [ref=e570]:
+                      - generic [ref=e571]:
+                        - generic [ref=e572]: სურათი
+                        - generic [ref=e575]:
+                          - generic [ref=e576]:
+                            - img [ref=e578]
+                            - generic [ref=e581]:
+                              - paragraph [ref=e582]:
+                                - link "jamila-fartenadze-1778588896.jpg" [ref=e583] [cursor=pointer]:
+                                  - /url: /api/media/file/jamila-fartenadze-1778588896.jpg
+                              - paragraph [ref=e584]: 111KB — 1600x1067 — image/jpeg
+                          - generic [ref=e585]:
+                            - button [ref=e586] [cursor=pointer]:
+                              - generic:
+                                - generic:
+                                  - img
+                            - button [ref=e587] [cursor=pointer]:
+                              - generic:
+                                - generic:
+                                  - img
+                        - generic [ref=e588]: მარჯვენა მხარის სურათი — სრულ სიმაღლეზე, მარცხნივ თეთრ ფონში გადადის.
+                      - generic [ref=e589]:
+                        - generic [ref=e590]:
+                          - text: სათაური
+                          - generic [ref=e591]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e592]:
+                          - textbox "სათაური — ქართული ვერსია (საიტი /ge)" [ref=e593]: გამოცდილი ექიმები
+                          - generic [ref=e594]: მთავარი ტექსტი (მარცხენა მხარეს). ცარიელი = ნაგულისხმევი ჰერო სათაური.
+                      - generic [ref=e595]:
+                        - generic [ref=e596]:
+                          - text: ქვესათაური
+                          - generic [ref=e597]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e598]:
+                          - textbox "ქვესათაური — ქართული ვერსია (საიტი /ge)" [ref=e600]: ჩვენი სპეციალისტები თქვენი ჯანმრთელობის სამსახურში.
+                          - generic [ref=e601]: სათაურის ქვემოთ მცირე ტექსტი.
+                      - generic [ref=e602]:
+                        - generic [ref=e603]:
+                          - text: ღილაკის ტექსტი
+                          - generic [ref=e604]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e605]:
+                          - textbox "ღილაკის ტექსტი — ქართული ვერსია (საიტი /ge)" [ref=e606]: ჩვენი ექიმები
+                          - generic [ref=e607]: ცარიელი დატოვებისას ღილაკი არ გამოჩნდება.
+                      - generic [ref=e608]:
+                        - generic [ref=e609]: ღილაკის ბმული
+                        - generic [ref=e610]:
+                          - textbox "ღილაკის ბმული" [ref=e611]: /doctors
+                          - generic [ref=e612]: "სად გადავიდეს ღილაკი — მაგ: /booking, /servisebi, /eqimebi/[slug], ან სრული მისამართი https://..."
+                - status [ref=e613]
+                - button "Add სლაიდი" [ref=e614] [cursor=pointer]:
+                  - generic:
+                    - generic: Add სლაიდი
+                    - generic:
+                      - img
+              - generic [ref=e618]:
+                - heading "სანდოობის ზოლი" [level=3] [ref=e619]
+                - generic [ref=e620]: ჰერო სექციის ქვედა ნაწილი
+              - heading "სიმპტომების ნავიგატორი" [level=3] [ref=e625]
+              - generic [ref=e626]:
+                - generic [ref=e627]:
+                  - generic [ref=e628]:
+                    - heading "სტატისტიკა (სრულად რედაქტირებადი)" [level=3] [ref=e630]
+                    - list [ref=e631]:
+                      - listitem [ref=e632]:
+                        - button "Collapse All" [ref=e633] [cursor=pointer]
+                      - listitem [ref=e634]:
+                        - button "Show All" [ref=e635] [cursor=pointer]
+                      - listitem [ref=e636]:
+                        - button [ref=e639] [cursor=pointer]:
+                          - img [ref=e640]
+                  - generic [ref=e644]: მთავარ გვერდის რიცხვები — ტექსტიც და რიცხვიც თქვენია. პირველი რიგი არის დიდი, გამორჩეული სტატისტიკა (გადაათრიეთ რიგები გადასალაგებლად). ცარიელი დატოვებისას ძველი ფიქსირებული 5 რიცხვი გამოჩნდება.
+                - generic [ref=e645]:
+                  - generic [ref=e647]:
+                    - generic [ref=e648]:
+                      - button "Toggle block" [ref=e649] [cursor=pointer]
+                      - button [ref=e650]:
+                        - img [ref=e651]
+                      - generic:
+                        - generic:
+                          - generic: სტატისტიკა 01
+                      - generic:
+                        - button [ref=e661] [cursor=pointer]:
+                          - img [ref=e662]
+                        - generic:
+                          - img
+                    - generic [ref=e669]:
+                      - generic [ref=e670]:
+                        - generic [ref=e671]:
+                          - text: რიცხვი
+                          - generic [ref=e672]: "*"
+                        - generic [ref=e673]:
+                          - spinbutton "რიცხვი *" [ref=e675]: "15000"
+                          - generic [ref=e676]: "მაგ: 15000 (ანიმაციით ითვლება ნულიდან)"
+                      - generic [ref=e677]:
+                        - generic [ref=e678]: სუფიქსი
+                        - generic [ref=e679]:
+                          - textbox "სუფიქსი" [ref=e680]: +
+                          - generic [ref=e681]: "რიცხვის ბოლოში — მაგ: +, %, /7. ცარიელიც შეიძლება."
+                      - generic [ref=e682]:
+                        - generic [ref=e683]:
+                          - text: წარწერა
+                          - generic [ref=e684]: "*"
+                          - generic [ref=e685]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e686]:
+                          - textbox "წარწერა * — ქართული ვერსია (საიტი /ge)" [ref=e687]: პაციენტი
+                          - generic [ref=e688]: "მაგ: ჩატარებული ოპერაცია"
+                  - generic [ref=e690]:
+                    - generic [ref=e691]:
+                      - button "Toggle block" [ref=e692] [cursor=pointer]
+                      - button [ref=e693]:
+                        - img [ref=e694]
+                      - generic:
+                        - generic:
+                          - generic: სტატისტიკა 02
+                      - generic:
+                        - button [ref=e704] [cursor=pointer]:
+                          - img [ref=e705]
+                        - generic:
+                          - img
+                    - generic [ref=e712]:
+                      - generic [ref=e713]:
+                        - generic [ref=e714]:
+                          - text: რიცხვი
+                          - generic [ref=e715]: "*"
+                        - generic [ref=e716]:
+                          - spinbutton "რიცხვი *" [ref=e718]: "14000"
+                          - generic [ref=e719]: "მაგ: 15000 (ანიმაციით ითვლება ნულიდან)"
+                      - generic [ref=e720]:
+                        - generic [ref=e721]: სუფიქსი
+                        - generic [ref=e722]:
+                          - textbox "სუფიქსი" [ref=e723]: +
+                          - generic [ref=e724]: "რიცხვის ბოლოში — მაგ: +, %, /7. ცარიელიც შეიძლება."
+                      - generic [ref=e725]:
+                        - generic [ref=e726]:
+                          - text: წარწერა
+                          - generic [ref=e727]: "*"
+                          - generic [ref=e728]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e729]:
+                          - textbox "წარწერა * — ქართული ვერსია (საიტი /ge)" [ref=e730]: კმაყოფილი პაციენტი
+                          - generic [ref=e731]: "მაგ: ჩატარებული ოპერაცია"
+                  - generic [ref=e733]:
+                    - generic [ref=e734]:
+                      - button "Toggle block" [ref=e735] [cursor=pointer]
+                      - button [ref=e736]:
+                        - img [ref=e737]
+                      - generic:
+                        - generic:
+                          - generic: სტატისტიკა 03
+                      - generic:
+                        - button [ref=e747] [cursor=pointer]:
+                          - img [ref=e748]
+                        - generic:
+                          - img
+                    - generic [ref=e755]:
+                      - generic [ref=e756]:
+                        - generic [ref=e757]:
+                          - text: რიცხვი
+                          - generic [ref=e758]: "*"
+                        - generic [ref=e759]:
+                          - spinbutton "რიცხვი *" [ref=e761]: "54"
+                          - generic [ref=e762]: "მაგ: 15000 (ანიმაციით ითვლება ნულიდან)"
+                      - generic [ref=e763]:
+                        - generic [ref=e764]: სუფიქსი
+                        - generic [ref=e765]:
+                          - textbox "სუფიქსი" [ref=e766]: +
+                          - generic [ref=e767]: "რიცხვის ბოლოში — მაგ: +, %, /7. ცარიელიც შეიძლება."
+                      - generic [ref=e768]:
+                        - generic [ref=e769]:
+                          - text: წარწერა
+                          - generic [ref=e770]: "*"
+                          - generic [ref=e771]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e772]:
+                          - textbox "წარწერა * — ქართული ვერსია (საიტი /ge)" [ref=e773]: ექიმი
+                          - generic [ref=e774]: "მაგ: ჩატარებული ოპერაცია"
+                  - generic [ref=e776]:
+                    - generic [ref=e777]:
+                      - button "Toggle block" [ref=e778] [cursor=pointer]
+                      - button [ref=e779]:
+                        - img [ref=e780]
+                      - generic:
+                        - generic:
+                          - generic: სტატისტიკა 04
+                      - generic:
+                        - button [ref=e790] [cursor=pointer]:
+                          - img [ref=e791]
+                        - generic:
+                          - img
+                    - generic [ref=e798]:
+                      - generic [ref=e799]:
+                        - generic [ref=e800]:
+                          - text: რიცხვი
+                          - generic [ref=e801]: "*"
+                        - generic [ref=e802]:
+                          - spinbutton "რიცხვი *" [ref=e804]: "5000"
+                          - generic [ref=e805]: "მაგ: 15000 (ანიმაციით ითვლება ნულიდან)"
+                      - generic [ref=e806]:
+                        - generic [ref=e807]: სუფიქსი
+                        - generic [ref=e808]:
+                          - textbox "სუფიქსი" [ref=e809]: +
+                          - generic [ref=e810]: "რიცხვის ბოლოში — მაგ: +, %, /7. ცარიელიც შეიძლება."
+                      - generic [ref=e811]:
+                        - generic [ref=e812]:
+                          - text: წარწერა
+                          - generic [ref=e813]: "*"
+                          - generic [ref=e814]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e815]:
+                          - textbox "წარწერა * — ქართული ვერსია (საიტი /ge)" [ref=e816]: წარმატებული ოპერაცია
+                          - generic [ref=e817]: "მაგ: ჩატარებული ოპერაცია"
+                  - generic [ref=e819]:
+                    - generic [ref=e820]:
+                      - button "Toggle block" [ref=e821] [cursor=pointer]
+                      - button [ref=e822]:
+                        - img [ref=e823]
+                      - generic:
+                        - generic:
+                          - generic: სტატისტიკა 05
+                      - generic:
+                        - button [ref=e833] [cursor=pointer]:
+                          - img [ref=e834]
+                        - generic:
+                          - img
+                    - generic [ref=e841]:
+                      - generic [ref=e842]:
+                        - generic [ref=e843]:
+                          - text: რიცხვი
+                          - generic [ref=e844]: "*"
+                        - generic [ref=e845]:
+                          - spinbutton "რიცხვი *" [ref=e847]: "9"
+                          - generic [ref=e848]: "მაგ: 15000 (ანიმაციით ითვლება ნულიდან)"
+                      - generic [ref=e849]:
+                        - generic [ref=e850]: სუფიქსი
+                        - generic [ref=e851]:
+                          - textbox "სუფიქსი" [ref=e852]
+                          - generic [ref=e853]: "რიცხვის ბოლოში — მაგ: +, %, /7. ცარიელიც შეიძლება."
+                      - generic [ref=e854]:
+                        - generic [ref=e855]:
+                          - text: წარწერა
+                          - generic [ref=e856]: "*"
+                          - generic [ref=e857]: — ქართული ვერსია (საიტი /ge)
+                        - generic [ref=e858]:
+                          - textbox "წარწერა * — ქართული ვერსია (საიტი /ge)" [ref=e859]: წლიანი გამოცდილება
+                          - generic [ref=e860]: "მაგ: ჩატარებული ოპერაცია"
+                - status [ref=e861]
+                - button "Add სტატისტიკა" [ref=e862] [cursor=pointer]:
+                  - generic:
+                    - generic: Add სტატისტიკა
+                    - generic:
+                      - img
+              - generic [ref=e866]:
+                - heading "სტატისტიკა (ძველი — მხოლოდ რიცხვები)" [level=3] [ref=e867]
+                - generic [ref=e868]: გამოიყენება მხოლოდ მაშინ, თუ ზემოთა სია ცარიელია. 0 ჩაწერისას ის რიცხვი საიტზე აღარ გამოჩნდება.
+              - generic [ref=e869]:
+                - generic [ref=e870]:
+                  - generic [ref=e871]:
+                    - heading "ხშირად დასმული კითხვები (FAQ)" [level=3] [ref=e873]
+                    - list [ref=e874]:
+                      - listitem [ref=e875]:
+                        - button "Collapse All" [ref=e876] [cursor=pointer]
+                      - listitem [ref=e877]:
+                        - button "Show All" [ref=e878] [cursor=pointer]
+                      - listitem [ref=e879]:
+                        - button [ref=e882] [cursor=pointer]:
+                          - img [ref=e883]
+                  - generic [ref=e887]: "მთავარ გვერდზე ნაჩვენები კითხვა-პასუხები. ასევე ქმნის FAQ structured data-ს Google-ისთვის და AI ძიებისთვის (ChatGPT, Perplexity). ცარიელი დატოვებისას სექცია არ გამოჩნდება. რეკომენდებულია 4–8 კითხვა (მაგ: სამუშაო საათები, ენები, ჯავშანი, გადახდა)."
+                - generic [ref=e888]:
+                  - generic [ref=e890]:
+                    - generic [ref=e891]:
+                      - button "Toggle block" [ref=e892] [cursor=pointer]
+                      - button [ref=e893]:
+                        - img [ref=e894]
+                      - generic:
+                        - generic:
+                          - generic: კითხვა 01
+                      - generic:
+                        - button [ref=e904] [cursor=pointer]:
+                          - img [ref=e905]
+                        - generic:
+                          - img
+                    - generic [ref=e912]:
+                      - generic [ref=e913]:
+                        - generic [ref=e914]:
+                          - text: კითხვა
+                          - generic [ref=e915]: "*"
+                          - generic [ref=e916]: — ქართული ვერსია (საიტი /ge)
+                        - textbox "კითხვა * — ქართული ვერსია (საიტი /ge)" [ref=e918]: რა არის სამუშაო საათები?
+                      - generic [ref=e919]:
+                        - generic [ref=e920]:
+                          - text: პასუხი
+                          - generic [ref=e921]: "*"
+                          - generic [ref=e922]: — ქართული ვერსია (საიტი /ge)
+                        - textbox "პასუხი * — ქართული ვერსია (საიტი /ge)" [ref=e925]: კლინიკა მუშაობს ორშაბათიდან პარასკევის ჩათვლით 09:00-დან 18:00 საათამდე, შაბათს 09:30-დან 17:00 საათამდე.
+                  - generic [ref=e927]:
+                    - generic [ref=e928]:
+                      - button "Toggle block" [ref=e929] [cursor=pointer]
+                      - button [ref=e930]:
+                        - img [ref=e931]
+                      - generic:
+                        - generic:
+                          - generic: კითხვა 02
+                      - generic:
+                        - button [ref=e941] [cursor=pointer]:
+                          - img [ref=e942]
+                        - generic:
+                          - img
+                    - generic [ref=e949]:
+                      - generic [ref=e950]:
+                        - generic [ref=e951]:
+                          - text: კითხვა
+                          - generic [ref=e952]: "*"
+                          - generic [ref=e953]: — ქართული ვერსია (საიტი /ge)
+                        - textbox "კითხვა * — ქართული ვერსია (საიტი /ge)" [ref=e955]: როგორ დავჯავშნო ვიზიტი?
+                      - generic [ref=e956]:
+                        - generic [ref=e957]:
+                          - text: პასუხი
+                          - generic [ref=e958]: "*"
+                          - generic [ref=e959]: — ქართული ვერსია (საიტი /ge)
+                        - textbox "პასუხი * — ქართული ვერსია (საიტი /ge)" [ref=e962]: ვიზიტის დასაჯავშნად დაგვირეკეთ ნომერზე (+995) 422 22 71 71 ან მოგვწერეთ — ჩვენი ადმინისტრატორი დაგეხმარებათ შესაფერისი დროის შერჩევაში.
+                  - generic [ref=e964]:
+                    - generic [ref=e965]:
+                      - button "Toggle block" [ref=e966] [cursor=pointer]
+                      - button [ref=e967]:
+                        - img [ref=e968]
+                      - generic:
+                        - generic:
+                          - generic: კითხვა 03
+                      - generic:
+                        - button [ref=e978] [cursor=pointer]:
+                          - img [ref=e979]
+                        - generic:
+                          - img
+                    - generic [ref=e986]:
+                      - generic [ref=e987]:
+                        - generic [ref=e988]:
+                          - text: კითხვა
+                          - generic [ref=e989]: "*"
+                          - generic [ref=e990]: — ქართული ვერსია (საიტი /ge)
+                        - textbox "კითხვა * — ქართული ვერსია (საიტი /ge)" [ref=e992]: რა ენებზე იღებენ ექიმები პაციენტებს?
+                      - generic [ref=e993]:
+                        - generic [ref=e994]:
+                          - text: პასუხი
+                          - generic [ref=e995]: "*"
+                          - generic [ref=e996]: — ქართული ვერსია (საიტი /ge)
+                        - textbox "პასუხი * — ქართული ვერსია (საიტი /ge)" [ref=e999]: ჩვენი ექიმები გესაუბრებიან ქართულ, ინგლისურ და რუსულ ენებზე.
+                  - generic [ref=e1001]:
+                    - generic [ref=e1002]:
+                      - button "Toggle block" [ref=e1003] [cursor=pointer]
+                      - button [ref=e1004]:
+                        - img [ref=e1005]
+                      - generic:
+                        - generic:
+                          - generic: კითხვა 04
+                      - generic:
+                        - button [ref=e1015] [cursor=pointer]:
+                          - img [ref=e1016]
+                        - generic:
+                          - img
+                    - generic [ref=e1023]:
+                      - generic [ref=e1024]:
+                        - generic [ref=e1025]:
+                          - text: კითხვა
+                          - generic [ref=e1026]: "*"
+                          - generic [ref=e1027]: — ქართული ვერსია (საიტი /ge)
+                        - textbox "კითხვა * — ქართული ვერსია (საიტი /ge)" [ref=e1029]: მჭირდება თუ არა წინასწარი ჩაწერა?
+                      - generic [ref=e1030]:
+                        - generic [ref=e1031]:
+                          - text: პასუხი
+                          - generic [ref=e1032]: "*"
+                          - generic [ref=e1033]: — ქართული ვერსია (საიტი /ge)
+                        - textbox "პასუხი * — ქართული ვერსია (საიტი /ge)" [ref=e1036]: რეკომენდებულია წინასწარი ჩაწერა ლოდინის თავიდან ასაცილებლად, თუმცა ვიღებთ პაციენტებს ადგილზეც.
+                  - generic [ref=e1038]:
+                    - generic [ref=e1039]:
+                      - button "Toggle block" [ref=e1040] [cursor=pointer]
+                      - button [ref=e1041]:
+                        - img [ref=e1042]
+                      - generic:
+                        - generic:
+                          - generic: კითხვა 05
+                      - generic:
+                        - button [ref=e1052] [cursor=pointer]:
+                          - img [ref=e1053]
+                        - generic:
+                          - img
+                    - generic [ref=e1060]:
+                      - generic [ref=e1061]:
+                        - generic [ref=e1062]:
+                          - text: კითხვა
+                          - generic [ref=e1063]: "*"
+                          - generic [ref=e1064]: — ქართული ვერსია (საიტი /ge)
+                        - textbox "კითხვა * — ქართული ვერსია (საიტი /ge)" [ref=e1066]: მუშაობთ თუ არა სადაზღვევო კომპანიებთან?
+                      - generic [ref=e1067]:
+                        - generic [ref=e1068]:
+                          - text: პასუხი
+                          - generic [ref=e1069]: "*"
+                          - generic [ref=e1070]: — ქართული ვერსია (საიტი /ge)
+                        - textbox "პასუხი * — ქართული ვერსია (საიტი /ge)" [ref=e1073]: დიახ, ვთანამშრომლობთ წამყვან სადაზღვევო კომპანიებთან. დეტალებისთვის დაგვიკავშირდით.
+                  - generic [ref=e1075]:
+                    - generic [ref=e1076]:
+                      - button "Toggle block" [ref=e1077] [cursor=pointer]
+                      - button [ref=e1078]:
+                        - img [ref=e1079]
+                      - generic:
+                        - generic:
+                          - generic: კითხვა 06
+                      - generic:
+                        - button [ref=e1089] [cursor=pointer]:
+                          - img [ref=e1090]
+                        - generic:
+                          - img
+                    - generic [ref=e1097]:
+                      - generic [ref=e1098]:
+                        - generic [ref=e1099]:
+                          - text: კითხვა
+                          - generic [ref=e1100]: "*"
+                          - generic [ref=e1101]: — ქართული ვერსია (საიტი /ge)
+                        - textbox "კითხვა * — ქართული ვერსია (საიტი /ge)" [ref=e1103]: სად მდებარეობს კლინიკა?
+                      - generic [ref=e1104]:
+                        - generic [ref=e1105]:
+                          - text: პასუხი
+                          - generic [ref=e1106]: "*"
+                          - generic [ref=e1107]: — ქართული ვერსია (საიტი /ge)
+                        - textbox "პასუხი * — ქართული ვერსია (საიტი /ge)" [ref=e1110]: კლინიკა მდებარეობს ბათუმში. ზუსტი მისამართი და რუკა იხილეთ საკონტაქტო გვერდზე.
+                - status [ref=e1111]
+                - button "Add კითხვა" [ref=e1112] [cursor=pointer]:
+                  - generic:
+                    - generic: Add კითხვა
+                    - generic:
+                      - img
+        - status [ref=e1113]
+  - status [ref=e47]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]:
+    - img [ref=e8]
+  - alert [ref=e11]: Editing - მთავარი გვერდი — ხოზრევანიძის კლინიკა

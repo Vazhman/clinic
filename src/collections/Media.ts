@@ -44,7 +44,6 @@ export const Media: CollectionConfig = {
       { name: 'card', width: 768, height: 512, position: 'centre' },
       { name: 'hero', width: 1400, height: undefined, position: 'centre' },
     ],
-    mimeTypes: ['image/*'],
     crop: true,
     focalPoint: true,
   },

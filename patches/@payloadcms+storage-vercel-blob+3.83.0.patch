@@ -1,0 +1,33 @@
+diff --git a/node_modules/@payloadcms/storage-vercel-blob/dist/adapter.js b/node_modules/@payloadcms/storage-vercel-blob/dist/adapter.js
+index e1fcf6c..8eb40a0 100644
+--- a/node_modules/@payloadcms/storage-vercel-blob/dist/adapter.js
++++ b/node_modules/@payloadcms/storage-vercel-blob/dist/adapter.js
+@@ -36,7 +36,14 @@ export function createVercelBlobAdapter({ access, addRandomSuffix, baseUrl, cach
+                     useCompositePrefixes
+                 });
+                 if (result.filename) {
+-                    data.filename = result.filename;
++                    if (filename === data.filename) {
++                        data.filename = result.filename;
++                    } else if (data.sizes) {
++                        const sizeKey = Object.keys(data.sizes).find((key)=>data.sizes[key]?.filename === filename);
++                        if (sizeKey) {
++                            data.sizes[sizeKey].filename = result.filename;
++                        }
++                    }
+                 }
+                 return data;
+             },
+diff --git a/node_modules/@payloadcms/storage-vercel-blob/dist/client/VercelBlobClientUploadHandler.js b/node_modules/@payloadcms/storage-vercel-blob/dist/client/VercelBlobClientUploadHandler.js
+index 94a3512..8de8ffb 100644
+--- a/node_modules/@payloadcms/storage-vercel-blob/dist/client/VercelBlobClientUploadHandler.js
++++ b/node_modules/@payloadcms/storage-vercel-blob/dist/client/VercelBlobClientUploadHandler.js
+@@ -17,7 +17,7 @@ export const VercelBlobClientUploadHandler = createClientUploadHandler({
+         });
+         // Update filename with suffix from returned url
+         if (addRandomSuffix) {
+-            updateFilename(result.url.replace(`${baseURL}/`, ''));
++            updateFilename(decodeURIComponent(result.url.replace(`${baseURL}/`, '')));
+         }
+         return {
+             prefix
