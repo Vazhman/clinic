@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { getServices, getDoctors } from "@/lib/payload-data";
+import { getServices, getDoctors, getFeatureToggles } from "@/lib/payload-data";
 import Card from "@/components/shared/Card";
 import Breadcrumbs from "@/components/shared/Breadcrumbs";
 import ServiceIcon from "@/components/shared/ServiceIcon";
@@ -37,13 +37,12 @@ export default async function HealthLibraryPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  // ⛔ DISABLED 2026-05-30 per client request — the Health Library / Digital
-  // Library page is hidden from the live site. ALL code below (incl. the 3D
-  // anatomy viewer) and public/models/organs.glb are intentionally kept in the
-  // repo. To RE-ENABLE: delete this `notFound()` line and restore the menu /
-  // sitemap entries marked "DISABLED 2026-05-30" in Header.tsx, Footer.tsx,
-  // sitemap.ts and payload-data.ts (STANDARD_ROUTES).
-  notFound();
+  // Gated by FeatureToggles.healthLibrary (src/globals/FeatureToggles.ts),
+  // defaulting to OFF — matches the 2026-05-30 client request that hid this
+  // page — so the CMS admin can flip it back on without a code change.
+  // Nav/footer links stay hidden separately (their own 2026-05-30 decision).
+  const toggles = await getFeatureToggles();
+  if (toggles?.healthLibrary !== true) notFound();
 
   const { locale } = await params;
   const t = await getTranslations("HealthLibrary");

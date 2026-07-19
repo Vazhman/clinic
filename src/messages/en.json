@@ -115,7 +115,10 @@
     "commonlyUsedInDepartment": "Lab tests commonly used in this specialty",
     "reviewedBy": "Reviewed by {name}",
     "lastReviewed": "Last updated: {date}",
-    "bookConsultation": "Book a consultation"
+    "bookConsultation": "Book a consultation",
+    "price": "Price",
+    "notCurrentlyAvailable": "This test is temporarily unavailable",
+    "downloadPdf": "Download preparation instructions (PDF)"
   },
   "Doctors": {
     "title": "Doctors",
@@ -343,13 +346,16 @@
     "title": "News & Articles",
     "subtitle": "Latest Updates",
     "viewAll": "View All",
+    "allCategories": "All",
     "noArticles": "Articles will be added soon.",
     "readMore": "Read More",
     "relatedArticles": "Related Articles",
     "categoryHealthTips": "Health Tips",
     "categoryClinicNews": "Clinic News",
     "categoryMedicalInfo": "Medical Info",
-    "categoryAnnouncements": "Announcements"
+    "categoryAnnouncements": "Announcements",
+    "readingTime": "{minutes} min read",
+    "featured": "Featured"
   },
   "Gallery": {
     "title": "Gallery",

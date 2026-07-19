@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Breadcrumbs from "@/components/shared/Breadcrumbs";
 import BookingWizard from "@/components/booking/BookingWizard";
@@ -11,6 +12,8 @@ import {
   getContactPage,
   getBookingServicesFromPayload,
   getBookingDoctorsFromPayload,
+  getFeatureToggles,
+  isFeatureEnabled,
 } from "@/lib/payload-data";
 
 export async function generateMetadata({
@@ -41,6 +44,8 @@ export default async function BookingPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const toggles = await getFeatureToggles();
+  if (!isFeatureEnabled(toggles, "booking")) notFound();
   const t = await getTranslations("Booking");
   const nav = await getTranslations("Navigation");
 

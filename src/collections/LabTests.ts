@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { seoFields } from '../fields/seo'
 import { localeHint } from '../fields/locale-hint'
 import { slugField } from '../fields/slug'
+import { featureTogglesCache } from '../lib/feature-toggles-cache'
 
 // Lab Tests is a content library, NOT a bookable catalog. The point is SEO:
 // give every test the clinic performs its own URL with editorial-quality
@@ -31,6 +32,13 @@ export const LabTests: CollectionConfig = {
     description: 'ლაბორატორიული ანალიზების ბიბლიოთეკა — Mayo Clinic-ის სტილით. ყოველი ანალიზი = ერთი გვერდი (/lab-tests/<slug>). SEO-ისთვის: ჩაწერეთ აღწერა, მომზადება, შედეგების ინტერპრეტაცია სამივე ენაზე.',
     defaultColumns: ['title', 'slug', 'category', 'published', 'updatedAt'],
     group: 'კონტენტი',
+    // Mirrors feature-toggles.labTests: when the toggle is off, /lab-tests
+    // 404s on the frontend, so hide the collection from the admin nav (and
+    // its direct routes) too rather than leaving a dead-end menu entry.
+    // `hidden` only ever runs synchronously with `{ user }` — it can't read
+    // a Global itself — so it reads the in-memory cache kept fresh by
+    // FeatureToggles.ts's afterChange hook + payload.config.ts's onInit.
+    hidden: () => !featureTogglesCache.labTests,
   },
   access: { read: () => true },
   versions: { drafts: true },
@@ -88,6 +96,50 @@ export const LabTests: CollectionConfig = {
       admin: {
         position: 'sidebar',
         description: 'მონიშნულია — ჩანს საიტზე. ⚠️ სამედიცინო (YMYL) შინაარსი ჯერ ექიმმა უნდა გადახედოს — გამოაქვეყნეთ მხოლოდ ექიმის გადახედვის შემდეგ. ახალი ანალიზი იწყება მონიშნულის გარეშე, შევსებისა და გადახედვის შემდეგ ჩართეთ.',
+      },
+    },
+    {
+      name: 'active',
+      label: 'აქტიური (ტარდება ამჟამად)',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        position: 'sidebar',
+        description: 'გამორთეთ, თუ ეს ანალიზი დროებით აღარ ტარდება (მაგ: რეაგენტის დეფიციტი). გვერდი „გამოქვეყნებულის“ მსგავსად კვლავ ჩანს, მაგრამ ფასისა და ჯავშნის ღილაკის ნაცვლად უჩვენებს „დროებით არ ტარდება“ — ცალკე ველია "published"-ისგან, რადგან სტატია შეიძლება რჩებოდეს საძიებოდ ხელმისაწვდომი, სანამ თავად მომსახურება დროებით შეჩერებულია.',
+      },
+    },
+    {
+      name: 'price',
+      label: 'ფასი',
+      type: 'number',
+      min: 0,
+      admin: {
+        position: 'sidebar',
+        description: 'ანალიზის ფასი არჩეულ ვალუტაში (მხოლოდ რიცხვი). ცარიელი — ფასი საიტზე არ ჩანს (მაგ: თუ ფასი ცვალებადია ან შემთხვევაზეა დამოკიდებული).',
+      },
+    },
+    {
+      name: 'currency',
+      label: 'ვალუტა',
+      type: 'text',
+      defaultValue: 'GEL',
+      admin: { position: 'sidebar', description: 'ვალუტის კოდი — დაშვებულია მხოლოდ: GEL (ლარი), USD (დოლარი), EUR (ევრო).' },
+      validate: (value: string | string[] | null | undefined) => {
+        if (!value || (typeof value === 'string' && value.trim() === '')) return true
+        const allowed = ['GEL', 'USD', 'EUR']
+        if (typeof value === 'string' && allowed.includes(value.trim().toUpperCase())) return true
+        return 'არასწორი ვალუტა — დაშვებულია მხოლოდ: GEL, USD, EUR.'
+      },
+    },
+    {
+      name: 'pdfAttachment',
+      label: 'PDF დანართი',
+      type: 'relationship',
+      relationTo: 'media',
+      filterOptions: { mimeType: { equals: 'application/pdf' } },
+      admin: {
+        position: 'sidebar',
+        description: 'დასაბეჭდი/ჩამოსატვირთი PDF — მაგ: მომზადების ინსტრუქცია ან საკონტროლო ფურცელი. აირჩიეთ მხოლოდ PDF ფაილი მედია-ბიბლიოთეკიდან (ჯერ ატვირთეთ Media-ში).',
       },
     },
 

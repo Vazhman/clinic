@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { getServices, getDoctors, getLabTestsForService } from "@/lib/payload-data";
+import { getServices, getDoctors, getLabTestsForService, getFeatureToggles, isFeatureEnabled } from "@/lib/payload-data";
 import { Link } from "@/i18n/navigation";
 import Breadcrumbs from "@/components/shared/Breadcrumbs";
 import Button from "@/components/shared/Button";
@@ -12,6 +12,8 @@ import SnapCarousel from "@/components/shared/SnapCarousel";
 import StructuredData from "@/components/shared/StructuredData";
 import { generateServiceSchema, generateBreadcrumbSchema } from "@/lib/structured-data";
 import { buildLocalizedAlternates, type Locale } from "@/lib/seo-helpers";
+import LexicalContent from "@/components/blog/LexicalContent";
+import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 
 export async function generateMetadata({
   params,
@@ -49,6 +51,8 @@ export default async function ServicePage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
+  const toggles = await getFeatureToggles();
+  if (!isFeatureEnabled(toggles, "services")) notFound();
   const loc = locale as "ge" | "en" | "ru";
   const services = await getServices(loc);
   const service = services.find((s) => s.slug === slug);
@@ -103,7 +107,7 @@ export default async function ServicePage({
           <h1 className="text-[clamp(1.6rem,4vw,3rem)] font-bold text-pink mt-4 mb-4 tracking-tight break-words">
             {service.name}
           </h1>
-          <p className="text-base sm:text-lg text-white/70 max-w-2xl break-words">
+          <p className="text-base sm:text-lg text-white/70 max-w-2xl break-words whitespace-pre-wrap">
             {service.shortDescription}
           </p>
           <div className="mt-6 sm:mt-8">
@@ -118,9 +122,20 @@ export default async function ServicePage({
       <section className="py-10 sm:py-14 lg:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-3xl">
+            {/* `description` was upgraded from a plain textarea to a full
+                richText field (Item 4 parity). Rows saved before that
+                migration still hold a bare string in descriptionRichText —
+                render those as a plain paragraph instead of feeding a
+                non-Lexical shape into LexicalContent. */}
+            {service.descriptionRichText && typeof service.descriptionRichText === "object" ? (
+              <div className="text-base sm:text-lg text-grey leading-relaxed break-words">
+                <LexicalContent data={service.descriptionRichText as SerializedEditorState} />
+              </div>
+            ) : (
               <p className="text-base sm:text-lg text-grey leading-relaxed break-words">
                 {service.description}
               </p>
+            )}
           </div>
         </div>
       </section>
@@ -196,7 +211,7 @@ export default async function ServicePage({
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 break-words">
             {dt("bookAppointment")}
           </h2>
-          <p className="text-white/70 mb-6 sm:mb-8 break-words">
+          <p className="text-white/70 mb-6 sm:mb-8 break-words whitespace-pre-wrap">
             {service.shortDescription}
           </p>
           <Button href="/booking" variant="secondary" size="lg">

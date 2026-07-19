@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import Breadcrumbs from "@/components/shared/Breadcrumbs";
 import BlogList from "@/components/blog/BlogList";
+import CategoryFilter from "@/components/blog/CategoryFilter";
 import StructuredData from "@/components/shared/StructuredData";
 import { generateBreadcrumbSchema } from "@/lib/structured-data";
-import { getAllNews } from "@/lib/payload-data";
+import { getAllNews, getNewsCategories, getFeatureToggles, isFeatureEnabled } from "@/lib/payload-data";
 import { buildLocalizedAlternates, type Locale } from "@/lib/seo-helpers";
 
 export async function generateMetadata({
@@ -32,16 +34,23 @@ export async function generateMetadata({
 
 export default async function BlogPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ category?: string }>;
 }) {
   const { locale } = await params;
+  const { category } = await searchParams;
+  const toggles = await getFeatureToggles();
+  if (!isFeatureEnabled(toggles, "blog")) notFound();
   const nav = await getTranslations("Navigation");
   const t = await getTranslations("Blog");
   const tBook = await getTranslations("Hero");
   const loc = locale as "ge" | "en" | "ru";
 
-  const { docs: news } = await getAllNews(loc);
+  const categories = await getNewsCategories(loc);
+  const activeSlug = category && categories.some((c) => c.slug === category) ? category : undefined;
+  const { docs: news } = await getAllNews(loc, 1, 60, activeSlug);
 
   return (
     <>
@@ -75,6 +84,7 @@ export default async function BlogPage({
 
       <section className="py-16 sm:py-20 lg:py-24 bg-cream">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10">
+          <CategoryFilter categories={categories} activeSlug={activeSlug} allLabel={t("allCategories")} />
           {news.length === 0 ? (
             <div className="text-center max-w-2xl mx-auto">
               <span aria-hidden className="block h-[3px] w-[72px] bg-pink rounded-full mx-auto mb-8" />

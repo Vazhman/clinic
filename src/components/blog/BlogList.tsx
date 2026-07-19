@@ -16,13 +16,6 @@ type BlogItem = {
   featuredImage: { url: string; alt: string };
 };
 
-const categoryKeyMap: Record<string, string> = {
-  "health-tips": "categoryHealthTips",
-  "clinic-news": "categoryClinicNews",
-  "medical-info": "categoryMedicalInfo",
-  announcements: "categoryAnnouncements",
-};
-
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export default function BlogList({ news }: { news: BlogItem[] }) {
@@ -32,7 +25,6 @@ export default function BlogList({ news }: { news: BlogItem[] }) {
   if (news.length === 0) return null;
 
   const fmt = (d: string) => formatLongDate(d, locale);
-  const catLabel = (c: string) => (categoryKeyMap[c] ? t(categoryKeyMap[c]) : c);
 
   const [lead, ...rest] = news;
 
@@ -57,7 +49,7 @@ export default function BlogList({ news }: { news: BlogItem[] }) {
               )}
               <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-blackberry/55 via-blackberry/10 to-transparent" />
               <span className="absolute top-4 left-4 inline-flex items-center bg-white/92 backdrop-blur-sm text-blackberry text-[10px] font-bold tracking-[0.12em] uppercase px-3.5 py-2 rounded-full shadow-sm">
-                {catLabel(lead.category)}
+                {lead.category}
               </span>
             </div>
             <div className="p-6 sm:p-9 lg:p-11 flex flex-col justify-center min-w-0">

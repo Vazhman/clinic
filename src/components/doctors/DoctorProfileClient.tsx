@@ -11,18 +11,24 @@ import AnimateIn from "@/components/shared/AnimateIn";
 import SnapCarousel from "@/components/shared/SnapCarousel";
 import { SERVICES } from "@/lib/booking-data";
 import { formatLongDate } from "@/lib/format-date";
+import LexicalContent from "@/components/blog/LexicalContent";
+import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
+import { getLanguage } from "@/lib/languages";
 
 interface DoctorProfileClientProps {
   doctor: Doctor;
   relatedDoctors: Doctor[];
   // Dialer number from the ContactPage global (single source of truth).
   contactPhone?: string;
+  // DoctorsPage.showLanguages — admin kill-switch for the languages section.
+  showLanguages?: boolean;
 }
 
 export default function DoctorProfileClient({
   doctor,
   relatedDoctors,
   contactPhone = "",
+  showLanguages = true,
 }: DoctorProfileClientProps) {
   const t = useTranslations("Doctors");
   const locale = useLocale();
@@ -85,6 +91,7 @@ export default function DoctorProfileClient({
   const hasQualifications = doctor.qualifications.length > 0;
   const hasSpecializations = doctor.specializations.length > 0;
   const hasExperience = doctor.experienceYears > 0;
+  const hasLanguages = showLanguages && doctor.languagesSpoken.length > 0;
   const hasRelated = relatedDoctors.length > 0;
   // A doctor is bookable only when:
   //   1. Both Doctra link fields are populated (wizard needs them to find
@@ -144,7 +151,7 @@ export default function DoctorProfileClient({
               {/* Photo */}
               <div className="hero-animate hero-animate-1">
                 <div className="relative max-w-[260px] sm:max-w-[280px] mx-auto lg:max-w-none">
-                  <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-grey-lighter shadow-lg shadow-blackberry/[0.06]">
+                  <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-grey-lighter shadow-lg shadow-blackberry/[0.06]">
                     {hasPhoto ? (
                       <Image
                         src={doctor.photo}
@@ -319,7 +326,17 @@ export default function DoctorProfileClient({
                 {hasBio && (
                   <AnimateIn>
                     <SectionTitle>{t("biography")}</SectionTitle>
-                      <p className="text-grey leading-[1.8] text-[14px] break-words">{doctor.biography}</p>
+                    {doctor.biographyRichText ? (
+                      // Full formatting (bold/lists/links/etc.) via the shared
+                      // Lexical renderer. Falls back to the flattened plain-text
+                      // projection below for legacy/seed doctors that never had
+                      // a Payload richText value.
+                      <div className="text-grey leading-[1.8] text-[14px] break-words">
+                        <LexicalContent data={doctor.biographyRichText as SerializedEditorState} />
+                      </div>
+                    ) : (
+                      <p className="text-grey leading-[1.8] text-[14px] break-words whitespace-pre-wrap">{doctor.biography}</p>
+                    )}
                   </AnimateIn>
                 )}
 
@@ -361,6 +378,26 @@ export default function DoctorProfileClient({
                           <span className="text-[13px] text-grey break-words min-w-0">{q}</span>
                         </div>
                       ))}
+                    </div>
+                  </AnimateIn>
+                )}
+
+                {hasLanguages && (
+                  <AnimateIn delay={150}>
+                    <SectionTitle>{t("languages")}</SectionTitle>
+                    <div className="flex flex-wrap gap-2">
+                      {doctor.languagesSpoken.map((code) => {
+                        const lang = getLanguage(code);
+                        return (
+                          <span
+                            key={code}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium bg-grey-lighter text-grey break-words max-w-full"
+                          >
+                            <span className="text-[15px] leading-none">{lang?.flag ?? ""}</span>
+                            {lang?.name[locale as "ge" | "en" | "ru"] ?? code}
+                          </span>
+                        );
+                      })}
                     </div>
                   </AnimateIn>
                 )}

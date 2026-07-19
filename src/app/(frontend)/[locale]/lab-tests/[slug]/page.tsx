@@ -10,7 +10,7 @@ import LexicalContent from "@/components/blog/LexicalContent";
 import { generateBreadcrumbSchema } from "@/lib/structured-data";
 import { buildLocalizedAlternates, type Locale } from "@/lib/seo-helpers";
 import { SITE_URL } from "@/lib/site";
-import { getLabTestBySlug } from "@/lib/payload-data";
+import { getLabTestBySlug, getFeatureToggles, isFeatureEnabled } from "@/lib/payload-data";
 
 // Lexical bodies arrive as `unknown` from the data layer (the Payload type is
 // open-ended). Casting to `never` lets the typed RichText component accept it
@@ -56,6 +56,8 @@ export default async function LabTestDetailPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
+  const toggles = await getFeatureToggles();
+  if (!isFeatureEnabled(toggles, "labTests")) notFound();
   const test = await getLabTestBySlug(slug, locale as Locale);
 
   if (!test) notFound();
@@ -126,7 +128,7 @@ export default async function LabTestDetailPage({
             {test.title}
           </h1>
           {test.summary && (
-            <p className="text-base sm:text-lg text-white/70 max-w-2xl break-words">
+            <p className="text-base sm:text-lg text-white/70 max-w-2xl break-words whitespace-pre-wrap">
               {test.summary}
             </p>
           )}
@@ -135,6 +137,20 @@ export default async function LabTestDetailPage({
               <span className="text-white/70 font-semibold">{t("alsoKnownAs")}:</span>{" "}
               {test.aliases.join(", ")}
             </p>
+          )}
+          {(test.price !== null || !test.active) && (
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              {test.price !== null && (
+                <span className="inline-flex items-center rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold text-white">
+                  {t("price")}: {test.price} {test.currency ?? "GEL"}
+                </span>
+              )}
+              {!test.active && (
+                <span className="inline-flex items-center rounded-full bg-pink/20 px-4 py-1.5 text-sm font-semibold text-pink">
+                  {t("notCurrentlyAvailable")}
+                </span>
+              )}
+            </div>
           )}
           {(test.reviewedBy || test.lastReviewed) && (
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-1 text-[12px] text-white/50">
@@ -169,6 +185,19 @@ export default async function LabTestDetailPage({
               <LexicalContent data={data as never} />
             </section>
           ))}
+          {test.pdfUrl && (
+            <a
+              href={test.pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-pink/40 px-5 py-2.5 text-sm font-semibold text-pink hover:bg-pink/5 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
+              </svg>
+              {t("downloadPdf")}
+            </a>
+          )}
         </div>
       </article>
 
@@ -195,7 +224,7 @@ export default async function LabTestDetailPage({
                       {item.title}
                     </h3>
                     {item.summary && (
-                      <p className="text-sm text-grey-light line-clamp-2 break-words">{item.summary}</p>
+                      <p className="text-sm text-grey-light line-clamp-2 break-words whitespace-pre-wrap">{item.summary}</p>
                     )}
                   </Link>
               ))}
@@ -211,7 +240,7 @@ export default async function LabTestDetailPage({
             {t("bookConsultation")}
           </h2>
           {test.summary && (
-            <p className="text-white/70 mb-6 sm:mb-8 break-words">{test.summary}</p>
+            <p className="text-white/70 mb-6 sm:mb-8 break-words whitespace-pre-wrap">{test.summary}</p>
           )}
           <Button href="/booking" variant="secondary" size="lg">
             {t("bookConsultation")}

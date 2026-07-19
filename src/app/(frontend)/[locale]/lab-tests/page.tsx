@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import Breadcrumbs from "@/components/shared/Breadcrumbs";
 import StructuredData from "@/components/shared/StructuredData";
 import { generateBreadcrumbSchema } from "@/lib/structured-data";
 import { buildLocalizedAlternates, type Locale } from "@/lib/seo-helpers";
-import { getLabTests, type LabTestCategory, type LabTestListItem } from "@/lib/payload-data";
+import {
+  getLabTests,
+  getFeatureToggles,
+  isFeatureEnabled,
+  type LabTestCategory,
+  type LabTestListItem,
+} from "@/lib/payload-data";
 
 // Order in which categories are rendered. Anything returned by the API but
 // not listed here lands at the bottom under 'other'. Ordering chosen to put
@@ -51,6 +58,8 @@ export default async function LabTestsIndexPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const toggles = await getFeatureToggles();
+  if (!isFeatureEnabled(toggles, "labTests")) notFound();
   const tests = await getLabTests(locale as Locale);
   const t = await getTranslations("LabTests");
   const nav = await getTranslations("Navigation");
@@ -128,7 +137,21 @@ export default async function LabTestsIndexPage({
                             {item.title}
                           </h3>
                           {item.summary && (
-                            <p className="text-sm text-grey-light line-clamp-2 break-words">{item.summary}</p>
+                            <p className="text-sm text-grey-light line-clamp-2 break-words whitespace-pre-wrap">{item.summary}</p>
+                          )}
+                          {(item.price !== null || !item.active) && (
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              {item.price !== null && (
+                                <span className="inline-flex items-center rounded-full bg-pink/10 px-2.5 py-0.5 text-[11px] font-semibold text-pink">
+                                  {item.price} {item.currency ?? "GEL"}
+                                </span>
+                              )}
+                              {!item.active && (
+                                <span className="inline-flex items-center rounded-full bg-grey-lighter px-2.5 py-0.5 text-[11px] font-semibold text-grey">
+                                  {t("notCurrentlyAvailable")}
+                                </span>
+                              )}
+                            </div>
                           )}
                           <span className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-semibold text-pink group-hover:gap-2 transition-all">
                             {t("viewTest")}

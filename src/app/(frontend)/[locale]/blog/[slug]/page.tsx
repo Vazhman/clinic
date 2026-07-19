@@ -9,7 +9,7 @@ import type { Data } from "@puckeditor/core";
 import StructuredData from "@/components/shared/StructuredData";
 import { generateArticleSchema, generateBreadcrumbSchema } from "@/lib/structured-data";
 import { buildLocalizedAlternates, type Locale } from "@/lib/seo-helpers";
-import { getNewsBySlug } from "@/lib/payload-data";
+import { getNewsBySlug, getFeatureToggles, isFeatureEnabled } from "@/lib/payload-data";
 import { formatLongDate } from "@/lib/format-date";
 
 export async function generateMetadata({
@@ -59,8 +59,10 @@ export default async function BlogDetailPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
+  const toggles = await getFeatureToggles();
+  if (!isFeatureEnabled(toggles, "blog")) notFound();
   const nav = await getTranslations("Navigation");
-  const t = await getTranslations("Blog");
+  const blogT = await getTranslations("Blog");
   const loc = locale as "ge" | "en" | "ru";
 
   const article = await getNewsBySlug(slug, loc);
@@ -74,14 +76,19 @@ export default async function BlogDetailPage({
       ? article.featuredImage.url
       : "";
 
-  const categoryKeyMap: Record<string, string> = {
-    "health-tips": "categoryHealthTips",
-    "clinic-news": "categoryClinicNews",
-    "medical-info": "categoryMedicalInfo",
-    announcements: "categoryAnnouncements",
-  };
+  const categoryLabel =
+    typeof article.categoryRef === "object" && article.categoryRef !== null
+      ? (article.categoryRef as { name?: string }).name || ""
+      : "";
 
-  const categoryLabel = categoryKeyMap[article.category] ? t(categoryKeyMap[article.category]) : article.category;
+  const tags = Array.isArray((article as { tags?: unknown }).tags)
+    ? ((article as { tags: string[] }).tags)
+    : [];
+  const isFeatured = Boolean((article as { featured?: boolean }).featured);
+  const readingTimeMinutes = (article as { readingTimeMinutes?: number }).readingTimeMinutes;
+  const gallery = Array.isArray((article as { gallery?: unknown }).gallery)
+    ? ((article as { gallery: { url: string; alt: string }[] }).gallery)
+    : [];
 
   return (
     <>
@@ -118,12 +125,22 @@ export default async function BlogDetailPage({
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="mb-8 sm:mb-10">
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+              {isFeatured && (
+                <span className="bg-blackberry text-white text-[10px] font-bold tracking-[0.1em] uppercase px-3 py-1.5 rounded-full break-words">
+                  {blogT("featured")}
+                </span>
+              )}
               <span className="bg-pink text-white text-[10px] font-bold tracking-[0.1em] uppercase px-3 py-1.5 rounded-full break-words">
                 {categoryLabel}
               </span>
               <span className="text-[13px] text-grey-light break-words">
                 {formatLongDate(article.publishedDate, locale)}
               </span>
+              {typeof readingTimeMinutes === "number" && (
+                <span className="text-[13px] text-grey-light break-words">
+                  {blogT("readingTime", { minutes: readingTimeMinutes })}
+                </span>
+              )}
             </div>
             <h1 className="text-[clamp(1.5rem,4vw,3rem)] sm:text-[clamp(1.8rem,4vw,3rem)] font-bold tracking-tight text-blackberry leading-tight break-words">
               {article.title}
@@ -155,6 +172,37 @@ export default async function BlogDetailPage({
             article.body && typeof article.body === 'object' && 'root' in article.body && (
               <LexicalContent data={article.body as SerializedEditorState} />
             )
+          )}
+
+          {gallery.length > 0 && (
+            <div className="mt-10 sm:mt-12 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+              {gallery.map((image, i) => (
+                <div
+                  key={`${image.url}-${i}`}
+                  className="rounded-lg sm:rounded-xl overflow-hidden aspect-[4/3] bg-grey-lighter"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={image.url}
+                    alt={image.alt || article.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {tags.length > 0 && (
+            <div className="mt-8 sm:mt-10 flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-[12px] text-grey bg-grey-lighter px-3 py-1 rounded-full break-words"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
           )}
         </div>
       </article>

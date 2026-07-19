@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { getServices, getServicesPage } from "@/lib/payload-data";
+import { getServices, getServicesPage, getFeatureToggles, isFeatureEnabled } from "@/lib/payload-data";
 import Breadcrumbs from "@/components/shared/Breadcrumbs";
 import ServicesListClient from "@/components/services/ServicesListClient";
 import StructuredData from "@/components/shared/StructuredData";
@@ -35,6 +36,8 @@ export default async function ServicesPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const toggles = await getFeatureToggles();
+  if (!isFeatureEnabled(toggles, "services")) notFound();
   const [services, cms] = await Promise.all([
     getServices(locale as "ge" | "en" | "ru"),
     getServicesPage(locale as Locale),

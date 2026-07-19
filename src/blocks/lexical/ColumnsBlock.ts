@@ -10,10 +10,17 @@ import {
   HorizontalRuleFeature,
   UploadFeature,
   BlocksFeature,
+  CodeBlock,
+  EXPERIMENTAL_TableFeature,
+  TextStateFeature,
 } from '@payloadcms/richtext-lexical'
 import { CalloutBlock } from './CalloutBlock'
 import { GalleryBlock } from './GalleryBlock'
 import { ResizableUploadFeature } from '../../lexical/features/resizable-upload/feature'
+import { RemoveFormattingFeature } from '../../lexical/features/remove-formatting/feature'
+import { HtmlSourceFeature } from '../../lexical/features/html-source/feature'
+import { textColorStates, backgroundColorStates } from '../../lexical/textStateColors'
+import { fontSizeStates } from '../../lexical/fontSizeStates'
 
 // Inline Lexical block: a 2-or-3-column row whose cells are themselves
 // Lexical rich-text fields. Editors pick a `layout` (50/50, 33/67, 67/33,
@@ -112,10 +119,24 @@ const cellEditor = lexicalEditor({
     // main body. The Lexical node-replacement is registered per editor, so
     // installing it in the cell editor here does not conflict with the parent.
     ResizableUploadFeature(),
-    // Callout + Gallery only. Excluding ColumnsBlock here is what prevents
-    // infinite nesting: a column cannot contain another columns block.
+    // Text/background color + remove-formatting mirrored from the parent
+    // editor — see the note above the media fields: any feature added to
+    // src/payload.config.ts's main editor must be mirrored here too.
+    TextStateFeature({
+      state: {
+        color: textColorStates,
+        bgColor: backgroundColorStates,
+        fontSize: fontSizeStates,
+      },
+    }),
+    EXPERIMENTAL_TableFeature(),
+    RemoveFormattingFeature(),
+    // Mirrored from the parent editor — see note above the media fields.
+    HtmlSourceFeature(),
+    // Callout + Gallery + Code only. Excluding ColumnsBlock here is what
+    // prevents infinite nesting: a column cannot contain another columns block.
     BlocksFeature({
-      blocks: [CalloutBlock, GalleryBlock],
+      blocks: [CalloutBlock, GalleryBlock, CodeBlock()],
     }),
   ],
 })

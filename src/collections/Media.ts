@@ -1,4 +1,37 @@
-import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionBeforeOperationHook, CollectionConfig } from 'payload'
+
+import { sanitizeFilename } from '../lib/translit-ka'
+
+// Item 6 fix: sanitize the uploaded filename to a guaranteed ASCII/URL-safe
+// name before Payload's own upload pipeline (generateFileData/getSafeFilename,
+// neither of which transliterate Unicode) ever sees it. This covers the
+// direct/multipart upload path (local disk adapter, API/curl uploads). The
+// `clientUploads: true` (Vercel Blob browser-direct-upload) path used in
+// production is fixed separately, client-side, via a patch to
+// VercelBlobClientUploadHandler.js — a server hook runs too late for that
+// path since the browser already PUTs bytes to Blob under the client-chosen
+// pathname before this hook ever executes.
+//
+// Bug found 2026-07-19: for a completed client upload, `req.file.name` is
+// NOT a raw browser filename — it's already the FINAL filename the client
+// handler computed, including the case-sensitive random suffix Vercel Blob
+// assigned to the real stored object (e.g. `...-3AfFRluPBZ...`). This hook
+// ran unconditionally and re-ran `sanitizeFilename()` (which lowercases
+// everything) on that already-final name, corrupting the suffix's case and
+// leaving the DB `filename` pointing at an object that doesn't exist under
+// that key — the original 404s everywhere while sized derivatives (a
+// separate server-side path that never touches `req.file.name`) stay fine.
+// `req.file.clientUploadContext` is only present on a client-upload-complete
+// request (see @payloadcms/plugin-cloud-storage's getIncomingFiles.js), so
+// use it to skip re-sanitizing a name that's already safe and final.
+const sanitizeUploadFilename: CollectionBeforeOperationHook = async ({ req, operation }) => {
+  if ((operation !== 'create' && operation !== 'update') || !req.file?.name) return
+  if (req.file.clientUploadContext) return
+  const safeName = sanitizeFilename(req.file.name)
+  if (safeName !== req.file.name) {
+    req.file.name = safeName
+  }
+}
 
 // Doctor photos are 1:1 portraits, not shared assets — replacing the file on a
 // Media doc still referenced by >1 doctor would silently change every other
@@ -34,6 +67,7 @@ export const Media: CollectionConfig = {
   },
   access: { read: () => true },
   hooks: {
+    beforeOperation: [sanitizeUploadFilename],
     beforeChange: [preventSharedDoctorPhotoReplace],
   },
   upload: {

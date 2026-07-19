@@ -122,6 +122,7 @@ export const Doctors: CollectionConfig = {
       defaultValue: 0,
       admin: {
         position: 'sidebar',
+        hidden: true,
         description: 'განსაზღვრავს თანმიმდევრობას "ექიმები" გვერდზე — გამოიყენეთ სიის თავზე "რიგის დალაგება" ღილაკი (ჩავლება/dragdrop), ხელით შეცვლა არ არის საჭირო.',
       },
     },
@@ -135,7 +136,17 @@ export const Doctors: CollectionConfig = {
           description: 'სახელი და ფოტო — პირველი რაც პაციენტი ხედავს',
           fields: [
             { name: 'name', label: 'სახელი', type: 'text', required: true, localized: true },
-            { name: 'photo', label: 'ფოტო', type: 'upload', relationTo: 'media' },
+            {
+              name: 'photo',
+              label: 'ფოტო',
+              type: 'upload',
+              relationTo: 'media',
+              admin: {
+                description:
+                  'რეკომენდებული ზომა: 1200×1500px (პორტრეტული 4:5 პროპორცია). ' +
+                  'სურათი ავსებს ჩარჩოს მთლიანად — თუ პროპორცია 4:5-ისგან განსხვავდება, გვერდები ან ზედა/ქვედა ნაწილი შეიძლება მოიჭრას (განსაკუთრებით მაღალ/განიერ ფოტოებზე), ამიტომ სასურველია თავიდანვე 4:5 პროპორციის ფოტოს ატვირთვა.',
+              },
+            },
           ],
         },
         {

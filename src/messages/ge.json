@@ -115,7 +115,10 @@
     "commonlyUsedInDepartment": "ამ მიმართულებაში ხშირად გამოყენებული ანალიზები",
     "reviewedBy": "გადახედილია: {name}",
     "lastReviewed": "ბოლო განახლება: {date}",
-    "bookConsultation": "დაჯავშნე კონსულტაცია"
+    "bookConsultation": "დაჯავშნე კონსულტაცია",
+    "price": "ფასი",
+    "notCurrentlyAvailable": "ეს ანალიზი დროებით არ ტარდება",
+    "downloadPdf": "მომზადების ინსტრუქცია (PDF)"
   },
   "Doctors": {
     "title": "ექიმები",
@@ -343,13 +346,16 @@
     "title": "სიახლეები და სტატიები",
     "subtitle": "უახლესი განახლებები",
     "viewAll": "ყველას ნახვა",
+    "allCategories": "ყველა",
     "noArticles": "სტატიები მალე დაემატება.",
     "readMore": "სრულად ნახვა",
     "relatedArticles": "მსგავსი სტატიები",
     "categoryHealthTips": "ჯანმრთელობის რჩევები",
     "categoryClinicNews": "კლინიკის სიახლეები",
     "categoryMedicalInfo": "სამედიცინო ინფორმაცია",
-    "categoryAnnouncements": "განცხადებები"
+    "categoryAnnouncements": "განცხადებები",
+    "readingTime": "{minutes} წუთის საკითხავი",
+    "featured": "გამორჩეული"
   },
   "Gallery": {
     "title": "გალერეა",

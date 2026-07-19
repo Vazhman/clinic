@@ -1,0 +1,38 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - img "ხოზრევანიძის კლინიკა — ლოგო" [ref=e5]
+    - generic [ref=e6]:
+      - heading "ხოზრევანიძის კლინიკა" [level=1] [ref=e7]
+      - paragraph [ref=e8]: ადმინისტრაციული პანელი
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - generic [ref=e12]:
+            - text: Email
+            - generic [ref=e13]: "*"
+          - textbox "Email *" [active] [ref=e15]
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - text: Password
+            - generic [ref=e18]: "*"
+          - textbox "Password" [ref=e21]
+      - link "Forgot password?" [ref=e22] [cursor=pointer]:
+        - /url: /admin/forgot
+      - button "Login" [ref=e24] [cursor=pointer]:
+        - generic:
+          - generic: Login
+    - generic [ref=e25]:
+      - link "(+995) 422 22 71 71" [ref=e26] [cursor=pointer]:
+        - /url: tel:+995422227171
+        - img [ref=e27]
+        - text: (+995) 422 22 71 71
+      - link "khozrevanidze.ge" [ref=e29] [cursor=pointer]:
+        - /url: https://khozrevanidze.ge
+        - img [ref=e30]
+        - text: khozrevanidze.ge
+        - img [ref=e33]
+  - status [ref=e37]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e43] [cursor=pointer]:
+    - img [ref=e44]
+  - alert [ref=e47]: Login — ხოზრევანიძის კლინიკა

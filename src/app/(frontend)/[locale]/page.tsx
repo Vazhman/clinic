@@ -23,6 +23,8 @@ import {
   getHeroSlides,
   getHomePage,
   getContactPage,
+  getFeatureToggles,
+  isFeatureEnabled,
 } from "@/lib/payload-data";
 
 // Render the homepage fresh on every request so CMS edits (hero slides,
@@ -98,7 +100,7 @@ export default async function HomePage({
   const { locale } = await params;
   const loc = locale as "ge" | "en" | "ru";
 
-  const [services, checkupPackages, reviews, stats, news, heroSlides, homeCms, contactCms] =
+  const [services, checkupPackages, reviews, stats, news, heroSlides, homeCms, contactCms, toggles] =
     await Promise.all([
       getServices(loc),
       getCheckupPackages(loc),
@@ -108,6 +110,7 @@ export default async function HomePage({
       getHeroSlides(loc),
       getHomePage(loc),
       getContactPage(loc),
+      getFeatureToggles(),
     ]);
 
   // "Our doctors" home section — driven by HomePage.featuredDoctors (the admin's
@@ -160,13 +163,23 @@ export default async function HomePage({
   const sv = homeCms?.sectionVisibility;
   const show = (key: keyof NonNullable<typeof sv>) => sv?.[key] !== false;
 
+  // Feature Toggles (src/globals/FeatureToggles.ts) are a stronger, site-wide
+  // switch layered on top of the per-locale `sectionVisibility` above — when
+  // a whole feature is off, its homepage teaser must hide too, otherwise the
+  // teaser would link straight into a route that now 404s.
+  const showDoctorsPreview = show("doctorsPreview") && isFeatureEnabled(toggles, "doctors");
+  const showServicesGrid = show("servicesGrid") && isFeatureEnabled(toggles, "services");
+  const showNews = news.length > 0 && show("news") && isFeatureEnabled(toggles, "blog");
+  const showReviews = show("reviews") && isFeatureEnabled(toggles, "testimonials");
+  const showFaq = show("faq") && isFeatureEnabled(toggles, "faq");
+
   return (
     <>
       <StructuredData data={generateClinicSchema(locale, reviews)} />
       <StructuredData data={generateWebSiteSchema()} />
-      {faqs.length > 0 && show("faq") && <StructuredData data={generateFAQSchema(faqs)} />}
+      {faqs.length > 0 && showFaq && <StructuredData data={generateFAQSchema(faqs)} />}
       {show("hero") && (
-        <HeroSection doctors={doctors} slides={heroSlides} hero={homeCms?.hero ?? null} trustStrip={homeCms?.trustStrip ?? null} showDoctorCard={show("doctorsPreview")} />
+        <HeroSection doctors={doctors} slides={heroSlides} hero={homeCms?.hero ?? null} trustStrip={homeCms?.trustStrip ?? null} showDoctorCard={showDoctorsPreview} />
       )}
       {show("symptomNavigator") && <SymptomNavigator services={services} symptomNav={homeCms?.symptomNavigator ?? null} />}
       {show("stats") && (
@@ -179,16 +192,16 @@ export default async function HomePage({
             .filter((s) => s.value > 0 && s.label)}
         />
       )}
-      {show("servicesGrid") && <ServicesGrid services={services.slice(0, 8)} totalCount={services.length} />}
-      {show("doctorsPreview") && <DoctorsPreview doctors={doctors} />}
+      {showServicesGrid && <ServicesGrid services={services.slice(0, 8)} totalCount={services.length} />}
+      {showDoctorsPreview && <DoctorsPreview doctors={doctors} />}
       {/* Full packages: the teaser cards now open the same /checkups details
           modal (package list ⇄ details) in place, so they need the package
           names/descriptions/tests too. */}
       {show("checkupCards") && <CheckupCards checkupPackages={checkupPackages} phone={phone} locale={loc} />}
       {/* phone is needed by the shared checkup modal (phone-booking CTA). */}
-      {news.length > 0 && show("news") && <NewsSection news={news} />}
-      {show("reviews") && <ReviewsCarousel reviews={reviews} />}
-      {show("faq") && <FAQSection faqs={faqs} />}
+      {showNews && <NewsSection news={news} />}
+      {showReviews && <ReviewsCarousel reviews={reviews} />}
+      {showFaq && <FAQSection faqs={faqs} />}
       {show("contactMap") && <ContactMap contact={contactCms} />}
     </>
   );

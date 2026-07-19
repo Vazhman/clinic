@@ -75,7 +75,7 @@ export default function SymptomNavigator({
                   {matched.map((s) => (
                     <Link key={s.id} href={{ pathname: '/services/[slug]', params: { slug: s.slug } }} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-3.5 rounded-xl hover:bg-pink-light transition-colors">
                       <div className="w-10 h-10 bg-pink-light rounded-xl flex items-center justify-center shrink-0"><div className="text-blackberry"><ServiceIcon icon={s.icon} className="w-4 h-4" /></div></div>
-                      <div className="flex-1 min-w-0 text-left"><p className="text-[14px] font-bold text-blackberry break-words">{s.name}</p><p className="text-[12px] text-grey-light break-words">{s.shortDescription}</p></div>
+                      <div className="flex-1 min-w-0 text-left"><p className="text-[14px] font-bold text-blackberry break-words">{s.name}</p><p className="text-[12px] text-grey-light break-words whitespace-pre-wrap">{s.shortDescription}</p></div>
                       <svg className="w-4 h-4 text-pink shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                     </Link>
                   ))}

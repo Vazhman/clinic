@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -7,6 +8,78 @@ import StructuredData from "@/components/shared/StructuredData";
 import { generateBreadcrumbSchema, generateClinicSchema } from "@/lib/structured-data";
 import { buildLocalizedAlternates, type Locale } from "@/lib/seo-helpers";
 import { getAboutPage } from "@/lib/payload-data";
+
+// Lexical TextNode format bitmask (matches @payloadcms/richtext-lexical's
+// NodeFormat: bold=1, italic=2, strikethrough=4, underline=8, code=16).
+type LexicalNode = {
+  type?: string;
+  text?: string;
+  format?: number;
+  children?: LexicalNode[];
+  fields?: { url?: string; newTab?: boolean };
+  url?: string;
+};
+
+// Renders one Lexical inline node (text/link/linebreak) to JSX, preserving
+// bold/italic/underline/strikethrough/code/links. Used ONLY for the About
+// hero + story-continuation paragraphs below, which have bespoke Tailwind
+// typography that doesn't fit LexicalContent's `prose` wrapper — this keeps
+// the custom layout while fixing the actual bug (formatting silently
+// dropped by the plain-text extractor previously used for these sections).
+function renderInlineLexicalNode(node: LexicalNode, key: number): ReactNode {
+  if (node.type === "linebreak") return <br key={key} />;
+  if (node.type === "text" && typeof node.text === "string") {
+    let el: ReactNode = node.text;
+    const format = node.format ?? 0;
+    if (format & 16) el = <code key={`code-${key}`}>{el}</code>;
+    if (format & 1) el = <strong key={`b-${key}`}>{el}</strong>;
+    if (format & 2) el = <em key={`i-${key}`}>{el}</em>;
+    if (format & 8)
+      el = (
+        <span key={`u-${key}`} style={{ textDecoration: "underline" }}>
+          {el}
+        </span>
+      );
+    if (format & 4)
+      el = (
+        <span key={`s-${key}`} style={{ textDecoration: "line-through" }}>
+          {el}
+        </span>
+      );
+    return <span key={key}>{el}</span>;
+  }
+  if (node.type === "link" && Array.isArray(node.children)) {
+    const url = node.fields?.url ?? node.url ?? "#";
+    return (
+      <a
+        key={key}
+        href={url}
+        className="underline hover:no-underline"
+        target={node.fields?.newTab ? "_blank" : undefined}
+        rel={node.fields?.newTab ? "noopener noreferrer" : undefined}
+      >
+        {node.children.map((c, i) => renderInlineLexicalNode(c, i))}
+      </a>
+    );
+  }
+  if (Array.isArray(node.children)) {
+    return <span key={key}>{node.children.map((c, i) => renderInlineLexicalNode(c, i))}</span>;
+  }
+  return null;
+}
+
+// One entry per top-level Lexical block (paragraph/heading/etc.) so callers
+// can split "first paragraph" (hero lead) from "rest" (story continuation)
+// exactly like extractLexicalParagraphs did, but returning renderable nodes
+// instead of flattened strings.
+function extractLexicalParagraphNodes(rt: unknown): ReactNode[][] {
+  if (!rt || typeof rt !== "object") return [];
+  const root = (rt as { root?: { children?: LexicalNode[] } }).root;
+  const blocks = Array.isArray(root?.children) ? root!.children : [];
+  return blocks
+    .map((b) => (Array.isArray(b.children) ? b.children.map((c, i) => renderInlineLexicalNode(c, i)) : []))
+    .filter((nodes) => nodes.length > 0);
+}
 
 // Walk a Lexical richText tree and concatenate plain text nodes. Mirrors the
 // extractor used for doctor biographies in payload-data.ts. Returns "" when
@@ -84,6 +157,9 @@ export default async function AboutPage({
   const subtitle = aboutCms?.subtitle?.trim() ?? "";
   const description = extractLexicalText(aboutCms?.description);
   const descParagraphs = extractLexicalParagraphs(aboutCms?.description);
+  // Same paragraph split as descParagraphs above, but with inline formatting
+  // (bold/italic/underline/links) preserved for actual rendering.
+  const descParagraphNodes = extractLexicalParagraphNodes(aboutCms?.description);
 
   // Facts come entirely from AboutPage.stats (value + label + description), in
   // admin order. No hardcoded facts — what the editor sees is what renders.
@@ -159,7 +235,7 @@ export default async function AboutPage({
               </h1>
               {description && (
                 <p className="text-white/70 text-[17px] sm:text-[19px] leading-[1.65] max-w-[58ch] break-words">
-                  {descParagraphs[0] ?? description}
+                  {descParagraphNodes[0] ?? descParagraphs[0] ?? description}
                 </p>
               )}
             </div>
@@ -186,9 +262,9 @@ export default async function AboutPage({
         <section className="bg-cream pt-2 pb-4">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-10">
             <div className="space-y-5">
-              {descParagraphs.slice(1).map((p, i) => (
+              {descParagraphNodes.slice(1).map((nodes, i) => (
                 <p key={i} className="text-[17px] sm:text-[18px] text-grey leading-[1.7] break-words">
-                  {p}
+                  {nodes}
                 </p>
               ))}
             </div>
@@ -206,11 +282,8 @@ export default async function AboutPage({
                   key={i}
                   className="group relative bg-white p-7 sm:p-8 lg:p-10 transition-colors duration-500 hover:bg-pink-light/30"
                 >
-                  <div className="flex items-baseline justify-between mb-6">
-                    <span className="text-[13px] font-bold tracking-[0.2em] text-pink tabular-nums">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span aria-hidden className="h-px flex-1 ml-4 bg-blackberry/10 group-hover:bg-pink/30 transition-colors duration-500" />
+                  <div className="mb-6">
+                    <span aria-hidden className="block h-px w-full bg-blackberry/10 group-hover:bg-pink/30 transition-colors duration-500" />
                   </div>
                   {h.title && (
                     <p className="text-[19px] sm:text-[21px] font-bold text-blackberry mb-3 break-words tracking-[-0.01em]">

@@ -9,7 +9,14 @@ export interface Service {
   id: string;
   slug: string;
   name: string;
+  /** Plain-text projection of the richText `description` field — for SEO
+   * meta description / JSON-LD only. Render `descriptionRichText` via
+   * `LexicalContent` for the actual page body to get full formatting. */
   description: string;
+  /** Raw serialized Lexical richText state for `description` (upgraded from
+   * a plain textarea for full editor-toolbar parity). `null` for legacy rows
+   * saved before the upgrade that still hold a bare string, or when empty. */
+  descriptionRichText?: unknown | null;
   shortDescription: string;
   icon: string;
   image?: string;
@@ -26,6 +33,15 @@ export interface Doctor {
   specialty: string;
   photo: string;
   biography: string;
+  /**
+   * Raw serialized Lexical richText state for `biography` (same underlying
+   * Payload field as `biography` above, which is a flattened plain-text
+   * projection used for search/meta-description). Render this via
+   * `LexicalContent` to get full formatting (bold/lists/links/etc.) on the
+   * doctor profile; `null` for legacy/seed doctors that never had a Payload
+   * row, or when the admin left the field empty.
+   */
+  biographyRichText?: unknown | null;
   qualifications: string[];
   specializations: string[];
   experienceYears: number;

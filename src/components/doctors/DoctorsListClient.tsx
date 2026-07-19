@@ -3,9 +3,10 @@
 import Image from "next/image";
 
 import { useState, useMemo, useRef, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Link } from "@/i18n/navigation";
+import { getLanguage } from "@/lib/languages";
 import type { Doctor } from "@/types";
 
 // Color palette for specialty bars (brand-aligned warm tones)
@@ -33,9 +34,10 @@ function getSpecialtyColor(specialty: string) {
 interface DoctorsListClientProps {
   doctors: Doctor[];
   specialties: string[];
+  showLanguages?: boolean;
 }
 
-export default function DoctorsListClient({ doctors, specialties }: DoctorsListClientProps) {
+export default function DoctorsListClient({ doctors, specialties, showLanguages = true }: DoctorsListClientProps) {
   const t = useTranslations("Doctors");
   const [search, setSearch] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
@@ -143,7 +145,7 @@ export default function DoctorsListClient({ doctors, specialties }: DoctorsListC
                   opacity: { duration: 0.3, ease: "easeOut" },
                 }}
               >
-                <DoctorCard doctor={doctor} index={i} />
+                <DoctorCard doctor={doctor} index={i} showLanguages={showLanguages} />
               </motion.div>
             ))}
           </AnimatePresence>
@@ -175,12 +177,16 @@ export default function DoctorsListClient({ doctors, specialties }: DoctorsListC
 /* ── Doctor card component ── */
 function DoctorCard({
   doctor,
+  showLanguages = true,
 }: {
   doctor: Doctor;
   index: number;
+  showLanguages?: boolean;
 }) {
   const t = useTranslations("Doctors");
+  const locale = useLocale();
   const hasExperience = doctor.experienceYears > 0;
+  const hasLanguages = showLanguages && doctor.languagesSpoken.length > 0;
 
   return (
     <Link href={{ pathname: '/doctors/[slug]', params: { slug: doctor.slug } }} className="block group">
@@ -193,7 +199,7 @@ function DoctorCard({
           {doctor.specialty}
         </div>
         {/* Photo section */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-pink-light/30 to-grey-lighter">
+        <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-pink-light/30 to-grey-lighter">
           {doctor.photo ? (
             <Image
               src={doctor.photo}
@@ -263,6 +269,23 @@ function DoctorCard({
               </span>
             )}
           </div>
+
+          {hasLanguages && (
+            <div className="flex items-center gap-1 flex-wrap mt-2">
+              {doctor.languagesSpoken.map((code) => {
+                const lang = getLanguage(code);
+                return (
+                  <span
+                    key={code}
+                    title={lang?.name[locale as "ge" | "en" | "ru"] ?? code}
+                    className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-grey-lighter text-[11px] leading-none"
+                  >
+                    {lang?.flag ?? code.slice(0, 2).toUpperCase()}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </Link>

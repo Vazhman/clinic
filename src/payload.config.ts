@@ -8,12 +8,19 @@ import {
   BlockquoteFeature,
   BlocksFeature,
   ChecklistFeature,
+  CodeBlock,
+  EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   HorizontalRuleFeature,
   IndentFeature,
   InlineToolbarFeature,
+  TextStateFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
+import { RemoveFormattingFeature } from './lexical/features/remove-formatting/feature'
+import { HtmlSourceFeature } from './lexical/features/html-source/feature'
+import { textColorStates, backgroundColorStates } from './lexical/textStateColors'
+import { fontSizeStates } from './lexical/fontSizeStates'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { payloadTotp } from 'payload-totp'
 import path from 'path'
@@ -27,6 +34,7 @@ import { Doctors } from './collections/Doctors'
 import { CheckupPackages } from './collections/CheckupPackages'
 import { Reviews } from './collections/Reviews'
 import { News } from './collections/News'
+import { NewsCategories } from './collections/NewsCategories'
 import { Pages } from './collections/Pages'
 import { LabTests } from './collections/LabTests'
 import { ChatLogs } from './collections/ChatLogs'
@@ -41,6 +49,8 @@ import { BookingPage } from './globals/BookingPage'
 import { ServicesPage } from './globals/ServicesPage'
 import { DoctorsPage } from './globals/DoctorsPage'
 import { Policies } from './globals/Policies'
+import { FeatureToggles } from './globals/FeatureToggles'
+import { refreshFeatureTogglesCache } from './lib/feature-toggles-cache'
 import { ka } from './i18n/payload-ka'
 import { en } from '@payloadcms/translations/languages/en'
 import { CalloutBlock } from './blocks/lexical/CalloutBlock'
@@ -87,6 +97,7 @@ const REVALIDATED_SLUGS = new Set([
   'booking-page',
   'services-page',
   'doctors-page',
+  'feature-toggles',
 ])
 
 function bustSlugTag(slug: string): void {
@@ -265,17 +276,45 @@ export default buildConfig({
       // feature must come AFTER UploadFeature() so the node-replacement
       // registers against the already-installed UploadNode class.
       ResizableUploadFeature(),
+      // Text color + background color as two independent toolbar dropdowns
+      // (separate stateKeys so a color and a background can both be set on
+      // the same text at once). Uses Payload's built-in light/dark-safe
+      // color palette.
+      TextStateFeature({
+        state: {
+          color: textColorStates,
+          bgColor: backgroundColorStates,
+          fontSize: fontSizeStates,
+        },
+      }),
+      EXPERIMENTAL_TableFeature(),
+      RemoveFormattingFeature(),
+      // WordPress "Text" tab equivalent — toggler + drawer with a fully
+      // editable HTML textarea, wired site-wide via this shared editor.
+      HtmlSourceFeature(),
       BlocksFeature({
-        blocks: [CalloutBlock, GalleryBlock, ColumnsBlock],
+        blocks: [CalloutBlock, GalleryBlock, ColumnsBlock, CodeBlock()],
       }),
     ],
   }),
 
-  collections: [Media, Users, Services, Doctors, CheckupPackages, Reviews, News, Pages, LabTests, ChatLogs, BuilderTemplates].map(
-    (c) => withRevalidate(c, false),
-  ),
+  collections: [
+    ...[Media, Users, Services, Doctors, CheckupPackages, Reviews, News, Pages, LabTests, ChatLogs, BuilderTemplates].map(
+      (c) => withRevalidate(c, false),
+    ),
+    // NewsCategories has no public getter of its own — it's only ever read
+    // as part of a News query — so renaming/deleting a category must bust
+    // the `news` tag (not a `news-categories` tag nobody reads).
+    {
+      ...NewsCategories,
+      hooks: {
+        afterChange: [() => bustSlugTag('news')],
+        afterDelete: [() => bustSlugTag('news')],
+      },
+    },
+  ],
 
-  globals: [SiteSettings, HomePage, AboutPage, Footer, ContactPage, Navigation, BookingPage, ServicesPage, DoctorsPage, Policies].map(
+  globals: [SiteSettings, HomePage, AboutPage, Footer, ContactPage, Navigation, BookingPage, ServicesPage, DoctorsPage, Policies, FeatureToggles].map(
     (g) => withRevalidate(g, true),
   ),
 
@@ -392,4 +431,7 @@ export default buildConfig({
     ] : []),
   ],
   telemetry: false,
+  onInit: async (payload) => {
+    await refreshFeatureTogglesCache(payload)
+  },
 })

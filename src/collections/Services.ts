@@ -79,6 +79,7 @@ export const Services: CollectionConfig = {
       defaultValue: 0,
       admin: {
         position: 'sidebar',
+        hidden: true,
         description: 'განსაზღვრავს თანმიმდევრობას დაუმაგრებელ სერვისებს შორის — გამოიყენეთ სიის თავზე "რიგის დალაგება" ღილაკი (ჩავლება/dragdrop). დამაგრებული სერვისები ყოველთვის იქნებიან თავში, "დამაგრების რიგის" მიხედვით.',
       },
     },
@@ -124,9 +125,17 @@ export const Services: CollectionConfig = {
       },
     },
     {
+      // Was `textarea` — upgraded to the project-wide Lexical editor
+      // (inherited from payload.config.ts, same toolbar as Doctors/Pages/News)
+      // for full rich-text parity per the CMS brief. NOTE: existing rows
+      // written while this was a textarea store a plain string in this
+      // column; ServiceDescription.tsx defensively falls back to plain-text
+      // rendering for those until re-saved through the new richText field
+      // (or a one-time migration wraps the legacy string in a minimal
+      // Lexical paragraph — see migration note in Services.ts history).
       name: 'description',
       label: 'სრული აღწერა',
-      type: 'textarea',
+      type: 'richText',
       required: true,
       localized: true,
       admin: {

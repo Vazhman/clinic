@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 import payloadConfig from '@payload-config'
 import { fetchGoogleReviews } from '@/lib/google-reviews'
+import { getFeatureToggles, isFeatureEnabled } from '@/lib/payload-data'
 
 /**
  * Sync Google reviews into the Reviews collection.
@@ -23,6 +24,20 @@ export async function POST(request: NextRequest) {
   const { user } = await payload.auth({ headers: request.headers })
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Feature Toggles (src/globals/FeatureToggles.ts) — admin can disable the
+  // Google sync feature independently of the manually-curated reviews that
+  // are already published, which must keep working untouched.
+  const toggles = await getFeatureToggles()
+  if (!isFeatureEnabled(toggles, 'googleReviewsSync')) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: 'Google-მიმოხილვების სინქრონიზაცია გამორთულია (Feature Toggles). ჩართეთ ადმინის პარამეტრებში, თუ სინქრონიზაცია საჭიროა.',
+      },
+      { status: 409 },
+    )
   }
 
   let fetched

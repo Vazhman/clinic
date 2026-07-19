@@ -41,6 +41,28 @@ import { getTimeSlots } from '@/lib/doctra-api'
 
 type Locale = 'ge' | 'en' | 'ru'
 
+// Walk Payload's Lexical rich-text structure and return the plain text
+// inside (depth-first concatenation of every `text` node). Used wherever a
+// richText field also needs a plain-text projection (SEO/meta description,
+// JSON-LD, or legacy string fallback for rows saved before a field was
+// upgraded from textarea to richText — Payload/SQLite will happily store
+// a bare string in a richText column, so `typeof rt === 'string'` guards
+// against that transitional shape instead of crashing on it).
+function extractLexicalText(rt: unknown): string {
+  if (typeof rt === 'string') return rt
+  if (!rt || typeof rt !== 'object') return ''
+  const out: string[] = []
+  const walk = (n: unknown): void => {
+    if (!n || typeof n !== 'object') return
+    const node = n as { text?: unknown; children?: unknown }
+    if (typeof node.text === 'string') out.push(node.text)
+    if (Array.isArray(node.children)) for (const c of node.children) walk(c)
+  }
+  const root = (rt as { root?: unknown }).root
+  walk(root ?? rt)
+  return out.join(' ').replace(/\s+/g, ' ').trim()
+}
+
 async function getPayloadClient() {
   return getPayload({ config })
 }
@@ -110,7 +132,15 @@ async function _getServices(locale: Locale): Promise<Service[]> {
       id: String(doc.id),
       slug: doc.slug,
       name: doc.name,
-      description: doc.description,
+      // `description` field was upgraded textarea -> richText for full
+      // editor-toolbar parity (Item 4). Keep a plain-text projection under
+      // `description` for SEO/JSON-LD consumers (generateServiceSchema,
+      // meta descriptions) and pass the raw serialized Lexical state through
+      // as `descriptionRichText` for the actual page body render.
+      // `extractLexicalText` also tolerates legacy rows still holding the
+      // old plain string (pre-migration data).
+      description: extractLexicalText(doc.description),
+      descriptionRichText: doc.description ?? null,
       shortDescription: doc.shortDescription,
       icon: doc.icon,
       image: (typeof doc.image === 'object' && doc.image !== null ? doc.image.url : null) || legacyImageMap.get(doc.slug) || '',
@@ -164,27 +194,6 @@ async function _getDoctors(
 
     const legacyMap = new Map(legacyDoctors.map((d) => [d.slug, d]))
 
-    // Walk Payload's Lexical rich-text structure and return the plain
-    // text inside (depth-first concatenation of every `text` node). Older
-    // code only handled biography-as-string and fell back to the Georgian
-    // hand-written hardcoded bios in src/lib/data.ts for any doctor whose
-    // payload biography came back as a Lexical object — which leaked
-    // Georgian text onto /en and /ru profile pages.
-    function extractLexicalText(rt: unknown): string {
-      if (typeof rt === 'string') return rt
-      if (!rt || typeof rt !== 'object') return ''
-      const out: string[] = []
-      const walk = (n: unknown): void => {
-        if (!n || typeof n !== 'object') return
-        const node = n as { text?: unknown; children?: unknown }
-        if (typeof node.text === 'string') out.push(node.text)
-        if (Array.isArray(node.children)) for (const c of node.children) walk(c)
-      }
-      const root = (rt as { root?: unknown }).root
-      walk(root ?? rt)
-      return out.join(' ').replace(/\s+/g, ' ').trim()
-    }
-
     return result.docs.map((doc) => {
       const legacy = legacyMap.get(doc.slug)
       const bio = extractLexicalText(doc.biography)
@@ -223,6 +232,11 @@ async function _getDoctors(
           return u && /doctor-placeholder/i.test(u) ? '' : u
         })(),
         biography: bio,
+        // Raw richText passed through alongside the flattened `bio` string —
+        // DoctorProfileClient renders this via LexicalContent for full
+        // formatting; `bio` above stays as the plain-text projection other
+        // consumers (metaDescription slicing, search) already rely on.
+        biographyRichText: doc.biography ?? null,
         qualifications: quals,
         specializations: specs,
         experienceYears: exp,
@@ -438,6 +452,56 @@ async function _getHeroSlides(locale: Locale): Promise<HeroSlide[] | null> {
   }
 }
 
+// Shape of News.categoryRef after find(depth: 1) — populated to its doc, or
+// left as a raw id if the relationship is empty/unpopulated.
+type NewsCategoryLike = { name?: string | null } | string | number | null | undefined
+
+const newsCategoryLabel = (c: NewsCategoryLike): string => (typeof c === 'object' && c !== null ? c.name ?? '' : '')
+
+// Real scheduled-publishing gate: an article marked `status: published` still
+// must not be visible until its `publishedDate` has actually arrived. Before
+// this, `publishedDate` was display/sort-only — nothing filtered on it, so a
+// future-dated "published" article would appear immediately. Reused by all
+// three News read paths below so the gate can't be bypassed via any one of
+// them.
+const publishedNewsWhere = () => ({
+  status: { equals: 'published' as const },
+  publishedDate: { less_than_equal: new Date().toISOString() },
+})
+
+// Recursively collects every string leaf out of an arbitrary JSON-ish value
+// (Lexical's SerializedEditorState, or the Puck builder's component-prop
+// tree). Used only to estimate reading time — not rendered — so it's fine
+// that it also sweeps up incidental non-prose strings (ids, urls): those are
+// a small fraction of total word count and don't meaningfully skew a rough
+// "N წუთი" estimate the same way Medium/most CMSs compute one.
+function collectStrings(value: unknown, out: string[]): void {
+  if (typeof value === 'string') {
+    out.push(value)
+  } else if (Array.isArray(value)) {
+    for (const v of value) collectStrings(v, out)
+  } else if (value && typeof value === 'object') {
+    for (const v of Object.values(value as Record<string, unknown>)) collectStrings(v, out)
+  }
+}
+
+const WORDS_PER_MINUTE = 200
+
+function estimateReadingTimeMinutes(content: unknown): number {
+  const strings: string[] = []
+  collectStrings(content, strings)
+  const words = strings.join(' ').trim().split(/\s+/).filter(Boolean).length
+  return Math.max(1, Math.round(words / WORDS_PER_MINUTE))
+}
+
+function newsGalleryUrls(gallery: unknown): { url: string; alt: string }[] {
+  if (!Array.isArray(gallery)) return []
+  return gallery
+    .filter((g): g is { url?: string; alt?: string } => typeof g === 'object' && g !== null)
+    .map((g) => ({ url: g.url ?? '', alt: g.alt ?? '' }))
+    .filter((g) => g.url)
+}
+
 async function _getHomepageNews(locale: Locale) {
   try {
     const payload = await getPayloadClient()
@@ -447,7 +511,7 @@ async function _getHomepageNews(locale: Locale) {
       depth: 1,
       where: {
         showOnHomepage: { equals: true },
-        status: { equals: 'published' },
+        ...publishedNewsWhere(),
       },
       sort: 'homepageOrder',
       limit: 6,
@@ -458,7 +522,7 @@ async function _getHomepageNews(locale: Locale) {
       slug: doc.slug,
       title: doc.title,
       excerpt: doc.excerpt,
-      category: doc.category,
+      category: newsCategoryLabel(doc.categoryRef),
       publishedDate: doc.publishedDate,
       featuredImage: typeof doc.featuredImage === 'object' && doc.featuredImage !== null
         ? { url: doc.featuredImage.url ?? '', alt: doc.featuredImage.alt ?? '' }
@@ -470,7 +534,24 @@ async function _getHomepageNews(locale: Locale) {
   }
 }
 
-async function _getAllNews(locale: Locale, page = 1, limit = 60) {
+async function _getNewsCategories(locale: Locale) {
+  try {
+    const payload = await getPayloadClient()
+    const result = await payload.find({
+      collection: 'news-categories',
+      locale,
+      depth: 0,
+      where: { hidden: { not_equals: true } },
+      sort: 'sortOrder',
+      limit: 100,
+    })
+    return result.docs.map((doc) => ({ slug: doc.slug, name: doc.name }))
+  } catch {
+    return []
+  }
+}
+
+async function _getAllNews(locale: Locale, page = 1, limit = 60, categorySlug?: string) {
   try {
     const payload = await getPayloadClient()
     const result = await payload.find({
@@ -478,7 +559,8 @@ async function _getAllNews(locale: Locale, page = 1, limit = 60) {
       locale,
       depth: 1,
       where: {
-        status: { equals: 'published' },
+        ...publishedNewsWhere(),
+        ...(categorySlug ? { 'categoryRef.slug': { equals: categorySlug } } : {}),
       },
       // Pinned articles first, then newest. `-pinned` puts `true` ahead of
       // `false`; ties broken by publish date descending. (`as never` mirrors
@@ -494,8 +576,13 @@ async function _getAllNews(locale: Locale, page = 1, limit = 60) {
         slug: doc.slug,
         title: doc.title,
         excerpt: doc.excerpt,
-        category: doc.category,
+        category: newsCategoryLabel(doc.categoryRef),
         publishedDate: doc.publishedDate,
+        featured: Boolean((doc as unknown as { featured?: boolean }).featured),
+        tags: Array.isArray((doc as unknown as { tags?: unknown }).tags)
+          ? ((doc as unknown as { tags: string[] }).tags)
+          : [],
+        readingTimeMinutes: estimateReadingTimeMinutes(doc.puckData ?? doc.body),
         featuredImage: typeof doc.featuredImage === 'object' && doc.featuredImage !== null
           ? { url: doc.featuredImage.url ?? '', alt: doc.featuredImage.alt ?? '' }
           : { url: '', alt: '' },
@@ -503,8 +590,8 @@ async function _getAllNews(locale: Locale, page = 1, limit = 60) {
       totalPages: result.totalPages,
       page: result.page,
     }
-  } catch {
-    // DB unavailable — no news
+  } catch (err) {
+    console.error('[DEBUG _getAllNews]', err)
     return { docs: [], totalPages: 0, page: 1 }
   }
 }
@@ -518,7 +605,7 @@ async function _getNewsBySlug(slug: string, locale: Locale) {
       depth: 2,
       where: {
         slug: { equals: slug },
-        status: { equals: 'published' },
+        ...publishedNewsWhere(),
       },
       limit: 1,
     })
@@ -528,7 +615,14 @@ async function _getNewsBySlug(slug: string, locale: Locale) {
     // Surface puckData with an explicit type so callers can discriminate
     // between a Puck layout and the fallback Lexical body without casting.
     const puckData: Record<string, unknown> | null = (doc.puckData as Record<string, unknown> | null) ?? null
-    return Object.assign(doc, { puckData })
+    const docWithFields = doc as unknown as { featured?: boolean; tags?: string[]; gallery?: unknown }
+    return Object.assign(doc, {
+      puckData,
+      featured: Boolean(docWithFields.featured),
+      tags: Array.isArray(docWithFields.tags) ? docWithFields.tags : [],
+      gallery: newsGalleryUrls(docWithFields.gallery),
+      readingTimeMinutes: estimateReadingTimeMinutes(puckData ?? doc.body),
+    })
   } catch {
     // DB unavailable
     return null
@@ -607,7 +701,8 @@ async function _getServiceByDoctraBranchId(doctraBranchId: string): Promise<Serv
       id: String(doc.id),
       slug: doc.slug,
       name: doc.name,
-      description: doc.description,
+      description: extractLexicalText(doc.description),
+      descriptionRichText: doc.description ?? null,
       shortDescription: doc.shortDescription,
       icon: doc.icon,
       image: (typeof doc.image === 'object' && doc.image !== null ? doc.image.url : null) || legacyImageMap.get(doc.slug) || '',
@@ -694,6 +789,9 @@ export type LabTestListItem = {
   title: string
   summary: string
   category: LabTestCategory
+  active: boolean
+  price: number | null
+  currency: string | null
 }
 
 export type LabTestDetail = LabTestListItem & {
@@ -708,6 +806,7 @@ export type LabTestDetail = LabTestListItem & {
   relatedDoctorSlugs: string[]
   reviewedBy: { name: string; slug: string } | null
   lastReviewed: string | null
+  pdfUrl: string | null
   seo?: SeoOverrides
 }
 
@@ -729,6 +828,10 @@ type LabTestDoc = {
   reviewedBy?: { name?: string | null; slug?: string | null } | string | number | null
   lastReviewed?: string | null
   published?: boolean | null
+  active?: boolean | null
+  price?: number | null
+  currency?: string | null
+  pdfAttachment?: { url?: string | null } | string | number | null
   seo?: RawSeo
 }
 
@@ -740,6 +843,10 @@ function toListItem(doc: LabTestDoc): LabTestListItem | null {
     title: doc.title,
     summary: doc.summary ?? '',
     category: (doc.category as LabTestCategory) ?? 'other',
+    // Defaults to true for older docs saved before this field existed.
+    active: doc.active !== false,
+    price: typeof doc.price === 'number' ? doc.price : null,
+    currency: doc.currency ?? null,
   }
 }
 
@@ -837,6 +944,11 @@ async function _getLabTestBySlug(slug: string, locale: Locale): Promise<LabTestD
         ? { name: reviewedByRaw.name, slug: reviewedByRaw.slug }
         : null
 
+    const pdfUrl =
+      typeof doc.pdfAttachment === 'object' && doc.pdfAttachment !== null && typeof doc.pdfAttachment.url === 'string'
+        ? doc.pdfAttachment.url
+        : null
+
     return {
       ...base,
       aliases,
@@ -850,6 +962,7 @@ async function _getLabTestBySlug(slug: string, locale: Locale): Promise<LabTestD
       relatedDoctorSlugs,
       reviewedBy,
       lastReviewed: doc.lastReviewed ?? null,
+      pdfUrl,
       seo: normalizeSeo(doc.seo),
     }
   } catch {
@@ -940,6 +1053,41 @@ async function _getSiteSettings(locale: Locale): Promise<SiteSettingsCms> {
   }
 }
 
+// Site-wide feature kill-switches (src/globals/FeatureToggles.ts). Booleans
+// aren't localized, so this getter takes no locale arg. A `null`/`undefined`
+// field (e.g. the global row predates this feature, or the DB is briefly
+// unreachable) is treated as "enabled" via `isFeatureEnabled` below — matches
+// each field's own `defaultValue: true` so nothing goes dark by accident.
+export type FeatureTogglesCms = {
+  labTests?: boolean | null
+  healthLibrary?: boolean | null
+  blog?: boolean | null
+  doctors?: boolean | null
+  services?: boolean | null
+  booking?: boolean | null
+  faq?: boolean | null
+  testimonials?: boolean | null
+  googleReviewsSync?: boolean | null
+  promotions?: boolean | null
+  contactForm?: boolean | null
+} | null
+
+async function _getFeatureToggles(): Promise<FeatureTogglesCms> {
+  try {
+    const payload = await getPayloadClient()
+    return (await payload.findGlobal({ slug: 'feature-toggles', depth: 0 })) as FeatureTogglesCms
+  } catch {
+    return null
+  }
+}
+
+export function isFeatureEnabled(
+  toggles: FeatureTogglesCms,
+  key: keyof NonNullable<FeatureTogglesCms>,
+): boolean {
+  return toggles?.[key] !== false
+}
+
 // Legal pages (Terms & Privacy) — edited in the visible „Policies" global.
 // `terms`/`privacy` are localized richText (Lexical JSON); null when the editor
 // hasn't filled that locale.
@@ -984,7 +1132,7 @@ export type NavigationCms = {
     isHighlighted?: boolean | null
     subLinks?: NavSubLink[] | null
   }> | null
-  ctaButton?: { label?: string | null; href?: string | null } | null
+  ctaButton?: { enabled?: boolean | null; label?: string | null; href?: string | null } | null
 } | null
 
 // Standard routes hardcoded into the site (one route file per key under
@@ -1004,6 +1152,7 @@ const STANDARD_ROUTES = [
   // { key: 'healthLibrary', group: 'healthLibraryRoute', href: '/health-library', i18nKey: 'healthLibrary' },
   { key: 'blog', group: 'blogRoute', href: '/blog', i18nKey: 'blog' },
   { key: 'contact', group: 'contactRoute', href: '/contact', i18nKey: 'contact' },
+  { key: 'labTests', group: 'labTestsRoute', href: '/lab-tests', i18nKey: 'labTests' },
 ] as const
 
 type RouteGroup = {
@@ -1045,7 +1194,7 @@ async function _getNavigation(locale: Locale): Promise<NavigationCms> {
     // published. Both feeds get merged into a single `mainMenu` array (with
     // the legacy field shape that Header.tsx already consumes) so the
     // frontend doesn't need to know about the schema rework.
-    const [navRaw, pages] = await Promise.all([
+    const [navRaw, pages, toggles] = await Promise.all([
       payload.findGlobal({ slug: 'navigation', locale, depth: 0 }) as Promise<Record<string, unknown>>,
       payload.find({
         collection: 'pages',
@@ -1061,16 +1210,32 @@ async function _getNavigation(locale: Locale): Promise<NavigationCms> {
         sort: ['navOrder', 'title'] as never,
         limit: 50,
       }),
+      _getFeatureToggles(),
     ])
+
+    // Feature Toggles (src/globals/FeatureToggles.ts) are a second, stronger
+    // on/off switch layered on top of each route group's own `enabled` box —
+    // when a whole feature is turned off site-wide, its nav entry must vanish
+    // even if the Navigation global's per-route checkbox still says "on".
+    // Only services/doctors/blog/labTests have a STANDARD_ROUTES entry at all
+    // (booking/faq/etc. never had a fixed nav slot to begin with).
+    const NAV_KEY_TO_TOGGLE: Partial<Record<(typeof STANDARD_ROUTES)[number]['key'], keyof NonNullable<FeatureTogglesCms>>> = {
+      services: 'services',
+      doctors: 'doctors',
+      blog: 'blog',
+      labTests: 'labTests',
+    }
 
     type NavRow = NonNullable<NonNullable<NavigationCms>['mainMenu']>[number]
 
     // Build standard-route rows with translation fallback. Disabled groups
     // are dropped entirely. Empty admin label → translation file.
     const standardRowsWithOrder = await Promise.all(
-      STANDARD_ROUTES.map(async ({ group, href, i18nKey }) => {
+      STANDARD_ROUTES.map(async ({ key, group, href, i18nKey }) => {
         const route = navRaw?.[group] as RouteGroup
         if (route?.enabled === false) return null
+        const toggleKey = NAV_KEY_TO_TOGGLE[key]
+        if (toggleKey && !isFeatureEnabled(toggles, toggleKey)) return null
         const customLabel = typeof route?.label === 'string' ? route.label.trim() : ''
         const label = customLabel.length > 0 ? customLabel : await readNavTranslation(locale, i18nKey)
         if (!label) return null
@@ -1083,6 +1248,24 @@ async function _getNavigation(locale: Locale): Promise<NavigationCms> {
       .filter((r): r is { row: NavRow; order: number } => r !== null)
       .sort((a, b) => a.order - b.order)
       .map((r) => r.row)
+
+    // Admin-managed free-form links (Navigation.customLinks) — array order is
+    // display order (drag to reorder in the admin UI), unlike standardRows
+    // which use an explicit `order` number field.
+    const customLinksRaw = navRaw?.customLinks as
+      | Array<{ enabled?: boolean | null; label?: string | null; href?: string | null }>
+      | null
+      | undefined
+    const customRows: NavRow[] = Array.isArray(customLinksRaw)
+      ? customLinksRaw
+          .filter((c) => c?.enabled !== false)
+          .map((c) => ({
+            label: typeof c?.label === 'string' ? c.label.trim() : '',
+            href: typeof c?.href === 'string' ? c.href.trim() : '',
+            isHighlighted: false,
+          }))
+          .filter((row) => row.label.length > 0 && row.href.length > 0)
+      : []
 
     // Auto-included Pages — sorted by navOrder server-side already.
     const autoRows: NavRow[] = pages.docs.map((doc) => {
@@ -1100,7 +1283,7 @@ async function _getNavigation(locale: Locale): Promise<NavigationCms> {
     const ctaButton = (navRaw?.ctaButton ?? null) as NavigationCms extends infer N ? (N extends { ctaButton?: infer C } ? C : null) : null
 
     return {
-      mainMenu: [...standardRows, ...autoRows],
+      mainMenu: [...standardRows, ...customRows, ...autoRows],
       ctaButton,
     } as NavigationCms
   } catch {
@@ -1145,10 +1328,12 @@ async function _getServicesPage(locale: Locale): Promise<SimplePageCms> {
   }
 }
 
-async function _getDoctorsPage(locale: Locale): Promise<SimplePageCms> {
+export type DoctorsPageCms = (SimplePageCms & { showLanguages?: boolean | null }) | null
+
+async function _getDoctorsPage(locale: Locale): Promise<DoctorsPageCms> {
   try {
     const payload = await getPayloadClient()
-    return (await payload.findGlobal({ slug: 'doctors-page', locale, depth: 0 })) as SimplePageCms
+    return (await payload.findGlobal({ slug: 'doctors-page', locale, depth: 0 })) as DoctorsPageCms
   } catch {
     return null
   }
@@ -1383,8 +1568,10 @@ export const getCheckupPackages = cached(_getCheckupPackages, 'getCheckupPackage
 export const getReviews = cached(_getReviews, 'getReviews', ['reviews'])
 export const getStats = cached(_getStats, 'getStats', ['home-page', 'site-settings'])
 export const getSiteSettings = cached(_getSiteSettings, 'getSiteSettings', ['site-settings'])
+export const getFeatureToggles = cached(_getFeatureToggles, 'getFeatureToggles', ['feature-toggles'])
 export const getHeroSlides = cached(_getHeroSlides, 'getHeroSlides', ['home-page'])
 export const getHomepageNews = cached(_getHomepageNews, 'getHomepageNews', ['news'])
+export const getNewsCategories = cached(_getNewsCategories, 'getNewsCategories', ['news'])
 export const getAllNews = cached(_getAllNews, 'getAllNews', ['news'])
 export const getNewsBySlug = cached(_getNewsBySlug, 'getNewsBySlug', ['news'])
 export const getDoctorByDoctraId = cached(_getDoctorByDoctraId, 'getDoctorByDoctraId', ['doctors'])
@@ -1395,7 +1582,7 @@ export const getLabTestBySlug = cached(_getLabTestBySlug, 'getLabTestBySlug', ['
 export const getContactPage = cached(_getContactPage, 'getContactPage', ['contact-page'])
 export const getFooter = cached(_getFooter, 'getFooter', ['footer'])
 export const getPolicies = cached(_getPolicies, 'getPolicies', ['policies'])
-export const getNavigation = cached(_getNavigation, 'getNavigation', ['navigation', 'pages'])
+export const getNavigation = cached(_getNavigation, 'getNavigation', ['navigation', 'pages', 'feature-toggles'])
 export const getAboutPage = cached(_getAboutPage, 'getAboutPage', ['about-page'])
 export const getServicesPage = cached(_getServicesPage, 'getServicesPage', ['services-page'])
 export const getDoctorsPage = cached(_getDoctorsPage, 'getDoctorsPage', ['doctors-page'])

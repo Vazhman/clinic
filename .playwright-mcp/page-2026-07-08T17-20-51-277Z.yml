@@ -1,0 +1,118 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - button "Open Menu" [ref=f3e32] [cursor=pointer]:
+      - generic "Open" [ref=f3e33]:
+        - img [ref=f3e34]
+    - generic [ref=f3e9]:
+      - complementary [ref=f3e36]:
+        - navigation [ref=f3e38]:
+          - generic [ref=f3e39]:
+            - link "მთავარი — Dashboard" [ref=f3e40] [cursor=pointer]:
+              - /url: /admin
+              - img [ref=f3e41]
+              - generic [ref=f3e45]: მთავარი — Dashboard
+            - link "საიტის ნახვა" [ref=f3e46] [cursor=pointer]:
+              - /url: /
+              - img [ref=f3e47]
+              - generic [ref=f3e50]: საიტის ნახვა
+              - img [ref=f3e52]
+          - generic [ref=f3e56]:
+            - button "კონტენტი" [ref=f3e57] [cursor=pointer]:
+              - generic [ref=f3e58]: კონტენტი
+              - img [ref=f3e60]
+            - generic [ref=f3e64]:
+              - link "მედია" [ref=f3e65] [cursor=pointer]:
+                - /url: /admin/collections/media
+                - generic [ref=f3e66]: მედია
+              - link "სერვისები" [ref=f3e67] [cursor=pointer]:
+                - /url: /admin/collections/services
+                - generic [ref=f3e69]: სერვისები
+              - link "ექიმები" [ref=f3e70] [cursor=pointer]:
+                - /url: /admin/collections/doctors
+                - generic [ref=f3e71]: ექიმები
+              - link "ჩექაფ პაკეტები" [ref=f3e72] [cursor=pointer]:
+                - /url: /admin/collections/checkup-packages
+                - generic [ref=f3e73]: ჩექაფ პაკეტები
+              - link "შეფასებები" [ref=f3e74] [cursor=pointer]:
+                - /url: /admin/collections/reviews
+                - generic [ref=f3e75]: შეფასებები
+              - link "სიახლეები" [ref=f3e76] [cursor=pointer]:
+                - /url: /admin/collections/news
+                - generic [ref=f3e77]: სიახლეები
+              - link "გვერდები" [ref=f3e78] [cursor=pointer]:
+                - /url: /admin/collections/pages
+                - generic [ref=f3e79]: გვერდები
+              - link "ანალიზები" [ref=f3e80] [cursor=pointer]:
+                - /url: /admin/collections/lab-tests
+                - generic [ref=f3e81]: ანალიზები
+              - link "სიახლის კატეგორიები" [ref=f3e82] [cursor=pointer]:
+                - /url: /admin/collections/news-categories
+                - generic [ref=f3e83]: სიახლის კატეგორიები
+          - generic [ref=f3e84]:
+            - button "ადმინი" [ref=f3e85] [cursor=pointer]:
+              - generic [ref=f3e86]: ადმინი
+              - img [ref=f3e88]
+            - link "მომხმარებლები" [ref=f3e93] [cursor=pointer]:
+              - /url: /admin/collections/users
+              - generic [ref=f3e94]: მომხმარებლები
+          - generic [ref=f3e95]:
+            - button "საიტის ელემენტები" [ref=f3e96] [cursor=pointer]:
+              - generic [ref=f3e97]: საიტის ელემენტები
+              - img [ref=f3e99]
+            - generic [ref=f3e103]:
+              - link "საიტის პარამეტრები" [ref=f3e104] [cursor=pointer]:
+                - /url: /admin/globals/site-settings
+                - generic [ref=f3e105]: საიტის პარამეტრები
+              - link "ფუტერი" [ref=f3e106] [cursor=pointer]:
+                - /url: /admin/globals/footer
+                - generic [ref=f3e107]: ფუტერი
+              - link "ნავიგაცია" [ref=f3e108] [cursor=pointer]:
+                - /url: /admin/globals/navigation
+                - generic [ref=f3e109]: ნავიგაცია
+          - generic [ref=f3e110]:
+            - button "გვერდები" [ref=f3e111] [cursor=pointer]:
+              - generic [ref=f3e112]: გვერდები
+              - img [ref=f3e114]
+            - generic [ref=f3e118]:
+              - link "მთავარი გვერდი" [ref=f3e119] [cursor=pointer]:
+                - /url: /admin/globals/home-page
+                - generic [ref=f3e120]: მთავარი გვერდი
+              - link "ჩვენ შესახებ" [ref=f3e121] [cursor=pointer]:
+                - /url: /admin/globals/about-page
+                - generic [ref=f3e122]: ჩვენ შესახებ
+              - link "საკონტაქტო გვერდი" [ref=f3e123] [cursor=pointer]:
+                - /url: /admin/globals/contact-page
+                - generic [ref=f3e124]: საკონტაქტო გვერდი
+              - link "ჯავშნის გვერდი" [ref=f3e125] [cursor=pointer]:
+                - /url: /admin/globals/booking-page
+                - generic [ref=f3e126]: ჯავშნის გვერდი
+              - link "სერვისების გვერდი" [ref=f3e127] [cursor=pointer]:
+                - /url: /admin/globals/services-page
+                - generic [ref=f3e128]: სერვისების გვერდი
+              - link "ექიმების გვერდი" [ref=f3e129] [cursor=pointer]:
+                - /url: /admin/globals/doctors-page
+                - generic [ref=f3e130]: ექიმების გვერდი
+              - link "წესები და პოლიტიკა (Policies)" [ref=f3e131] [cursor=pointer]:
+                - /url: /admin/globals/policies
+                - generic [ref=f3e132]: წესები და პოლიტიკა (Policies)
+          - link "Log out" [ref=f3e134] [cursor=pointer]:
+            - /url: /admin/logout
+            - img [ref=f3e135]
+      - banner [ref=f3e11]:
+        - generic [ref=f3e14]:
+          - generic "Dashboard" [ref=f3e18]:
+            - generic [ref=f3e19]: მთავარი
+          - link "Account" [ref=f3e20] [cursor=pointer]:
+            - /url: /admin/account
+            - img "yas" [ref=f3e21]
+        - button "Locale" [ref=f3e25] [cursor=pointer]:
+          - generic "Locale" [ref=f3e26]:
+            - generic [ref=f3e27]: "Locale:"
+            - generic [ref=f3e28]:
+              - generic [ref=f3e29]: ქართული ვერსია (საიტი /ge)
+              - img [ref=f3e30]
+  - status [ref=f3e139]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f3e145] [cursor=pointer]:
+    - img [ref=f3e146]
+  - alert [ref=f3e149]

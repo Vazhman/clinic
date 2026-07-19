@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { getDoctors, getDoctorsPage, getContactPage } from "@/lib/payload-data";
+import { getDoctors, getDoctorsPage, getContactPage, getFeatureToggles, isFeatureEnabled } from "@/lib/payload-data";
 import Breadcrumbs from "@/components/shared/Breadcrumbs";
 import StructuredData from "@/components/shared/StructuredData";
 import { generatePhysicianSchema, generateBreadcrumbSchema } from "@/lib/structured-data";
@@ -45,6 +45,8 @@ export default async function DoctorPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
+  const toggles = await getFeatureToggles();
+  if (!isFeatureEnabled(toggles, "doctors")) notFound();
   const loc = locale as "ge" | "en" | "ru";
   const [doctors, doctorsPage, contactPage] = await Promise.all([
     // includeHidden so a doctor hidden from the list still has a working profile.
@@ -58,6 +60,7 @@ export default async function DoctorPage({
 
   const nav = await getTranslations("Navigation");
   const doctorsTitle = doctorsPage?.title ?? "";
+  const showLanguages = doctorsPage?.showLanguages !== false;
   const contactPhone = contactPage?.phone?.value?.trim() ?? "";
 
   // Related doctors: same specialty, excluding current AND excluding any hidden
@@ -88,7 +91,7 @@ export default async function DoctorPage({
         />
       </div>
 
-      <DoctorProfileClient doctor={doctor} relatedDoctors={relatedDoctors} contactPhone={contactPhone} />
+      <DoctorProfileClient doctor={doctor} relatedDoctors={relatedDoctors} contactPhone={contactPhone} showLanguages={showLanguages} />
     </>
   );
 }

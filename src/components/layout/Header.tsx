@@ -15,7 +15,7 @@ type NavigationCms = {
     isHighlighted?: boolean | null;
     subLinks?: NavSubLink[] | null;
   }> | null;
-  ctaButton?: { label?: string | null; href?: string | null } | null;
+  ctaButton?: { enabled?: boolean | null; label?: string | null; href?: string | null } | null;
 } | null;
 
 type ContactCms = {
@@ -68,6 +68,7 @@ export default function Header({
 
   const ctaLabel = navigation?.ctaButton?.label?.trim() ?? "";
   const ctaHref = navigation?.ctaButton?.href?.trim() || "/booking";
+  const ctaEnabled = navigation?.ctaButton?.enabled !== false;
 
   // Mobile menu phone — CMS phone.display falls back to .value (both from CMS).
   const mobilePhoneDisplay = contact?.phone?.display?.trim() || contact?.phone?.value?.trim() || "";
@@ -176,10 +177,12 @@ export default function Header({
               </svg>
               <span className="whitespace-nowrap">{t("patientRoom")}</span>
             </Link>
-            <Link href={ctaHref as never} className="hidden sm:inline-flex items-center gap-2 text-[12px] leading-[1.45] font-bold px-5 py-2.5 rounded-full text-white transition-all duration-300 hover:shadow-lg hover:shadow-pink/20 hover:-translate-y-0.5" style={{ background: "linear-gradient(135deg, #682149 0%, #8A3A6B 50%, #DD64A6 100%)" }}>
-              <span className="whitespace-nowrap">{ctaLabel}</span>
-              <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-            </Link>
+            {ctaEnabled && (
+              <Link href={ctaHref as never} className="hidden sm:inline-flex items-center gap-2 text-[12px] leading-[1.45] font-bold px-5 py-2.5 rounded-full text-white transition-all duration-300 hover:shadow-lg hover:shadow-pink/20 hover:-translate-y-0.5" style={{ background: "linear-gradient(135deg, #682149 0%, #8A3A6B 50%, #DD64A6 100%)" }}>
+                <span className="whitespace-nowrap">{ctaLabel}</span>
+                <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+              </Link>
+            )}
             {/* Mobile menu toggle — a labeled pill matching the site's pill/CTA
                 language. Icon crossfades (no rotate-morph) and the pill fills
                 blackberry when open, so it reads as an intentional control. */}
@@ -268,7 +271,9 @@ export default function Header({
               </p>
             </div>
             <div className="pt-5 space-y-3">
-              <Link href={ctaHref as never} onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white text-[14px] font-bold py-3.5 rounded-2xl" style={{ background: "linear-gradient(135deg, #682149 0%, #DD64A6 100%)" }}>{ctaLabel}</Link>
+              {ctaEnabled && (
+                <Link href={ctaHref as never} onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white text-[14px] font-bold py-3.5 rounded-2xl" style={{ background: "linear-gradient(135deg, #682149 0%, #DD64A6 100%)" }}>{ctaLabel}</Link>
+              )}
               <Link
                 href={"/patient-room" as never}
                 onClick={() => setMobileMenuOpen(false)}

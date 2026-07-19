@@ -89,6 +89,9 @@ export async function POST(req: Request) {
     let placeholders = 0
 
     // ── News ────────────────────────────────────────────────────────────────
+    const categories = await payload.find({ collection: 'news-categories', limit: 100, depth: 0 })
+    const categorySlugToId = new Map(categories.docs.map((c) => [c.slug, c.id]))
+
     for (const item of newsSeed) {
       const existing = await payload.find({
         collection: 'news',
@@ -122,6 +125,7 @@ export async function POST(req: Request) {
         data: {
           slug: item.slug,
           category: item.category,
+          categoryRef: categorySlugToId.get(item.category),
           publishedDate: item.publishedDate,
           status: 'published',
           _status: 'published',

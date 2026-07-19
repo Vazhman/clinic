@@ -1,0 +1,433 @@
+- generic [ref=e1]:
+  - generic [ref=e58]:
+    - button "Open Menu" [ref=e60] [cursor=pointer]:
+      - generic "Open" [ref=e62]:
+        - img [ref=e63]
+    - generic [ref=e65]:
+      - complementary [ref=e66]:
+        - navigation [ref=e68]:
+          - generic [ref=e69]:
+            - link "მთავარი — Dashboard" [ref=e70] [cursor=pointer]:
+              - /url: /admin
+              - img [ref=e71]
+              - generic [ref=e75]: მთავარი — Dashboard
+            - link "საიტის ნახვა" [ref=e76] [cursor=pointer]:
+              - /url: /
+              - img [ref=e77]
+              - generic [ref=e80]: საიტის ნახვა
+              - img [ref=e82]
+          - generic [ref=e86]:
+            - button "კონტენტი" [ref=e87] [cursor=pointer]:
+              - generic [ref=e88]: კონტენტი
+              - img [ref=e90]
+            - generic [ref=e94]:
+              - link "მედია" [ref=e95] [cursor=pointer]:
+                - /url: /admin/collections/media
+                - generic [ref=e96]: მედია
+              - link "სერვისები" [ref=e97] [cursor=pointer]:
+                - /url: /admin/collections/services
+                - generic [ref=e98]: სერვისები
+              - link "ექიმები" [ref=e99] [cursor=pointer]:
+                - /url: /admin/collections/doctors
+                - generic [ref=e100]: ექიმები
+              - link "ჩექაფ პაკეტები" [ref=e101] [cursor=pointer]:
+                - /url: /admin/collections/checkup-packages
+                - generic [ref=e102]: ჩექაფ პაკეტები
+              - link "შეფასებები" [ref=e103] [cursor=pointer]:
+                - /url: /admin/collections/reviews
+                - generic [ref=e104]: შეფასებები
+              - link "სიახლეები" [ref=e105] [cursor=pointer]:
+                - /url: /admin/collections/news
+                - generic [ref=e106]: სიახლეები
+              - link "გვერდები" [ref=e107] [cursor=pointer]:
+                - /url: /admin/collections/pages
+                - generic [ref=e108]: გვერდები
+              - link "ანალიზები" [ref=e109] [cursor=pointer]:
+                - /url: /admin/collections/lab-tests
+                - generic [ref=e110]: ანალიზები
+          - generic [ref=e111]:
+            - button "ადმინი" [ref=e112] [cursor=pointer]:
+              - generic [ref=e113]: ადმინი
+              - img [ref=e115]
+            - link "მომხმარებლები" [ref=e120] [cursor=pointer]:
+              - /url: /admin/collections/users
+              - generic [ref=e121]: მომხმარებლები
+          - generic [ref=e122]:
+            - button "საიტის ელემენტები" [ref=e123] [cursor=pointer]:
+              - generic [ref=e124]: საიტის ელემენტები
+              - img [ref=e126]
+            - generic [ref=e130]:
+              - link "საიტის პარამეტრები" [ref=e131] [cursor=pointer]:
+                - /url: /admin/globals/site-settings
+                - generic [ref=e132]: საიტის პარამეტრები
+              - link "ფუტერი" [ref=e133] [cursor=pointer]:
+                - /url: /admin/globals/footer
+                - generic [ref=e134]: ფუტერი
+              - generic [ref=e137]: ნავიგაცია
+          - generic [ref=e138]:
+            - button "გვერდები" [ref=e139] [cursor=pointer]:
+              - generic [ref=e140]: გვერდები
+              - img [ref=e142]
+            - generic [ref=e146]:
+              - link "მთავარი გვერდი" [ref=e147] [cursor=pointer]:
+                - /url: /admin/globals/home-page
+                - generic [ref=e148]: მთავარი გვერდი
+              - link "ჩვენ შესახებ" [ref=e149] [cursor=pointer]:
+                - /url: /admin/globals/about-page
+                - generic [ref=e150]: ჩვენ შესახებ
+              - link "საკონტაქტო გვერდი" [ref=e151] [cursor=pointer]:
+                - /url: /admin/globals/contact-page
+                - generic [ref=e152]: საკონტაქტო გვერდი
+              - link "ჯავშნის გვერდი" [ref=e153] [cursor=pointer]:
+                - /url: /admin/globals/booking-page
+                - generic [ref=e154]: ჯავშნის გვერდი
+              - link "სერვისების გვერდი" [ref=e155] [cursor=pointer]:
+                - /url: /admin/globals/services-page
+                - generic [ref=e156]: სერვისების გვერდი
+              - link "ექიმების გვერდი" [ref=e157] [cursor=pointer]:
+                - /url: /admin/globals/doctors-page
+                - generic [ref=e158]: ექიმების გვერდი
+              - link "წესები და პოლიტიკა (Policies)" [ref=e159] [cursor=pointer]:
+                - /url: /admin/globals/policies
+                - generic [ref=e160]: წესები და პოლიტიკა (Policies)
+          - link "Log out" [ref=e162] [cursor=pointer]:
+            - /url: /admin/logout
+            - img [ref=e163]
+      - generic [ref=e167]:
+        - banner [ref=e168]:
+          - generic [ref=e171]:
+            - navigation [ref=e173]:
+              - link "მთავარი" [ref=e174] [cursor=pointer]:
+                - /url: /admin
+                - generic "Dashboard" [ref=e175]:
+                  - generic [ref=e176]: მთავარი
+              - generic [ref=e177]: /
+              - generic [ref=e178]: ნავიგაცია
+            - link "Account" [ref=e179] [cursor=pointer]:
+              - /url: /admin/account
+              - img "yas" [ref=e180]
+          - button "Locale" [ref=e184] [cursor=pointer]:
+            - generic "Locale" [ref=e185]:
+              - generic [ref=e186]: "Locale:"
+              - generic [ref=e187]:
+                - generic [ref=e188]: ქართული ვერსია (საიტი /ge)
+                - img [ref=e189]
+        - generic [ref=e191]:
+          - generic [ref=e192]:
+            - heading "ნავიგაცია" [level=1] [ref=e193]
+            - list [ref=e196]:
+              - generic "Edit" [ref=e197]:
+                - generic:
+                  - generic:
+                    - generic: Edit
+              - link "API" [ref=e198] [cursor=pointer]:
+                - /url: /admin/globals/navigation/api
+                - generic:
+                  - generic:
+                    - generic: API
+          - generic [ref=e200]: ჰედერის სტანდარტული მენიუ (7 ფიქსირებული გვერდი) + CTA ღილაკი. თითოეულ ბმულს შეუძლია ჰქონდეს ჩამოსაშლელი ქვემენიუ — ჩართეთ „ჩამოსაშლელი ქვემენიუ“ და დაამატეთ ქვებმულები. ⚠️ ცალკეული გვერდები (Pages) აქ აღარ ჩანს — ჩართეთ "Show in navigation" Pages-ში.
+        - main [ref=e201]:
+          - generic [ref=e202]:
+            - generic [ref=e204]:
+              - generic [ref=e205]:
+                - list
+              - generic [ref=e206]:
+                - generic [ref=e207]:
+                  - button "მენიუს რიგის დალაგება" [active] [ref=e208] [cursor=pointer]:
+                    - img [ref=e209]
+                    - text: მენიუს რიგის დალაგება
+                  - button "Save" [disabled] [ref=e217]:
+                    - generic:
+                      - generic: Save
+                - button [ref=e220] [cursor=pointer]
+            - generic [ref=e231]:
+              - generic [ref=e233]:
+                - heading "მთავარი (/)" [level=3] [ref=e236]
+                - generic [ref=e237]:
+                  - generic [ref=e238]:
+                    - generic [ref=e239]:
+                      - generic [ref=e240]:
+                        - checkbox "Enabled" [checked] [ref=e241]
+                        - img [ref=e243]
+                      - generic [ref=e245]: Enabled
+                    - generic [ref=e246]: ნავიგაციაში ჩვენება
+                  - generic [ref=e247]:
+                    - generic [ref=e248]:
+                      - text: Label
+                      - generic [ref=e249]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e250]:
+                      - textbox "Label — ქართული ვერსია (საიტი /ge)" [ref=e251]: მთავარი
+                      - generic [ref=e252]: ნაგულისხმევი თარგმანის ნაცვლად საჩვენებელი ტექსტი (არასავალდებულო). ცარიელად დატოვებისას იყენებს თარგმანებს.
+                  - generic [ref=e253]:
+                    - generic [ref=e254]: Order
+                    - generic [ref=e255]:
+                      - spinbutton "Order" [ref=e257]: "1"
+                      - generic [ref=e258]: რიგი მენიუში (უფრო დაბალი = პირველი). გამოიყენეთ ზემოთ „მენიუს რიგის დალაგება" ღილაკი (ჩავლება/drag-and-drop) — ხელით შეცვლა არ არის საჭირო.
+                  - generic [ref=e259]:
+                    - generic [ref=e260]:
+                      - checkbox "Has Dropdown" [ref=e262]
+                      - generic [ref=e263]: Has Dropdown
+                    - generic [ref=e264]: ჩამოსაშლელი ქვემენიუს ჩართვა — ამ ბმულზე კურსორის მიტანისას გამოჩნდება ქვებმულები. გამორთვისას ქვებმულები საიტზე იმალება, მაგრამ შენახული მონაცემები რჩება.
+              - generic [ref=e266]:
+                - heading "ჩვენ შესახებ (/about)" [level=3] [ref=e269]
+                - generic [ref=e270]:
+                  - generic [ref=e271]:
+                    - generic [ref=e272]:
+                      - generic [ref=e273]:
+                        - checkbox "Enabled" [checked] [ref=e274]
+                        - img [ref=e276]
+                      - generic [ref=e278]: Enabled
+                    - generic [ref=e279]: ნავიგაციაში ჩვენება
+                  - generic [ref=e280]:
+                    - generic [ref=e281]:
+                      - text: Label
+                      - generic [ref=e282]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e283]:
+                      - textbox "Label — ქართული ვერსია (საიტი /ge)" [ref=e284]: ჩვენ შესახებ
+                      - generic [ref=e285]: ნაგულისხმევი თარგმანის ნაცვლად საჩვენებელი ტექსტი (არასავალდებულო). ცარიელად დატოვებისას იყენებს თარგმანებს.
+                  - generic [ref=e286]:
+                    - generic [ref=e287]: Order
+                    - generic [ref=e288]:
+                      - spinbutton "Order" [ref=e290]: "2"
+                      - generic [ref=e291]: რიგი მენიუში (უფრო დაბალი = პირველი). გამოიყენეთ ზემოთ „მენიუს რიგის დალაგება" ღილაკი (ჩავლება/drag-and-drop) — ხელით შეცვლა არ არის საჭირო.
+                  - generic [ref=e292]:
+                    - generic [ref=e293]:
+                      - checkbox "Has Dropdown" [ref=e295]
+                      - generic [ref=e296]: Has Dropdown
+                    - generic [ref=e297]: ჩამოსაშლელი ქვემენიუს ჩართვა — ამ ბმულზე კურსორის მიტანისას გამოჩნდება ქვებმულები. გამორთვისას ქვებმულები საიტზე იმალება, მაგრამ შენახული მონაცემები რჩება.
+              - generic [ref=e299]:
+                - heading "სერვისები (/services)" [level=3] [ref=e302]
+                - generic [ref=e303]:
+                  - generic [ref=e304]:
+                    - generic [ref=e305]:
+                      - generic [ref=e306]:
+                        - checkbox "Enabled" [checked] [ref=e307]
+                        - img [ref=e309]
+                      - generic [ref=e311]: Enabled
+                    - generic [ref=e312]: ნავიგაციაში ჩვენება
+                  - generic [ref=e313]:
+                    - generic [ref=e314]:
+                      - text: Label
+                      - generic [ref=e315]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e316]:
+                      - textbox "Label — ქართული ვერსია (საიტი /ge)" [ref=e317]: სერვისები
+                      - generic [ref=e318]: ნაგულისხმევი თარგმანის ნაცვლად საჩვენებელი ტექსტი (არასავალდებულო). ცარიელად დატოვებისას იყენებს თარგმანებს.
+                  - generic [ref=e319]:
+                    - generic [ref=e320]: Order
+                    - generic [ref=e321]:
+                      - spinbutton "Order" [ref=e323]: "3"
+                      - generic [ref=e324]: რიგი მენიუში (უფრო დაბალი = პირველი). გამოიყენეთ ზემოთ „მენიუს რიგის დალაგება" ღილაკი (ჩავლება/drag-and-drop) — ხელით შეცვლა არ არის საჭირო.
+                  - generic [ref=e325]:
+                    - generic [ref=e326]:
+                      - checkbox "Has Dropdown" [ref=e328]
+                      - generic [ref=e329]: Has Dropdown
+                    - generic [ref=e330]: ჩამოსაშლელი ქვემენიუს ჩართვა — ამ ბმულზე კურსორის მიტანისას გამოჩნდება ქვებმულები. გამორთვისას ქვებმულები საიტზე იმალება, მაგრამ შენახული მონაცემები რჩება.
+              - generic [ref=e332]:
+                - heading "ექიმები (/doctors)" [level=3] [ref=e335]
+                - generic [ref=e336]:
+                  - generic [ref=e337]:
+                    - generic [ref=e338]:
+                      - generic [ref=e339]:
+                        - checkbox "Enabled" [checked] [ref=e340]
+                        - img [ref=e342]
+                      - generic [ref=e344]: Enabled
+                    - generic [ref=e345]: ნავიგაციაში ჩვენება
+                  - generic [ref=e346]:
+                    - generic [ref=e347]:
+                      - text: Label
+                      - generic [ref=e348]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e349]:
+                      - textbox "Label — ქართული ვერსია (საიტი /ge)" [ref=e350]: ექიმები
+                      - generic [ref=e351]: ნაგულისხმევი თარგმანის ნაცვლად საჩვენებელი ტექსტი (არასავალდებულო). ცარიელად დატოვებისას იყენებს თარგმანებს.
+                  - generic [ref=e352]:
+                    - generic [ref=e353]: Order
+                    - generic [ref=e354]:
+                      - spinbutton "Order" [ref=e356]: "4"
+                      - generic [ref=e357]: რიგი მენიუში (უფრო დაბალი = პირველი). გამოიყენეთ ზემოთ „მენიუს რიგის დალაგება" ღილაკი (ჩავლება/drag-and-drop) — ხელით შეცვლა არ არის საჭირო.
+                  - generic [ref=e358]:
+                    - generic [ref=e359]:
+                      - checkbox "Has Dropdown" [ref=e361]
+                      - generic [ref=e362]: Has Dropdown
+                    - generic [ref=e363]: ჩამოსაშლელი ქვემენიუს ჩართვა — ამ ბმულზე კურსორის მიტანისას გამოჩნდება ქვებმულები. გამორთვისას ქვებმულები საიტზე იმალება, მაგრამ შენახული მონაცემები რჩება.
+              - generic [ref=e365]:
+                - heading "შემოწმებები (/checkups)" [level=3] [ref=e368]
+                - generic [ref=e369]:
+                  - generic [ref=e370]:
+                    - generic [ref=e371]:
+                      - checkbox "Enabled" [ref=e373]
+                      - generic [ref=e374]: Enabled
+                    - generic [ref=e375]: ნავიგაციაში ჩვენება
+                  - generic [ref=e376]:
+                    - generic [ref=e377]:
+                      - text: Label
+                      - generic [ref=e378]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e379]:
+                      - textbox "Label — ქართული ვერსია (საიტი /ge)" [ref=e380]: ჩექაფები
+                      - generic [ref=e381]: ნაგულისხმევი თარგმანის ნაცვლად საჩვენებელი ტექსტი (არასავალდებულო). ცარიელად დატოვებისას იყენებს თარგმანებს.
+                  - generic [ref=e382]:
+                    - generic [ref=e383]: Order
+                    - generic [ref=e384]:
+                      - spinbutton "Order" [ref=e386]: "5"
+                      - generic [ref=e387]: რიგი მენიუში (უფრო დაბალი = პირველი). გამოიყენეთ ზემოთ „მენიუს რიგის დალაგება" ღილაკი (ჩავლება/drag-and-drop) — ხელით შეცვლა არ არის საჭირო.
+                  - generic [ref=e388]:
+                    - generic [ref=e389]:
+                      - checkbox "Has Dropdown" [ref=e391]
+                      - generic [ref=e392]: Has Dropdown
+                    - generic [ref=e393]: ჩამოსაშლელი ქვემენიუს ჩართვა — ამ ბმულზე კურსორის მიტანისას გამოჩნდება ქვებმულები. გამორთვისას ქვებმულები საიტზე იმალება, მაგრამ შენახული მონაცემები რჩება.
+              - generic [ref=e395]:
+                - heading "სამედიცინო ბიბლიოთეკა (/health-library)" [level=3] [ref=e398]
+                - generic [ref=e399]:
+                  - generic [ref=e400]:
+                    - generic [ref=e401]:
+                      - generic [ref=e402]:
+                        - checkbox "Enabled" [checked] [ref=e403]
+                        - img [ref=e405]
+                      - generic [ref=e407]: Enabled
+                    - generic [ref=e408]: ნავიგაციაში ჩვენება
+                  - generic [ref=e409]:
+                    - generic [ref=e410]:
+                      - text: Label
+                      - generic [ref=e411]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e412]:
+                      - textbox "Label — ქართული ვერსია (საიტი /ge)" [ref=e413]
+                      - generic [ref=e414]: ნაგულისხმევი თარგმანის ნაცვლად საჩვენებელი ტექსტი (არასავალდებულო). ცარიელად დატოვებისას იყენებს თარგმანებს.
+                  - generic [ref=e415]:
+                    - generic [ref=e416]: Order
+                    - generic [ref=e417]:
+                      - spinbutton "Order" [ref=e419]: "5"
+                      - generic [ref=e420]: რიგი მენიუში (უფრო დაბალი = პირველი). გამოიყენეთ ზემოთ „მენიუს რიგის დალაგება" ღილაკი (ჩავლება/drag-and-drop) — ხელით შეცვლა არ არის საჭირო.
+                  - generic [ref=e421]:
+                    - generic [ref=e422]:
+                      - checkbox "Has Dropdown" [ref=e424]
+                      - generic [ref=e425]: Has Dropdown
+                    - generic [ref=e426]: ჩამოსაშლელი ქვემენიუს ჩართვა — ამ ბმულზე კურსორის მიტანისას გამოჩნდება ქვებმულები. გამორთვისას ქვებმულები საიტზე იმალება, მაგრამ შენახული მონაცემები რჩება.
+              - generic [ref=e428]:
+                - heading "ბლოგი (/blog)" [level=3] [ref=e431]
+                - generic [ref=e432]:
+                  - generic [ref=e433]:
+                    - generic [ref=e434]:
+                      - generic [ref=e435]:
+                        - checkbox "Enabled" [checked] [ref=e436]
+                        - img [ref=e438]
+                      - generic [ref=e440]: Enabled
+                    - generic [ref=e441]: ნავიგაციაში ჩვენება
+                  - generic [ref=e442]:
+                    - generic [ref=e443]:
+                      - text: Label
+                      - generic [ref=e444]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e445]:
+                      - textbox "Label — ქართული ვერსია (საიტი /ge)" [ref=e446]: ბლოგი
+                      - generic [ref=e447]: ნაგულისხმევი თარგმანის ნაცვლად საჩვენებელი ტექსტი (არასავალდებულო). ცარიელად დატოვებისას იყენებს თარგმანებს.
+                  - generic [ref=e448]:
+                    - generic [ref=e449]: Order
+                    - generic [ref=e450]:
+                      - spinbutton "Order" [ref=e452]: "6"
+                      - generic [ref=e453]: რიგი მენიუში (უფრო დაბალი = პირველი). გამოიყენეთ ზემოთ „მენიუს რიგის დალაგება" ღილაკი (ჩავლება/drag-and-drop) — ხელით შეცვლა არ არის საჭირო.
+                  - generic [ref=e454]:
+                    - generic [ref=e455]:
+                      - checkbox "Has Dropdown" [ref=e457]
+                      - generic [ref=e458]: Has Dropdown
+                    - generic [ref=e459]: ჩამოსაშლელი ქვემენიუს ჩართვა — ამ ბმულზე კურსორის მიტანისას გამოჩნდება ქვებმულები. გამორთვისას ქვებმულები საიტზე იმალება, მაგრამ შენახული მონაცემები რჩება.
+              - generic [ref=e461]:
+                - heading "კონტაქტი (/contact)" [level=3] [ref=e464]
+                - generic [ref=e465]:
+                  - generic [ref=e466]:
+                    - generic [ref=e467]:
+                      - generic [ref=e468]:
+                        - checkbox "Enabled" [checked] [ref=e469]
+                        - img [ref=e471]
+                      - generic [ref=e473]: Enabled
+                    - generic [ref=e474]: ნავიგაციაში ჩვენება
+                  - generic [ref=e475]:
+                    - generic [ref=e476]:
+                      - text: Label
+                      - generic [ref=e477]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e478]:
+                      - textbox "Label — ქართული ვერსია (საიტი /ge)" [ref=e479]: კონტაქტი
+                      - generic [ref=e480]: ნაგულისხმევი თარგმანის ნაცვლად საჩვენებელი ტექსტი (არასავალდებულო). ცარიელად დატოვებისას იყენებს თარგმანებს.
+                  - generic [ref=e481]:
+                    - generic [ref=e482]: Order
+                    - generic [ref=e483]:
+                      - spinbutton "Order" [ref=e485]: "7"
+                      - generic [ref=e486]: რიგი მენიუში (უფრო დაბალი = პირველი). გამოიყენეთ ზემოთ „მენიუს რიგის დალაგება" ღილაკი (ჩავლება/drag-and-drop) — ხელით შეცვლა არ არის საჭირო.
+                  - generic [ref=e487]:
+                    - generic [ref=e488]:
+                      - checkbox "Has Dropdown" [ref=e490]
+                      - generic [ref=e491]: Has Dropdown
+                    - generic [ref=e492]: ჩამოსაშლელი ქვემენიუს ჩართვა — ამ ბმულზე კურსორის მიტანისას გამოჩნდება ქვებმულები. გამორთვისას ქვებმულები საიტზე იმალება, მაგრამ შენახული მონაცემები რჩება.
+              - generic [ref=e494]:
+                - generic [ref=e496]:
+                  - heading "CTA ღილაკი" [level=3] [ref=e497]
+                  - generic [ref=e498]: "ნავიგაციის მარჯვენა მხარეს გამოყოფილი ღილაკი (მაგ: \"ჯავშანი\")"
+                - generic [ref=e499]:
+                  - generic [ref=e500]:
+                    - generic [ref=e501]:
+                      - text: ღილაკის ტექსტი
+                      - generic [ref=e502]: — ქართული ვერსია (საიტი /ge)
+                    - generic [ref=e503]:
+                      - textbox "ღილაკის ტექსტი — ქართული ვერსია (საიტი /ge)" [ref=e504]: ჯავშანი
+                      - generic [ref=e505]: "ღილაკზე ნაჩვენები ტექსტი (მაგ: ჯავშანი)"
+                  - generic [ref=e506]:
+                    - generic [ref=e507]: ღილაკის ბმული
+                    - generic [ref=e508]:
+                      - textbox "ღილაკის ბმული" [ref=e509]: /booking
+                      - generic [ref=e510]: "სად გადავიდეს ღილაკი — შიდა (მაგ: /booking) ან სრული მისამართი (https://…)"
+        - status [ref=e511]
+  - status [ref=e37]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e43] [cursor=pointer]:
+    - img [ref=e44]
+  - alert [ref=e47]: Editing - ნავიგაცია — ხოზრევანიძის კლინიკა
+  - generic [ref=e512]:
+    - generic [ref=e513]:
+      - generic [ref=e514]:
+        - strong [ref=e515]: მენიუს რიგის დალაგება
+        - generic [ref=e516]: ჩავლებით დაალაგეთ ჰედერის ბმულები. Pages-დან ავტომატურად დამატებული ბმულები ყოველთვის ამათ შემდეგ ჩნდება.
+      - generic [ref=e517]:
+        - button "შენახვა" [ref=e518] [cursor=pointer]
+        - button "დახურვა" [ref=e519] [cursor=pointer]: ✕
+    - generic [ref=e520]:
+      - generic [ref=e521]:
+        - button "გადაადგილება" [ref=e522]:
+          - img [ref=e523]
+        - generic [ref=e530]:
+          - generic [ref=e531]: მთავარი
+          - generic [ref=e532]: /
+      - generic [ref=e533]:
+        - button "გადაადგილება" [ref=e534]:
+          - img [ref=e535]
+        - generic [ref=e542]:
+          - generic [ref=e543]: ჩვენ შესახებ
+          - generic [ref=e544]: /about
+      - generic [ref=e545]:
+        - button "გადაადგილება" [ref=e546]:
+          - img [ref=e547]
+        - generic [ref=e554]:
+          - generic [ref=e555]: სერვისები
+          - generic [ref=e556]: /services
+      - generic [ref=e557]:
+        - button "გადაადგილება" [ref=e558]:
+          - img [ref=e559]
+        - generic [ref=e566]:
+          - generic [ref=e567]: ექიმები
+          - generic [ref=e568]: /doctors
+      - generic [ref=e569]:
+        - button "გადაადგილება" [ref=e570]:
+          - img [ref=e571]
+        - generic [ref=e578]:
+          - generic [ref=e579]: ჩექაფები
+          - generic [ref=e580]: /checkups
+        - generic [ref=e581]: გამორთული
+      - generic [ref=e582]:
+        - button "გადაადგილება" [ref=e583]:
+          - img [ref=e584]
+        - generic [ref=e591]:
+          - generic [ref=e592]: ბლოგი
+          - generic [ref=e593]: /blog
+      - generic [ref=e594]:
+        - button "გადაადგილება" [ref=e595]:
+          - img [ref=e596]
+        - generic [ref=e603]:
+          - generic [ref=e604]: კონტაქტი
+          - generic [ref=e605]: /contact
+      - status [ref=e606]

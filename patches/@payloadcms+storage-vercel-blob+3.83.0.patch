@@ -1,33 +1,129 @@
 diff --git a/node_modules/@payloadcms/storage-vercel-blob/dist/adapter.js b/node_modules/@payloadcms/storage-vercel-blob/dist/adapter.js
-index e1fcf6c..8eb40a0 100644
+index e1fcf6c..1451604 100644
 --- a/node_modules/@payloadcms/storage-vercel-blob/dist/adapter.js
 +++ b/node_modules/@payloadcms/storage-vercel-blob/dist/adapter.js
-@@ -36,7 +36,14 @@ export function createVercelBlobAdapter({ access, addRandomSuffix, baseUrl, cach
+@@ -36,7 +36,31 @@ export function createVercelBlobAdapter({ access, addRandomSuffix, baseUrl, cach
                      useCompositePrefixes
                  });
                  if (result.filename) {
 -                    data.filename = result.filename;
 +                    if (filename === data.filename) {
 +                        data.filename = result.filename;
++                        if (result.url) {
++                            data.url = result.url;
++                        }
 +                    } else if (data.sizes) {
 +                        const sizeKey = Object.keys(data.sizes).find((key)=>data.sizes[key]?.filename === filename);
 +                        if (sizeKey) {
 +                            data.sizes[sizeKey].filename = result.filename;
++                            if (result.url) {
++                                data.sizes[sizeKey].url = result.url;
++                                // `thumbnailURL` is computed by Payload core's afterRead field
++                                // hook (getBaseFields.js) BEFORE this handleUpload/afterChange
++                                // hook runs (see create.js/update.js hook order), so it bakes in
++                                // the pre-suffix filename and 404s until the next read. Since
++                                // this same `data` object IS the final response doc (passed by
++                                // reference through afterChange), overwrite it here too so the
++                                // very first response is already correct.
++                                const adminThumbnail = typeof collection.upload === 'object' ? collection.upload.adminThumbnail : undefined;
++                                if (adminThumbnail === sizeKey) {
++                                    data.thumbnailURL = result.url;
++                                }
++                            }
 +                        }
 +                    }
                  }
                  return data;
              },
 diff --git a/node_modules/@payloadcms/storage-vercel-blob/dist/client/VercelBlobClientUploadHandler.js b/node_modules/@payloadcms/storage-vercel-blob/dist/client/VercelBlobClientUploadHandler.js
-index 94a3512..8de8ffb 100644
+index 94a3512..b3ea3d0 100644
 --- a/node_modules/@payloadcms/storage-vercel-blob/dist/client/VercelBlobClientUploadHandler.js
 +++ b/node_modules/@payloadcms/storage-vercel-blob/dist/client/VercelBlobClientUploadHandler.js
-@@ -17,7 +17,7 @@ export const VercelBlobClientUploadHandler = createClientUploadHandler({
+@@ -2,6 +2,40 @@
+ import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client';
+ import { upload } from '@vercel/blob/client';
+ import { formatAdminURL } from 'payload/shared';
++// --- Georgian transliteration + filename sanitizer (Item 6 fix) -----------
++// Duplicated inline (not imported from src/) because this file lives in
++// node_modules and is only ever modified via patch-package — it must stay a
++// self-contained diff that survives `npm install` + patch re-apply. Keep in
++// sync with the canonical copy in src/lib/translit-ka.ts (sanitizeFilename).
++//
++// clientUploads: true means the browser PUTs file bytes directly to Vercel
++// Blob under whatever pathname is passed to upload() below, BEFORE any of
++// Payload's server-side hooks run (the server only sees filename metadata
++// afterward, to create the DB doc). A server-side beforeOperation hook
++// cannot fix this path — only this client-side handler can, which is why
++// the same logic also exists server-side (Media.ts) for the direct/
++// multipart upload path.
++const KA_TO_LATIN = {
++    'ა': 'a', 'ბ': 'b', 'გ': 'g', 'დ': 'd', 'ე': 'e', 'ვ': 'v', 'ზ': 'z', 'თ': 't', 'ი': 'i',
++    'კ': 'k', 'ლ': 'l', 'მ': 'm', 'ნ': 'n', 'ო': 'o', 'პ': 'p', 'ჟ': 'zh', 'რ': 'r', 'ს': 's',
++    'ტ': 't', 'უ': 'u', 'ფ': 'p', 'ქ': 'k', 'ღ': 'gh', 'ყ': 'q', 'შ': 'sh', 'ჩ': 'ch', 'ც': 'ts',
++    'ძ': 'dz', 'წ': 'ts', 'ჭ': 'ch', 'ხ': 'kh', 'ჯ': 'j', 'ჰ': 'h'
++};
++function sanitizeFilename(originalName) {
++    if (!originalName) return originalName;
++    const lastDot = originalName.lastIndexOf('.');
++    const hasExt = lastDot > 0 && lastDot < originalName.length - 1;
++    const base = hasExt ? originalName.slice(0, lastDot) : originalName;
++    const ext = hasExt ? originalName.slice(lastDot + 1) : '';
++    let safeBase = '';
++    for (const ch of base) safeBase += KA_TO_LATIN[ch] ?? ch;
++    safeBase = safeBase.normalize('NFKD').replace(/[̀-ͯ]/g, '');
++    safeBase = safeBase.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120);
++    if (!safeBase) safeBase = `file-${Math.random().toString(36).slice(2, 10)}`;
++    const safeExt = ext.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10);
++    return safeExt ? `${safeBase}.${safeExt}` : safeBase;
++}
++// ---------------------------------------------------------------------------
+ export const VercelBlobClientUploadHandler = createClientUploadHandler({
+     handler: async ({ apiRoute, collectionSlug, extra: { addRandomSuffix, baseURL, prefix = '' }, file, serverHandlerPath, serverURL, updateFilename })=>{
+         const endpointRoute = formatAdminURL({
+@@ -9,15 +43,22 @@ export const VercelBlobClientUploadHandler = createClientUploadHandler({
+             path: serverHandlerPath,
+             serverURL
          });
-         // Update filename with suffix from returned url
+-        const result = await upload(`${prefix}${file.name}`, file, {
++        const safeName = sanitizeFilename(file.name);
++        const result = await upload(`${prefix}${safeName}`, file, {
+             access: 'public',
+             clientPayload: collectionSlug,
+             contentType: file.type,
+             handleUploadUrl: endpointRoute
+         });
+-        // Update filename with suffix from returned url
++        // Update filename with suffix from returned url. If there's no
++        // random suffix, still update it when sanitization changed the name
++        // so Payload's DB `filename` metadata matches what's actually stored
++        // in Blob (otherwise the DB would keep the browser's original,
++        // unsanitized name while the real object lives under safeName).
          if (addRandomSuffix) {
 -            updateFilename(result.url.replace(`${baseURL}/`, ''));
 +            updateFilename(decodeURIComponent(result.url.replace(`${baseURL}/`, '')));
++        } else if (safeName !== file.name) {
++            updateFilename(safeName);
          }
          return {
              prefix
+diff --git a/node_modules/@payloadcms/storage-vercel-blob/dist/uploadFile.js b/node_modules/@payloadcms/storage-vercel-blob/dist/uploadFile.js
+index 152e7c0..cb74d4e 100644
+--- a/node_modules/@payloadcms/storage-vercel-blob/dist/uploadFile.js
++++ b/node_modules/@payloadcms/storage-vercel-blob/dist/uploadFile.js
+@@ -16,10 +16,13 @@ export async function uploadFile({ access, addRandomSuffix, baseUrl, buffer, cac
+     });
+     if (addRandomSuffix) {
+         return {
+-            filename: decodeURIComponent(result.url.replace(`${baseUrl}/`, ''))
++            filename: decodeURIComponent(result.url.replace(`${baseUrl}/`, '')),
++            url: result.url
+         };
+     }
+-    return {};
++    return {
++        url: result.url
++    };
+ }
+ 
+ //# sourceMappingURL=uploadFile.js.map
+\ No newline at end of file

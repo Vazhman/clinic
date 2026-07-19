@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { seoFields } from '../fields/seo'
 import { localeHint } from '../fields/locale-hint'
 import { slugField } from '../fields/slug'
+import { syncPublishStatus } from './hooks/syncPublishStatus'
 
 // Pages was previously a heavy block-builder with 11 block types. For a
 // clinic site the realistic use case is a handful of static info pages
@@ -37,6 +38,12 @@ export const Pages: CollectionConfig = {
     // create/update/delete already default to authenticated-only in Payload.
   },
   versions: { drafts: true },
+  // Keeps the custom `status` field (used by frontend queries) in sync with
+  // Payload's native publish/draft state — see syncPublishStatus.ts for why
+  // this exists (the dual publish-gate bug: clicking native "Publish
+  // changes" used to leave this collection's custom `status` untouched at
+  // its 'draft' default, so the page stayed invisible on the frontend).
+  hooks: { beforeChange: [syncPublishStatus] },
   fields: [
     localeHint,
     { name: 'title', label: 'სათაური', type: 'text', required: true, localized: true, admin: { description: 'გვერდის სათაური. გამოჩნდება ბრაუზერის ჩანართზე + breadcrumb-ში.' } },
@@ -96,7 +103,8 @@ export const Pages: CollectionConfig = {
       ],
       admin: {
         position: 'sidebar',
-        description: 'ახალი გვერდი იწყება "მონახაზად". შევსების შემდეგ ცვალე "გამოქვეყნებულზე".',
+        description: 'ავტომატურად სინქრონდება "Publish changes" / "Save Draft" ღილაკებთან — ხელით შეცვლა საჭირო აღარ არის.',
+        readOnly: true,
       },
     },
     // Legacy block-builder field. Hidden from admin so editors aren't

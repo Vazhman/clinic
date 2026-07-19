@@ -111,6 +111,28 @@ export const PuckBuilderField: React.FC<{ path?: string }> = ({ path = 'puckData
     }
   }, [open])
 
+  // Keep `initialData` in sync with the field's real value whenever the
+  // overlay is CLOSED. `initialData` is otherwise only seeded once (the
+  // effect above) and Puck fully unmounts on close, so without this a
+  // successful save (submit() updates `value` but not `initialData`) left
+  // both the block-count badge and the next reopen showing the pre-save
+  // snapshot until a full page reload — the content was never actually
+  // lost, just displayed stale. Skipped while `open` so we never clobber
+  // in-progress edits out from under the mounted Puck instance.
+  React.useEffect(() => {
+    if (open) return
+    const current = value as Data | undefined
+    if (
+      current &&
+      typeof current === 'object' &&
+      Array.isArray(current.content) &&
+      current !== initialData
+    ) {
+      setInitialData(current)
+      seededRef.current = false
+    }
+  }, [open, value, initialData])
+
   const content = (initialData ?? (value && typeof value === 'object' ? (value as Data) : null))?.content
   const blockCount = Array.isArray(content) ? content.length : 0
 

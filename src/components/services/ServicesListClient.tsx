@@ -143,7 +143,7 @@ export default function ServicesListClient({ services }: ServicesListClientProps
                             </h2>
 
                             {/* Description */}
-                            <p className="text-white/50 text-sm leading-relaxed max-w-md break-words">
+                            <p className="text-white/50 text-sm leading-relaxed max-w-md break-words whitespace-pre-wrap">
                               {service.shortDescription}
                             </p>
                           </div>
@@ -197,7 +197,7 @@ export default function ServicesListClient({ services }: ServicesListClientProps
                         </h2>
 
                         {/* Description */}
-                        <p className="text-[13px] text-grey-light leading-relaxed line-clamp-2 sm:line-clamp-3 flex-1 break-words">
+                        <p className="text-[13px] text-grey-light leading-relaxed line-clamp-2 sm:line-clamp-3 flex-1 break-words whitespace-pre-wrap">
                           {service.shortDescription}
                         </p>
 

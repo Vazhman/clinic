@@ -1,6 +1,25 @@
 // Khozrevanidze Clinic - Payload Admin Brand Theme
 
 // ============================================
+// GEORGIAN FONT (admin panel doesn't inherit the frontend's
+// globals.css @font-face — Payload's default font lacks Mkhedruli
+// glyphs, so Georgian text (e.g. Media alt-text, doctor bios) renders
+// in a fallback font inside admin inputs/dialogs). Same FiraGO files
+// the public site already uses, served from /public/fonts/.
+// ============================================
+@font-face { font-family: "FiraGO"; src: url("/fonts/FiraGO-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "FiraGO"; src: url("/fonts/FiraGO-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "FiraGO"; src: url("/fonts/FiraGO-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+
+body,
+input,
+textarea,
+select,
+button {
+  font-family: "FiraGO", system-ui, sans-serif;
+}
+
+// ============================================
 // HIDE DEFAULT DASHBOARD (we use beforeDashboard)
 // ============================================
 // Our custom Dashboard component is injected via beforeDashboard.

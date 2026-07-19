@@ -115,7 +115,10 @@
     "commonlyUsedInDepartment": "Анализы, часто назначаемые в этой специализации",
     "reviewedBy": "Проверено: {name}",
     "lastReviewed": "Последнее обновление: {date}",
-    "bookConsultation": "Записаться на консультацию"
+    "bookConsultation": "Записаться на консультацию",
+    "price": "Цена",
+    "notCurrentlyAvailable": "Этот анализ временно не проводится",
+    "downloadPdf": "Инструкция по подготовке (PDF)"
   },
   "Doctors": {
     "title": "Врачи",
@@ -343,13 +346,16 @@
     "title": "Новости и статьи",
     "subtitle": "Последние обновления",
     "viewAll": "Смотреть все",
+    "allCategories": "Все",
     "noArticles": "Статьи скоро будут добавлены.",
     "readMore": "Читать далее",
     "relatedArticles": "Похожие статьи",
     "categoryHealthTips": "Советы по здоровью",
     "categoryClinicNews": "Новости клиники",
     "categoryMedicalInfo": "Медицинская информация",
-    "categoryAnnouncements": "Объявления"
+    "categoryAnnouncements": "Объявления",
+    "readingTime": "{minutes} мин. чтения",
+    "featured": "Рекомендуем"
   },
   "Gallery": {
     "title": "Галерея",

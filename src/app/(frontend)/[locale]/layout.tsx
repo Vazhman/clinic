@@ -164,7 +164,7 @@ export default async function LocaleLayout({
           type="font/woff2"
           crossOrigin="anonymous"
         />
-        <Script id="a11y-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: a11yInitScript }} />
+        <Script id="a11y-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: a11yInitScript }} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           {/* MotionProvider supplies the slim domAnimation feature set to all
               `m.*` components (LazyMotion) — see MotionProvider.tsx. */}

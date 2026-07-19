@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { getDoctors, getDoctorsPage } from "@/lib/payload-data";
+import { getDoctors, getDoctorsPage, getFeatureToggles, isFeatureEnabled } from "@/lib/payload-data";
 import Breadcrumbs from "@/components/shared/Breadcrumbs";
 import DoctorsListClient from "@/components/doctors/DoctorsListClient";
 import StructuredData from "@/components/shared/StructuredData";
@@ -34,6 +35,8 @@ export default async function DoctorsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const toggles = await getFeatureToggles();
+  if (!isFeatureEnabled(toggles, "doctors")) notFound();
   const t = await getTranslations("Doctors");
   const nav = await getTranslations("Navigation");
 
@@ -44,6 +47,7 @@ export default async function DoctorsPage({
   const specialties = [...new Set(doctors.map((d) => d.specialty))].sort();
   const pageTitle = cms?.title ?? "";
   const pageSubtitle = cms?.subtitle ?? "";
+  const showLanguages = cms?.showLanguages !== false;
 
   return (
     <>
@@ -93,7 +97,7 @@ export default async function DoctorsPage({
             </div>
           </div>
 
-          <DoctorsListClient doctors={doctors} specialties={specialties} />
+          <DoctorsListClient doctors={doctors} specialties={specialties} showLanguages={showLanguages} />
         </div>
       </section>
     </>

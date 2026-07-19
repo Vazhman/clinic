@@ -13,18 +13,9 @@ type NewsCardProps = {
   featuredImage: { url: string; alt: string };
 };
 
-const categoryKeyMap: Record<string, string> = {
-  "health-tips": "categoryHealthTips",
-  "clinic-news": "categoryClinicNews",
-  "medical-info": "categoryMedicalInfo",
-  announcements: "categoryAnnouncements",
-};
-
 export default function NewsCard({ slug, title, excerpt, category, publishedDate, featuredImage }: NewsCardProps) {
   const t = useTranslations("Blog");
   const locale = useLocale();
-
-  const categoryLabel = categoryKeyMap[category] ? t(categoryKeyMap[category]) : category;
 
   return (
     <Link href={{ pathname: "/blog/[slug]", params: { slug } }} className="block group h-full">
@@ -42,7 +33,7 @@ export default function NewsCard({ slug, title, excerpt, category, publishedDate
           {/* scrim deepens on hover for a more editorial feel */}
           <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-blackberry/35 via-blackberry/0 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-80" />
           <span className="absolute top-3 left-3 sm:top-4 sm:left-4 inline-flex items-center bg-white/92 backdrop-blur-sm text-blackberry text-[10px] font-bold tracking-[0.1em] uppercase px-3 py-1.5 rounded-full shadow-sm max-w-[calc(100%-1.5rem)] break-words">
-            {categoryLabel}
+            {category}
           </span>
         </div>
 

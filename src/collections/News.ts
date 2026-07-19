@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { seoFields } from '../fields/seo'
 import { localeHint } from '../fields/locale-hint'
 import { slugField } from '../fields/slug'
+import { syncPublishStatus } from './hooks/syncPublishStatus'
 
 export const News: CollectionConfig = {
   slug: 'news',
@@ -9,11 +10,15 @@ export const News: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     description: 'სიახლეების და სტატიების მართვა. აქ შეგიძლიათ შექმნათ ბლოგ პოსტები.',
-    defaultColumns: ['title', 'category', 'status', 'showOnHomepage', 'publishedDate'],
+    defaultColumns: ['title', 'categoryRef', 'status', 'showOnHomepage', 'publishedDate'],
     group: 'კონტენტი',
   },
   access: { read: () => true },
   versions: { drafts: true },
+  // Keeps the custom `status` field (used by frontend queries) in sync with
+  // Payload's native publish/draft state — see syncPublishStatus.ts for why
+  // this exists (the "can't publish" bug reported in the CMS brief).
+  hooks: { beforeChange: [syncPublishStatus] },
   fields: [
     // All fields live in tabs at the top of the main column — no sidebar.
     // Tab order matches the editor's workflow:
@@ -49,6 +54,14 @@ export const News: CollectionConfig = {
               relationTo: 'media',
               required: true,
             },
+            {
+              name: 'gallery',
+              label: 'გალერეა',
+              type: 'upload',
+              relationTo: 'media',
+              hasMany: true,
+              admin: { description: 'დამატებითი სურათები სტატიისთვის (არჩევითი) — ჩანს სტატიის ბოლოს, თუ დამატებულია.' },
+            },
             // Body is the writing surface — no collapsible wrapper, no inner
             // card. The Lexical editor sits flush on the form background
             // (chrome stripped by custom.scss `.field-news-body`) so it feels
@@ -59,20 +72,19 @@ export const News: CollectionConfig = {
               localized: true,
               label: false,
               admin: {
-                hidden: true,
                 className: 'field-news-body',
                 description: 'სლეში (/) ან „+" გახსნის მენიუს: სურათი, შენიშვნა, გალერეა.',
               },
             },
+            // Builder retired — editors now write articles in the Lexical
+            // field above. Kept hidden (not removed) so already-published
+            // articles built with it keep rendering via the frontend's
+            // puckData-first fallback in blog/[slug]/page.tsx.
             {
               name: 'puckData',
               type: 'json',
               label: false,
-              // Unlocalized: one shared layout; per-language text lives inside the Puck
-              // tree as {ge,en,ru} maps. Edited only via the builder component.
-              admin: {
-                components: { Field: '/components/admin/PuckBuilderField#PuckBuilderField' },
-              },
+              admin: { hidden: true },
             },
           ],
         },
@@ -89,17 +101,33 @@ export const News: CollectionConfig = {
                 // to keep the two-column row layout of this tab.
                 slugField('news', 'title', { sidebar: false, description: 'ცარიელი დატოვებისას ავტომატურად შეიქმნება სათაურიდან. ხელით ჩაწერაც შეიძლება (მაგ: my-article).' }),
                 {
-                  name: 'category',
+                  name: 'categoryRef',
                   label: 'კატეგორია',
-                  type: 'select',
+                  type: 'relationship',
+                  relationTo: 'news-categories',
                   required: true,
-                  options: [
-                    { label: 'ჯანმრთელობის რჩევები', value: 'health-tips' },
-                    { label: 'კლინიკის სიახლეები', value: 'clinic-news' },
-                    { label: 'სამედიცინო ინფორმაცია', value: 'medical-info' },
-                    { label: 'განცხადებები', value: 'announcements' },
-                  ],
+                  admin: {
+                    description: 'კატეგორიების დამატება/რედაქტირება/წაშლა — "სიახლის კატეგორიები" სექციაში.',
+                  },
                 },
+              ],
+            },
+            // Legacy fixed-4-option select (health-tips/clinic-news/medical-info/
+            // announcements), superseded by `categoryRef` above (a real,
+            // admin-manageable collection). Kept hidden + non-required, same as
+            // Navigation.mainMenu / HomePage.heroDoctors, so the column and its
+            // existing data survive untouched instead of forcing a destructive
+            // schema change.
+            {
+              name: 'category',
+              label: 'კატეგორია (ძველი)',
+              type: 'select',
+              admin: { hidden: true },
+              options: [
+                { label: 'ჯანმრთელობის რჩევები', value: 'health-tips' },
+                { label: 'კლინიკის სიახლეები', value: 'clinic-news' },
+                { label: 'სამედიცინო ინფორმაცია', value: 'medical-info' },
+                { label: 'განცხადებები', value: 'announcements' },
               ],
             },
             {
@@ -124,10 +152,14 @@ export const News: CollectionConfig = {
                 },
                 {
                   name: 'publishedDate',
-                  label: 'გამოქვეყნების თარიღი',
+                  label: 'გამოქვეყნების თარიღი და დრო',
                   type: 'date',
                   required: true,
-                  admin: { date: { pickerAppearance: 'dayOnly', displayFormat: 'dd/MM/yyyy' } },
+                  defaultValue: () => new Date().toISOString(),
+                  admin: {
+                    description: 'დროის არჩევა: თუ ახლავე უნდა გამოქვეყნდეს, დატოვე ავტომატურად შევსებული ახლანდელი დრო.',
+                    date: { pickerAppearance: 'dayAndTime', displayFormat: 'dd/MM/yyyy HH:mm' },
+                  },
                 },
               ],
             },
@@ -141,6 +173,27 @@ export const News: CollectionConfig = {
                 { label: 'დრაფტი', value: 'draft' },
                 { label: 'გამოქვეყნებული', value: 'published' },
               ],
+              admin: {
+                description: 'ავტომატურად სინქრონდება ზედა "Publish changes" / "Save Draft" ღილაკებთან — ხელით შეცვლა საჭირო აღარ არის.',
+                readOnly: true,
+              },
+            },
+            {
+              name: 'tags',
+              label: 'ტეგები',
+              type: 'text',
+              hasMany: true,
+              localized: true,
+              admin: { description: 'საკვანძო სიტყვები/ტეგები სტატიისთვის (თითოეული ველის შევსების შემდეგ დააჭირეთ Enter-ს ახლის დასამატებლად).' },
+            },
+            {
+              name: 'featured',
+              label: 'გამორჩეული სტატია',
+              type: 'checkbox',
+              defaultValue: false,
+              admin: {
+                description: 'გამორჩეული სტატიები შეიძლება ცალკე გამოიყოს ბლოგის გვერდზე (მაგ. "რჩეული" ბლოკი) — განსხვავებულია "დამაგრებული"-საგან (რომელიც სორტირებას განსაზღვრავს) და "მთავარ გვერდზე გამოჩენა"-საგან (რომელიც საწყის გვერდზე აჩვენებს).',
+              },
             },
             {
               name: 'pinned',

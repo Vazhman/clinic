@@ -29,3 +29,57 @@ export function localizeName(value: string, locale: string): string {
   if (locale === 'ge') return value
   return hasGeorgian(value) ? transliterateKa(value) : value
 }
+
+// Filename sanitizer for uploads (Item 6 fix).
+//
+// Payload's own filename handling (generateFileData.js / getSafeFilename.js)
+// uses the `sanitize-filename` package, which only strips illegal path
+// characters — it does NOT transliterate or reject Unicode. The
+// @vercel/blob SDK is even more permissive: it only disallows a literal
+// "//" in the pathname. Net effect: a Georgian (or any non-ASCII) filename
+// sailed straight through every layer of the pipeline and became the actual
+// Vercel Blob storage key, which is what caused production 400s on doctor
+// photos uploaded with Georgian filenames.
+//
+// This produces a guaranteed ASCII-safe, URL-safe filename: Georgian is
+// transliterated to Latin (reusing the same map used for doctor names),
+// other scripts have diacritics stripped via NFKD, and anything left over
+// is slugified. If nothing usable survives (e.g. a CJK-only or emoji-only
+// name) it falls back to a short random token so uploads never fail outright.
+//
+// Used from two places so both upload paths are covered end-to-end:
+//   1. `beforeOperation` hook on the Media collection (direct/multipart
+//      upload path — local disk adapter, API/curl uploads).
+//   2. Patched inline into `VercelBlobClientUploadHandler.js` (the
+//      `clientUploads: true` path actually used in production) — the
+//      browser uploads straight to Vercel Blob using the pathname the
+//      client computes, so a server-side hook alone cannot fix that path;
+//      the vendor file must be patched with the same logic (see
+//      patches/@payloadcms+storage-vercel-blob+3.83.0.patch).
+export function sanitizeFilename(originalName: string): string {
+  if (!originalName) return originalName
+
+  const lastDot = originalName.lastIndexOf('.')
+  const hasExt = lastDot > 0 && lastDot < originalName.length - 1
+  const base = hasExt ? originalName.slice(0, lastDot) : originalName
+  const ext = hasExt ? originalName.slice(lastDot + 1) : ''
+
+  let safeBase = transliterateKa(base)
+  // Strip combining diacritical marks left over from other Latin-adjacent
+  // scripts (é, ñ, ü, etc.) after NFKD decomposition.
+  safeBase = safeBase.normalize('NFKD').replace(/[̀-ͯ]/g, '')
+  // Slugify: lowercase, collapse anything non-alphanumeric into a single
+  // dash, trim leading/trailing dashes, cap length.
+  safeBase = safeBase
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 120)
+
+  if (!safeBase) {
+    safeBase = `file-${Math.random().toString(36).slice(2, 10)}`
+  }
+
+  const safeExt = ext.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10)
+  return safeExt ? `${safeBase}.${safeExt}` : safeBase
+}

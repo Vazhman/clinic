@@ -52,7 +52,7 @@ export default function ServicesGrid({
               <h3 className="relative text-[15px] font-bold text-blackberry mb-1.5 group-hover:text-pink transition-colors duration-300 break-words leading-snug">
                 {service.name}
               </h3>
-              <p className="relative text-[13px] text-grey-light leading-[1.55] break-words mb-4">
+              <p className="relative text-[13px] text-grey-light leading-[1.55] break-words whitespace-pre-wrap mb-4">
                 {service.shortDescription}
               </p>
 
