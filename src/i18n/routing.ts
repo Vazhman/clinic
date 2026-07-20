@@ -77,6 +77,11 @@ export const routing = defineRouting({
       en: "/health-library",
       ru: "/biblioteka-zdorovya",
     },
+    "/ai-assistant": {
+      ge: "/ai-asistenti",
+      en: "/ai-assistant",
+      ru: "/ii-assistent",
+    },
     "/pages/[slug]": {
       ge: "/gverdebi/[slug]",
       en: "/pages/[slug]",

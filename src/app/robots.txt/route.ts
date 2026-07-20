@@ -64,6 +64,12 @@ export async function GET() {
       lines.push(`Disallow: /${locale}${resolveLocalizedPath(locale, '/health-library')}`)
     }
   }
+  // aiAssistant also defaults OFF — same reasoning as healthLibrary above.
+  if (toggles?.aiAssistant !== true) {
+    for (const locale of LOCALES) {
+      lines.push(`Disallow: /${locale}${resolveLocalizedPath(locale, '/ai-assistant')}`)
+    }
+  }
   lines.push('')
 
   for (const [key, userAgents] of Object.entries(AI_BOT_USER_AGENTS)) {

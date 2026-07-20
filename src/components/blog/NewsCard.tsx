@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { formatLongDate } from "@/lib/format-date";
@@ -23,11 +24,12 @@ export default function NewsCard({ slug, title, excerpt, category, publishedDate
         {/* Image */}
         <div className="relative aspect-[16/10] overflow-hidden bg-grey-lighter">
           {featuredImage.url && (
-            <img
+            <Image
               src={featuredImage.url}
               alt={featuredImage.alt || title}
-              loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-[800ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
+              fill
+              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover transition-transform duration-[800ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
             />
           )}
           {/* scrim deepens on hover for a more editorial feel */}

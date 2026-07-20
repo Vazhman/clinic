@@ -49,7 +49,7 @@ export default function SymptomNavigator({
     : [];
 
   return (
-    <section className="py-16 sm:py-20 lg:py-24 bg-blackberry relative">
+    <section id="symptom-navigator" className="py-16 sm:py-20 lg:py-24 bg-blackberry relative">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-pink/10 rounded-full blur-[120px]" />
       </div>

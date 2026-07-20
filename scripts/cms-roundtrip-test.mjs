@@ -35,6 +35,13 @@ function record(name, ok, detail) {
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? ` — ${detail}` : ""}`);
 }
 
+// For checks whose precondition isn't met in this environment (e.g. a
+// site-wide feature toggle is off) — not a failure, just not applicable.
+function skip(name, detail) {
+  results.push({ name, ok: true, skipped: true, detail });
+  console.log(`SKIP  ${name}${detail ? ` — ${detail}` : ""}`);
+}
+
 async function api(path, opts = {}) {
   const res = await fetch(`${SITE}/api${path}`, {
     ...opts,
@@ -108,7 +115,8 @@ const GLOBAL_CHECKS = [
   { slug: "navigation", path: "aboutRoute.label", page: "/ge", locale: "ge" },
   { slug: "navigation", path: "servicesRoute.label", page: "/ge", locale: "ge" },
   { slug: "navigation", path: "doctorsRoute.label", page: "/ge", locale: "ge" },
-  { slug: "navigation", path: "checkupsRoute.label", page: "/ge", locale: "ge" },
+  // checkupsRoute is handled in its own block below (enabled=false in prod, so
+  // its label wouldn't render at all without force-enabling it for the check).
   { slug: "navigation", path: "blogRoute.label", page: "/ge", locale: "ge" },
   { slug: "navigation", path: "contactRoute.label", page: "/ge", locale: "ge" },
   { slug: "navigation", path: "ctaButton.label", page: "/ge", locale: "ge" },
@@ -181,6 +189,41 @@ for (const c of GLOBAL_CHECKS) {
     const now = get(check.body, c.path);
     const restored = (now ?? "") === (original ?? "");
     if (!restored) console.error(`  !! RESTORE FAILED for ${name}: now=${JSON.stringify(now)} expected=${JSON.stringify(original)} (patch ${restore.status})`);
+  }
+}
+
+// ── navigation.checkupsRoute (enabled=false in prod, so its label alone
+// wouldn't render — force-enable for the duration of the check, then restore
+// the whole group exactly as it was, including enabled) ────────────────────
+{
+  const name = "global:navigation.checkupsRoute.label -> /ge";
+  const before = await api(`/globals/navigation?locale=ge&depth=0`);
+  const orig = before.body?.checkupsRoute ?? {};
+  try {
+    const patch = await api(`/globals/navigation?locale=ge&depth=0`, {
+      method: "POST",
+      body: JSON.stringify({ checkupsRoute: { ...orig, label: SENTINEL, enabled: true } }),
+    });
+    if (patch.status !== 200) {
+      record(name, false, `PATCH ${patch.status}: ${JSON.stringify(patch.body?.errors).slice(0, 200)}`);
+    } else {
+      const pub = await publicHtml("/ge");
+      const onPage = pub.html.includes(SENTINEL);
+      record(name, onPage, onPage ? "sentinel visible in header nav" : "saved but NOT on public page");
+    }
+  } finally {
+    await api(`/globals/navigation?locale=ge&depth=0`, {
+      method: "POST",
+      body: JSON.stringify({
+        checkupsRoute: {
+          label: orig.label ?? "",
+          enabled: orig.enabled ?? false,
+          order: orig.order,
+          hasDropdown: orig.hasDropdown ?? false,
+          subLinks: orig.subLinks ?? [],
+        },
+      }),
+    });
   }
 }
 
@@ -352,6 +395,35 @@ const withSentinelParagraph = (rich, text) => {
   }
 }
 
+// services[0].description (richText, migrated from plain text)
+{
+  const name = "richtext:services.description -> service page";
+  const list = await api(`/services?limit=1&locale=ge&depth=0`);
+  const doc = list.body?.docs?.[0];
+  if (!doc) {
+    record(name, false, "no services found");
+  } else {
+    const original = doc.description;
+    try {
+      const patch = await api(`/services/${doc.id}?locale=ge&depth=0`, {
+        method: "PATCH",
+        body: JSON.stringify({ description: withSentinelParagraph(original, SENTINEL) }),
+      });
+      if (patch.status !== 200) {
+        record(name, false, `PATCH ${patch.status}: ${JSON.stringify(patch.body?.errors).slice(0, 200)}`);
+      } else {
+        const pub = await publicHtml(`/ge/servisebi/${doc.slug}`);
+        record(name, pub.html.includes(SENTINEL), pub.html.includes(SENTINEL) ? "description paragraph visible on service page" : `saved but NOT on page (HTTP ${pub.status})`);
+      }
+    } finally {
+      await api(`/services/${doc.id}?locale=ge&depth=0`, {
+        method: "PATCH",
+        body: JSON.stringify({ description: original ?? null }),
+      });
+    }
+  }
+}
+
 // ── lab-tests fixture: local DBs may have none — create one so the update
 //    roundtrips below have a doc to work with; deleted after the loop. ──────
 let labTestFixtureId = null;
@@ -381,7 +453,8 @@ const COLLECTION_CHECKS = [
   { col: "doctors", field: "specialty", locale: "ge", where: "&where[inactive][not_equals]=true", publicPage: (doc) => `/ge/eqimebi/${doc.slug}` },
   { col: "services", field: "name", locale: "ge", publicPage: (doc) => `/ge/servisebi/${doc.slug}` },
   { col: "services", field: "shortDescription", locale: "ge", publicPage: (doc) => `/ge/servisebi/${doc.slug}` },
-  { col: "services", field: "description", locale: "ge", publicPage: (doc) => `/ge/servisebi/${doc.slug}` },
+  // services.description is richText (migrated from plain text) — checked
+  // separately below via withSentinelParagraph, not through this plain-string loop.
   // NB: the blog DETAIL route is /siakhlebi/ (routing.ts) while the list is
   // /siaxleebi/ — different transliterations, easy to trip on.
   { col: "news", field: "title", locale: "ge", publicPage: (doc) => `/ge/siakhlebi/${doc.slug}` },
@@ -519,6 +592,13 @@ if (labTestFixtureId) await api(`/lab-tests/${labTestFixtureId}`, { method: "DEL
   const name = "lifecycle:news create -> list + detail + homepage";
   let newsId, mediaId;
   try {
+    // categoryRef is required (relationTo news-categories) — resolve the
+    // "clinic-news" category's id dynamically so this works against any
+    // seeded DB (local or prod), not just one with a hardcoded id.
+    const catList = await api(`/news-categories?where[slug][equals]=clinic-news&limit=1&depth=0`);
+    const categoryRefId = catList.body?.docs?.[0]?.id;
+    if (!categoryRefId) throw new Error("no 'clinic-news' news-categories doc found to satisfy required categoryRef");
+
     // featuredImage is required → upload a 1x1 png first
     const png = Buffer.from(
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
@@ -540,7 +620,8 @@ if (labTestFixtureId) await api(`/lab-tests/${labTestFixtureId}`, { method: "DEL
         body: JSON.stringify({
           title: `სიახლე ${SENTINEL}`,
           excerpt: `ანონსი ${SENTINEL}`,
-          category: "clinic-news",
+          category: "clinic-news", // legacy hidden field, kept for schema push-safety only
+          categoryRef: categoryRefId, // the field News.ts actually requires
           publishedDate: new Date().toISOString(),
           status: "published",
           _status: "published",
@@ -603,47 +684,57 @@ if (labTestFixtureId) await api(`/lab-tests/${labTestFixtureId}`, { method: "DEL
 }
 
 // ── lifecycle: LabTest → list + detail page ────────────────────────────────
+// (public routes intentionally notFound() when feature-toggles.labTests is
+// off site-wide — don't force-flip a live prod toggle just to run this
+// check, just skip it; a locally-toggled-on env still runs it for real.)
 {
   const name = "lifecycle:lab-tests create published -> /ge/analizebi/[slug]";
-  let testId;
-  try {
-    const res = await api(`/lab-tests?locale=ge`, {
-      method: "POST",
-      body: JSON.stringify({
-        title: `ანალიზი ${SENTINEL}`,
-        category: "biochemistry",
-        summary: `აღწერა ${SENTINEL}`,
-        published: true,
-        _status: "published",
-      }),
-    });
-    const doc = res.body?.doc;
-    if (!((res.status === 201 || res.status === 200) && doc?.id)) {
-      record(name, false, `create HTTP ${res.status}: ${JSON.stringify(res.body?.errors).slice(0, 250)}`);
-    } else {
-      testId = doc.id;
-      const detail = await publicHtml(`/ge/analizebi/${doc.slug}`);
-      const listPg = await publicHtml(`/ge/analizebi`);
-      const d = detail.status === 200 && detail.html.includes(SENTINEL);
-      const l = listPg.html.includes(SENTINEL);
-      record(name, d && l, `detail=${d} (HTTP ${detail.status}), list=${l}, slug=${doc.slug}`);
+  const toggles = await api(`/globals/feature-toggles?locale=ge&depth=0`);
+  if (toggles.body?.labTests === false) {
+    skip(name, "feature-toggles.labTests is off — public routes 404 by design");
+  } else {
+    let testId;
+    try {
+      const res = await api(`/lab-tests?locale=ge`, {
+        method: "POST",
+        body: JSON.stringify({
+          title: `ანალიზი ${SENTINEL}`,
+          category: "biochemistry",
+          summary: `აღწერა ${SENTINEL}`,
+          published: true,
+          _status: "published",
+        }),
+      });
+      const doc = res.body?.doc;
+      if (!((res.status === 201 || res.status === 200) && doc?.id)) {
+        record(name, false, `create HTTP ${res.status}: ${JSON.stringify(res.body?.errors).slice(0, 250)}`);
+      } else {
+        testId = doc.id;
+        const detail = await publicHtml(`/ge/analizebi/${doc.slug}`);
+        const listPg = await publicHtml(`/ge/analizebi`);
+        const d = detail.status === 200 && detail.html.includes(SENTINEL);
+        const l = listPg.html.includes(SENTINEL);
+        record(name, d && l, `detail=${d} (HTTP ${detail.status}), list=${l}, slug=${doc.slug}`);
+      }
+    } catch (e) {
+      record(name, false, e.message);
+    } finally {
+      if (testId) await api(`/lab-tests/${testId}`, { method: "DELETE" });
     }
-  } catch (e) {
-    record(name, false, e.message);
-  } finally {
-    if (testId) await api(`/lab-tests/${testId}`, { method: "DELETE" });
   }
 }
 
-// ── HomePage.showDoctorCard=false must HIDE the doctors section ────────────
+// ── HomePage.sectionVisibility.doctorsPreview=false must HIDE the doctors
+//    section (showDoctorCard is a deprecated/hidden field page.tsx no longer
+//    reads at all — sectionVisibility.doctorsPreview is the real switch) ───
 {
-  const name = "global:home-page.showDoctorCard toggle hides doctors section";
+  const name = "global:home-page.sectionVisibility.doctorsPreview toggle hides doctors section";
   const before = await api(`/globals/home-page?locale=ge&depth=0`);
-  const original = before.body?.showDoctorCard;
+  const origSv = before.body?.sectionVisibility ?? {};
   try {
     const off = await api(`/globals/home-page?locale=ge&depth=0`, {
       method: "POST",
-      body: JSON.stringify({ showDoctorCard: false }),
+      body: JSON.stringify({ sectionVisibility: { ...origSv, doctorsPreview: false } }),
     });
     if (off.status !== 200) {
       record(name, false, `PATCH ${off.status}: ${JSON.stringify(off.body?.errors).slice(0, 250)}`);
@@ -657,7 +748,34 @@ if (labTestFixtureId) await api(`/lab-tests/${labTestFixtureId}`, { method: "DEL
   } finally {
     await api(`/globals/home-page?locale=ge&depth=0`, {
       method: "POST",
-      body: JSON.stringify({ showDoctorCard: original ?? true }),
+      body: JSON.stringify({ sectionVisibility: { ...origSv, doctorsPreview: origSv.doctorsPreview ?? true } }),
+    });
+  }
+}
+
+// ── HomePage.sectionVisibility.symptomNavigator=false must HIDE the symptom
+//    navigator section — same pattern as the doctorsPreview toggle above.
+//    SymptomNavigator's <section id="symptom-navigator"> is the fingerprint. ─
+{
+  const name = "global:home-page.sectionVisibility.symptomNavigator toggle hides symptom-navigator section";
+  const before = await api(`/globals/home-page?locale=ge&depth=0`);
+  const origSv = before.body?.sectionVisibility ?? {};
+  try {
+    const off = await api(`/globals/home-page?locale=ge&depth=0`, {
+      method: "POST",
+      body: JSON.stringify({ sectionVisibility: { ...origSv, symptomNavigator: false } }),
+    });
+    if (off.status !== 200) {
+      record(name, false, `PATCH ${off.status}: ${JSON.stringify(off.body?.errors).slice(0, 250)}`);
+    } else {
+      const pub = await publicHtml("/ge");
+      const hasSection = pub.html.includes('id="symptom-navigator"');
+      record(name, !hasSection, hasSection ? "symptom-navigator section STILL renders with toggle off" : "section hidden when toggled off");
+    }
+  } finally {
+    await api(`/globals/home-page?locale=ge&depth=0`, {
+      method: "POST",
+      body: JSON.stringify({ sectionVisibility: { ...origSv, symptomNavigator: origSv.symptomNavigator ?? true } }),
     });
   }
 }
@@ -698,7 +816,8 @@ if (labTestFixtureId) await api(`/lab-tests/${labTestFixtureId}`, { method: "DEL
 
 // ── summary ────────────────────────────────────────────────────────────────
 const fails = results.filter((r) => !r.ok);
-console.log(`\n=== ${results.length - fails.length}/${results.length} PASS ===`);
+const skips = results.filter((r) => r.ok && r.skipped);
+console.log(`\n=== ${results.length - fails.length}/${results.length} PASS (${skips.length} skipped) ===`);
 if (fails.length) {
   console.log("FAILURES:");
   for (const f of fails) console.log(`  - ${f.name}: ${f.detail}`);

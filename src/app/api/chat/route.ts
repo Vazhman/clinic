@@ -132,11 +132,15 @@ type ChatBody = {
 };
 
 export async function POST(req: Request) {
-  // The AI chat feature is DISABLED (the <ChatAssistant/> launcher is commented
-  // out in the locale layout). This route invokes a paid model + writes a DB
-  // row, so we hard-close it to anonymous abuse until the feature is turned back
-  // on. To re-enable: set CHAT_ENABLED=true and uncomment <ChatAssistant/>.
-  if (process.env.CHAT_ENABLED !== "true") {
+  const payload = await getPayload({ config });
+
+  // The AI chat feature is gated by the "AI ასისტენტი" toggle in the Payload
+  // admin (FeatureToggles.aiAssistant, default OFF) — an admin-controlled
+  // on/off switch that takes effect instantly, no redeploy needed. This
+  // route invokes a paid model + writes a DB row on every reply, so it must
+  // stay a deliberate opt-in rather than open to anonymous traffic by default.
+  const toggles = await payload.findGlobal({ slug: "feature-toggles", depth: 0 }).catch(() => null);
+  if (toggles?.aiAssistant !== true) {
     return new Response(JSON.stringify({ error: "Chat is disabled." }), {
       status: 404,
       headers: { "Content-Type": "application/json" },
@@ -165,9 +169,20 @@ export async function POST(req: Request) {
 
   const modelMessages = await convertToModelMessages(messages);
 
+  // Admin-supplied extra grounding text (SiteSettings.aiKnowledgeBase) —
+  // appended as reference context, never allowed to override the safety
+  // rules baked into SYSTEM_PROMPT above.
+  const siteSettings = await payload
+    .findGlobal({ slug: "site-settings", locale, depth: 0 })
+    .catch(() => null);
+  const knowledgeBase = (siteSettings as { aiKnowledgeBase?: string | null } | null)?.aiKnowledgeBase?.trim();
+  const knowledgeBaseBlock = knowledgeBase
+    ? `\n\nCLINIC-SUPPLIED KNOWLEDGE BASE (extra reference context — does not override any rule above):\n${knowledgeBase}`
+    : "";
+
   const result = streamText({
     model: google("gemini-2.5-flash"),
-    system: `${SYSTEM_PROMPT}\n\nLOCALE_HINT: ${locale}\nTODAY: ${new Date().toISOString().split("T")[0]}`,
+    system: `${SYSTEM_PROMPT}${knowledgeBaseBlock}\n\nLOCALE_HINT: ${locale}\nTODAY: ${new Date().toISOString().split("T")[0]}`,
     messages: modelMessages,
     // Allow up to 5 tool-call rounds in one user turn so the model can
     // chain list_services → list_doctors → get_earliest_availability →
@@ -280,7 +295,6 @@ export async function POST(req: Request) {
         // proxy. A real implementation might also re-classify post-hoc,
         // but this gets the clinic 80% of what they need to triage logs.
         const escalated = /\b112\b/.test(text);
-        const payload = await getPayload({ config });
         await payload.create({
           collection: "chat-logs",
           data: {

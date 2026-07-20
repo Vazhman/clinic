@@ -40,6 +40,7 @@ import { default as default_34f5cae10486c9e2fb3b91ad010f9b66 } from '../../../co
 import { default as default_47f29214687e896f7377d5a0275d8265 } from '../../../components/admin/DoctorListFilters'
 import { default as default_8a819ae3f009dac07e0fca20319866a3 } from '../../../components/admin/DoctorReorderPanel'
 import { default as default_f3de9b98b6358a1ebe38585b30d279c9 } from '../../../components/admin/DoctorViewLiveButton'
+import { default as default_acac0bd312c9b41d8b7ec3668e402f4e } from '../../../components/admin/PageSettingsPanel'
 import { default as default_da4835da480a9de2514fe92d53067817 } from '../../../components/admin/NavigationReorderPanel'
 import { default as default_dfe4008080d895d460898c3a6155e9ba } from '../../../components/admin/Icon'
 import { default as default_91a09b539d3c86b0aebf520e7564ce08 } from '../../../components/admin/Logo'
@@ -94,6 +95,7 @@ export const importMap = {
   "/components/admin/DoctorListFilters#default": default_47f29214687e896f7377d5a0275d8265,
   "/components/admin/DoctorReorderPanel#default": default_8a819ae3f009dac07e0fca20319866a3,
   "/components/admin/DoctorViewLiveButton#default": default_f3de9b98b6358a1ebe38585b30d279c9,
+  "/components/admin/PageSettingsPanel#default": default_acac0bd312c9b41d8b7ec3668e402f4e,
   "/components/admin/NavigationReorderPanel#default": default_da4835da480a9de2514fe92d53067817,
   "/components/admin/Icon#default": default_dfe4008080d895d460898c3a6155e9ba,
   "/components/admin/Logo#default": default_91a09b539d3c86b0aebf520e7564ce08,

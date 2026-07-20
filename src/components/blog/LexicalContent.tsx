@@ -9,6 +9,12 @@ import { ColumnsRenderer } from './lexical-converters/ColumnsRenderer'
 import { textColorStates, backgroundColorStates } from '@/lexical/textStateColors'
 import { fontSizeStates } from '@/lexical/fontSizeStates'
 
+function toCamelCaseCss(css: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(css).map(([key, value]) => [key.replace(/-([a-z])/g, (_, c) => c.toUpperCase()), value]),
+  )
+}
+
 // JSX converters map Lexical node types -> React components. We override the
 // `upload` node (so it picks up our border/shadow/radius styling) and the
 // `blocks` group (for our Callout + Gallery custom blocks). Everything else
@@ -55,9 +61,13 @@ const converters: JSXConvertersFunction = ({ defaultConverters }) => {
       const sizeCss = state.fontSize
         ? fontSizeStates[state.fontSize as keyof typeof fontSizeStates]?.css
         : undefined
-      if (colorCss) Object.assign(style, colorCss)
-      if (bgCss) Object.assign(style, bgCss)
-      if (sizeCss) Object.assign(style, sizeCss)
+      // These `css` records come from Payload's defaultColors/fontSizeStates as
+      // kebab-case CSS property names (e.g. `background-color`, `font-size`) —
+      // React's `style` prop requires camelCase, so plain `Object.assign` here
+      // silently drops anything but `color` (kebab === camel by coincidence).
+      if (colorCss) Object.assign(style, toCamelCaseCss(colorCss))
+      if (bgCss) Object.assign(style, toCamelCaseCss(bgCss))
+      if (sizeCss) Object.assign(style, toCamelCaseCss(sizeCss))
       if (Object.keys(style).length === 0) return rendered
       return <span style={style as CSSProperties}>{rendered}</span>
     },

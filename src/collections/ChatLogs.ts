@@ -18,10 +18,6 @@ export const ChatLogs: CollectionConfig = {
   slug: 'chat-logs',
   labels: { singular: 'AI ჩატის ჟურნალი', plural: 'AI ჩატის ჟურნალები' },
   admin: {
-    // Hidden from the CMS admin per client request — the AI chat is disabled,
-    // so there are no new journals. The table + data are preserved; flip this
-    // to false (and re-enable <ChatAssistant />) to bring it back.
-    hidden: true,
     useAsTitle: 'summary',
     defaultColumns: ['summary', 'locale', 'escalated', 'turns', 'createdAt'],
     description:

@@ -21,135 +21,14 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
-import Link from "next/link";
-import { Link as IntlLink } from "@/i18n/navigation";
-import { localizeName } from "@/lib/translit-ka";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type UIMessage } from "ai";
-
-// ── Visual constants ───────────────────────────────────────────────────────
+import { DefaultChatTransport } from "ai";
+import { Link } from "@/i18n/navigation";
+import { messageText, renderLine, ChatIcon } from "./chat-ui";
 
 const Z_INDEX_LAUNCHER = 40;
 const Z_INDEX_PANEL = 50;
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-
-/**
- * Pull all text out of a UI message's parts. v6 messages are arrays of
- * `{ type: 'text', text }` and tool-call parts; we only render the text
- * parts. Tool calls/results are intentionally not surfaced to the user —
- * the model already mentions doctor names and times in its text reply,
- * so showing the raw tool JSON would be noise.
- */
-function messageText(message: UIMessage): string {
-  return (message.parts ?? [])
-    .filter((p): p is { type: "text"; text: string } => p.type === "text")
-    .map((p) => p.text)
-    .join("");
-}
-
-/**
- * Render a single line of assistant text. If the line looks like a
- * relative booking URL (/[locale]/booking?...), render it as a primary
- * action button. Anything else → plain text.
- *
- * We intentionally only accept paths that start with /ge/booking,
- * /en/booking, or /ru/booking so the model can't trick us into rendering
- * arbitrary external links as styled buttons.
- */
-/**
- * Doctor card — rendered when the assistant emits a /[locale]/doctors/[slug]
- * line. Fetches the real doctor record by slug (photo/name come from the CMS,
- * not model output) and links to the localized profile.
- */
-function DoctorCard({ slug, locale }: { slug: string; locale: string }) {
-  const [doc, setDoc] = useState<{ name: string; specialty?: string; photo?: string } | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch(
-      `/api/doctors?where[slug][equals]=${encodeURIComponent(slug)}&depth=1&limit=1&locale=${locale}`,
-      { credentials: "include" },
-    )
-      .then((r) => r.json())
-      .then((j: { docs?: Array<{ name?: string; specialty?: string; photo?: { url?: string } | null }> }) => {
-        const d = j.docs?.[0];
-        if (!d || cancelled) return;
-        setDoc({
-          name: localizeName(String(d.name ?? ""), locale),
-          specialty: d.specialty ? localizeName(String(d.specialty), locale) : undefined,
-          photo: typeof d.photo === "object" && d.photo ? d.photo.url ?? undefined : undefined,
-        });
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [slug, locale]);
-
-  if (!doc) return null;
-
-  return (
-    <IntlLink
-      href={{ pathname: "/doctors/[slug]", params: { slug } }}
-      className="my-1.5 flex items-center gap-3 bg-white border border-pink/20 hover:border-pink rounded-2xl p-2.5 transition-colors no-underline shadow-sm"
-    >
-      {doc.photo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={doc.photo} alt={doc.name} className="w-12 h-12 rounded-xl object-cover object-top shrink-0" />
-      ) : (
-        <div className="w-12 h-12 rounded-xl bg-pink-light shrink-0" />
-      )}
-      <div className="min-w-0">
-        <p className="text-[13px] font-bold text-blackberry truncate">{doc.name}</p>
-        {doc.specialty && <p className="text-[11px] text-pink font-medium truncate">{doc.specialty}</p>}
-      </div>
-      <svg className="w-4 h-4 text-grey-light ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-      </svg>
-    </IntlLink>
-  );
-}
-
-function renderLine(line: string, locale: string, bookCta: string, key: string) {
-  const trimmed = line.trim();
-  const safe = new RegExp(`^/(ge|en|ru)/booking($|\\?)`).test(trimmed);
-  if (safe) {
-    return (
-      <Link
-        key={key}
-        href={trimmed}
-        className="my-1 inline-flex items-center gap-1.5 bg-pink hover:bg-pink/90 text-white text-[13px] font-bold px-4 py-2 rounded-full transition-colors shadow-sm"
-      >
-        {bookCta}
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-        </svg>
-      </Link>
-    );
-  }
-  const doctorMatch = trimmed.match(/^\/(?:ge|en|ru)\/doctors\/([\w-]+)(?:\?.*)?$/);
-  if (doctorMatch) {
-    return <DoctorCard key={key} slug={doctorMatch[1]} locale={locale} />;
-  }
-  return (
-    <span key={key} className="block">
-      {line || " "}
-    </span>
-  );
-}
-
-// ── Icon ───────────────────────────────────────────────────────────────────
-
-function ChatIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-    </svg>
-  );
-}
-
-// ── Main component ─────────────────────────────────────────────────────────
 
 export default function ChatAssistant() {
   const t = useTranslations("ChatAssistant");
@@ -249,16 +128,28 @@ export default function ChatAssistant() {
                   <p className="text-[11px] text-white/70 leading-tight truncate">{t("headerSubtitle")}</p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="w-8 h-8 rounded-lg hover:bg-white/15 flex items-center justify-center transition-colors shrink-0"
-                aria-label={t("closeLabel")}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-1 shrink-0">
+                <Link
+                  href="/ai-assistant"
+                  className="w-8 h-8 rounded-lg hover:bg-white/15 flex items-center justify-center transition-colors"
+                  aria-label={t("openFullPage")}
+                  title={t("openFullPage")}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                  </svg>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="w-8 h-8 rounded-lg hover:bg-white/15 flex items-center justify-center transition-colors"
+                  aria-label={t("closeLabel")}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {/* Message list */}

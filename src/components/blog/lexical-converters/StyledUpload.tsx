@@ -1,8 +1,18 @@
+import Image from 'next/image'
 import type { SerializedUploadNode } from '@payloadcms/richtext-lexical'
+import { mediaDerivativeUrl, type MediaSizeName } from '@/lib/media-url'
 
 // `fields` on the upload node = the extra metadata we declared on UploadFeature
 // (alignment, borderStyle, shadow, radius, caption) in src/payload.config.ts.
 // `value` is the populated Media doc (Payload depth >= 1 hydrates it).
+type MediaValue = {
+  url?: string | null
+  alt?: string | null
+  width?: number | null
+  height?: number | null
+  sizes?: Partial<Record<MediaSizeName, { url?: string | null } | null>> | null
+}
+
 type Fields = {
   alignment?: 'left' | 'center' | 'right' | 'fullWidth'
   size?: 'small' | 'medium' | 'large' | 'full'
@@ -61,7 +71,7 @@ export function StyledUpload({ node }: { node: SerializedUploadNode }) {
   const value = node.value
   if (!value || typeof value !== 'object') return null
 
-  const media = value as { url?: string | null; alt?: string | null }
+  const media = value as MediaValue
   const fields = (node.fields ?? {}) as Fields
 
   const alignment = fields.alignment ?? 'center'
@@ -81,18 +91,30 @@ export function StyledUpload({ node }: { node: SerializedUploadNode }) {
   const inlineStyle = widthPercent ? { width: `${widthPercent}%`, maxWidth: '100%' } : undefined
   const sizeClassValue = alignment === 'fullWidth' || widthPercent ? '' : sizeClass[size]
 
-  if (!media.url) return null
+  // `hero` (aspect-preserving, no fixed-box crop) — content images can be any
+  // aspect ratio, and this figure never crops via CSS, so a hard-cropped
+  // derivative would distort/cut the image. See src/lib/media-url.ts.
+  const src = mediaDerivativeUrl(media, 'hero')
+  if (!src) return null
+  const imgClassName = `block w-full max-w-full h-auto ${radiusClass[radius]} ${borderClass[border]} ${shadowClass[shadow]}`
 
   return (
     <figure className={`my-6 sm:my-8 ${alignmentClass[alignment]} ${sizeClassValue}`} style={inlineStyle}>
-      <img
-        src={media.url}
-        alt={media.alt ?? ''}
-        loading="lazy"
-        // `block max-w-full h-auto` is the responsive-image defaults so the
-        // img never exceeds its figure and always preserves aspect ratio.
-        className={`block w-full max-w-full h-auto ${radiusClass[radius]} ${borderClass[border]} ${shadowClass[shadow]}`}
-      />
+      {media.width && media.height ? (
+        <Image
+          src={src}
+          alt={media.alt ?? ''}
+          width={media.width}
+          height={media.height}
+          sizes="(min-width: 768px) 880px, 100vw"
+          className={imgClassName}
+        />
+      ) : (
+        // Legacy/edge-case media without stored dimensions (next/image
+        // requires width+height unless using `fill`) — same visual result,
+        // just without Next's optimization pipeline.
+        <img src={src} alt={media.alt ?? ''} loading="lazy" className={imgClassName} />
+      )}
       {fields.caption && (
         <figcaption className="text-[13px] text-grey-light text-center mt-3 italic break-words">
           {fields.caption}

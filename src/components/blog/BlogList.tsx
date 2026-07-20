@@ -1,6 +1,7 @@
 "use client";
 
 import { m } from "framer-motion";
+import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import NewsCard from "./NewsCard";
@@ -41,10 +42,13 @@ export default function BlogList({ news }: { news: BlogItem[] }) {
           <article className="grid lg:grid-cols-2 bg-white rounded-3xl overflow-hidden border border-grey-lighter/70 transition-all duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:border-pink/25 group-hover:shadow-[0_36px_80px_-34px_rgba(104,33,73,0.32)]">
             <div className="relative aspect-[16/11] lg:aspect-auto lg:min-h-[380px] overflow-hidden bg-grey-lighter">
               {lead.featuredImage.url && (
-                <img
+                <Image
                   src={lead.featuredImage.url}
                   alt={lead.featuredImage.alt || lead.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1000ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
+                  fill
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  priority
+                  className="object-cover transition-transform duration-[1000ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
                 />
               )}
               <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-blackberry/55 via-blackberry/10 to-transparent" />

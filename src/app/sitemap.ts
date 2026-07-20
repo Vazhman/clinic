@@ -32,6 +32,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // healthLibrary defaults OFF (opposite of every other toggle) — off since
     // 2026-05-30 per client request, only included once the CMS admin flips it on.
     ...(toggleFlags.healthLibrary === true ? [{ path: "/health-library", priority: 0.7, freq: "weekly" as const }] : []),
+    // aiAssistant also defaults OFF — same reasoning as healthLibrary above.
+    ...(toggleFlags.aiAssistant === true ? [{ path: "/ai-assistant", priority: 0.6, freq: "monthly" as const }] : []),
     ...(isOn("blog") ? [{ path: "/blog", priority: 0.8, freq: "daily" as const }] : []),
     ...(isOn("labTests") ? [{ path: "/lab-tests", priority: 0.7, freq: "weekly" as const }] : []),
     { path: "/gallery", priority: 0.6, freq: "monthly" as const },

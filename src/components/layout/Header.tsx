@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import LanguageSwitcher from "./LanguageSwitcher";
+import HeaderSearch from "./HeaderSearch";
 
 type NavSubLink = { label: string; href: string };
 
@@ -158,6 +159,10 @@ export default function Header({
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Sitewide search — collapsible icon between the desktop nav
+                and the language switcher, also reachable on mobile since
+                this whole control row isn't hidden below xl:. */}
+            <HeaderSearch />
             {/* Language switcher — always visible in the header bar, left of
                 the burger button on mobile and alongside other controls on
                 desktop. No longer duplicated inside the mobile menu panel. */}

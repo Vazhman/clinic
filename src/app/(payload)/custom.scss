@@ -489,7 +489,10 @@ select,
     color: #1F0715;
     background: transparent !important;
     border: 0 !important;
-    border-bottom: 1px solid transparent !important;
+    // Visible at rest (not just on focus) — a fully transparent border made
+    // this field impossible to spot as an input at all when empty, which
+    // read as a missing/broken field to editors.
+    border-bottom: 2px solid #E8A0C4 !important;
     border-radius: 0 !important;
     padding: 6px 0 !important;
     box-shadow: none !important;

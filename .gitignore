@@ -75,3 +75,12 @@ backups/
 
 # ad-hoc diagnostic scripts (never committed intentionally)
 scratch_*.mjs
+
+# READMEs and AI-assistant/skill-definition files — kept local only, never pushed
+/AGENTS.md
+/CLAUDE.md
+/README.md
+/HANDOVER.md
+/docs/HANDOVER.md
+/skills-lock.json
+/.agents/

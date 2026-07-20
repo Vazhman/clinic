@@ -2,6 +2,7 @@ import { getPayload } from 'payload'
 import { unstable_cache } from 'next/cache'
 import config from '@payload-config'
 import type { Service, Doctor, CheckupPackage, Review, SeoOverrides } from '@/types'
+import { mediaDerivativeUrl, type MediaSizeName } from '@/lib/media-url'
 
 // Shape returned by Payload for the seo group. ogImage may be the populated
 // Media object (depth >= 1) or just the ID (depth: 0). We normalize to a URL
@@ -48,7 +49,7 @@ type Locale = 'ge' | 'en' | 'ru'
 // upgraded from textarea to richText — Payload/SQLite will happily store
 // a bare string in a richText column, so `typeof rt === 'string'` guards
 // against that transitional shape instead of crashing on it).
-function extractLexicalText(rt: unknown): string {
+export function extractLexicalText(rt: unknown): string {
   if (typeof rt === 'string') return rt
   if (!rt || typeof rt !== 'object') return ''
   const out: string[] = []
@@ -143,7 +144,7 @@ async function _getServices(locale: Locale): Promise<Service[]> {
       descriptionRichText: doc.description ?? null,
       shortDescription: doc.shortDescription,
       icon: doc.icon,
-      image: (typeof doc.image === 'object' && doc.image !== null ? doc.image.url : null) || legacyImageMap.get(doc.slug) || '',
+      image: mediaUrl(doc.image) || legacyImageMap.get(doc.slug) || '',
       seo: normalizeSeo((doc as { seo?: RawSeo }).seo),
     }))
   } catch {
@@ -228,7 +229,7 @@ async function _getDoctors(
         // photoless — components then render their clean person-icon fallback
         // instead of a misleading stock portrait. Real headshots are untouched.
         photo: (() => {
-          const u = (typeof doc.photo === 'object' && doc.photo !== null ? doc.photo.url : null) || legacy?.photo || ''
+          const u = mediaUrl(doc.photo) || legacy?.photo || ''
           return u && /doctor-placeholder/i.test(u) ? '' : u
         })(),
         biography: bio,
@@ -384,8 +385,13 @@ export type HeroSlide = {
 }
 
 // Shape of a raw heroSlides row after findGlobal(depth: 2). Relationships are
-// populated to their docs; uploads to media objects with a `url`.
-type MediaLike = { url?: string | null } | string | null | undefined
+// populated to their docs; uploads to media objects with a `url` plus the
+// Sharp-generated `sizes.{thumbnail,card,hero}` derivatives (Media.ts).
+type MediaLike =
+  | { url?: string | null; sizes?: Partial<Record<MediaSizeName, { url?: string | null } | null>> | null }
+  | string
+  | null
+  | undefined
 type RelatedDoc = {
   slug?: string | null
   title?: string | null
@@ -395,7 +401,12 @@ type RelatedDoc = {
   image?: MediaLike
 } | string | number | null | undefined
 
-const mediaUrl = (m: MediaLike): string => (typeof m === 'object' && m !== null ? m.url ?? '' : '')
+// Prefers a pre-generated, much smaller derivative over the original
+// full-resolution upload (originals can be MBs; `hero` is typically tens of
+// KB and preserves the source aspect ratio — see src/lib/media-url.ts for
+// why `card`/`thumbnail` aren't the default) — reused by components outside
+// this data layer too.
+const mediaUrl = (m: MediaLike, preferred: MediaSizeName = 'hero'): string => mediaDerivativeUrl(m, preferred)
 
 async function _getHeroSlides(locale: Locale): Promise<HeroSlide[] | null> {
   try {
@@ -497,8 +508,8 @@ function estimateReadingTimeMinutes(content: unknown): number {
 function newsGalleryUrls(gallery: unknown): { url: string; alt: string }[] {
   if (!Array.isArray(gallery)) return []
   return gallery
-    .filter((g): g is { url?: string; alt?: string } => typeof g === 'object' && g !== null)
-    .map((g) => ({ url: g.url ?? '', alt: g.alt ?? '' }))
+    .filter((g): g is MediaLike & { alt?: string } => typeof g === 'object' && g !== null)
+    .map((g) => ({ url: mediaUrl(g), alt: g.alt ?? '' }))
     .filter((g) => g.url)
 }
 
@@ -525,7 +536,7 @@ async function _getHomepageNews(locale: Locale) {
       category: newsCategoryLabel(doc.categoryRef),
       publishedDate: doc.publishedDate,
       featuredImage: typeof doc.featuredImage === 'object' && doc.featuredImage !== null
-        ? { url: doc.featuredImage.url ?? '', alt: doc.featuredImage.alt ?? '' }
+        ? { url: mediaUrl(doc.featuredImage), alt: doc.featuredImage.alt ?? '' }
         : { url: '', alt: '' },
     }))
   } catch {
@@ -584,7 +595,7 @@ async function _getAllNews(locale: Locale, page = 1, limit = 60, categorySlug?: 
           : [],
         readingTimeMinutes: estimateReadingTimeMinutes(doc.puckData ?? doc.body),
         featuredImage: typeof doc.featuredImage === 'object' && doc.featuredImage !== null
-          ? { url: doc.featuredImage.url ?? '', alt: doc.featuredImage.alt ?? '' }
+          ? { url: mediaUrl(doc.featuredImage), alt: doc.featuredImage.alt ?? '' }
           : { url: '', alt: '' },
       })),
       totalPages: result.totalPages,
@@ -659,7 +670,7 @@ async function _getDoctorByDoctraId(doctraId: string): Promise<Doctor | null> {
       slug: doc.slug,
       name: doc.name,
       specialty: doc.specialty,
-      photo: (typeof doc.photo === 'object' && doc.photo !== null ? doc.photo.url : null) || '',
+      photo: mediaUrl(doc.photo) || '',
       biography: bio,
       qualifications: quals,
       specializations: specs,
@@ -705,7 +716,7 @@ async function _getServiceByDoctraBranchId(doctraBranchId: string): Promise<Serv
       descriptionRichText: doc.description ?? null,
       shortDescription: doc.shortDescription,
       icon: doc.icon,
-      image: (typeof doc.image === 'object' && doc.image !== null ? doc.image.url : null) || legacyImageMap.get(doc.slug) || '',
+      image: mediaUrl(doc.image) || legacyImageMap.get(doc.slug) || '',
       seo: normalizeSeo((doc as { seo?: RawSeo }).seo),
     }
   } catch {
@@ -1070,6 +1081,7 @@ export type FeatureTogglesCms = {
   googleReviewsSync?: boolean | null
   promotions?: boolean | null
   contactForm?: boolean | null
+  aiAssistant?: boolean | null
 } | null
 
 async function _getFeatureToggles(): Promise<FeatureTogglesCms> {
@@ -1516,10 +1528,7 @@ export async function getBookingDoctorsFromPayload(
     const { available, errored } = await getBookableDoctorIds(branchIds)
 
     return linked.map((d) => {
-      const rawPhoto =
-        typeof d.photo === 'object' && d.photo !== null && 'url' in d.photo
-          ? d.photo.url ?? null
-          : null
+      const rawPhoto = mediaUrl(d.photo, 'thumbnail') || null
       // Most doctors share the generic `doctor-placeholder` upload. Treat that
       // as photoless so the booking card's initials fallback fires — a grid of
       // colored initials reads far cleaner than ~100 identical grey silhouettes.
@@ -1562,6 +1571,96 @@ export async function getBookingDoctorsFromPayload(
 // tagged with both `navigation` and `pages`. `getStats` reads both the
 // `home-page` and `site-settings` globals, so it carries both tags.
 // ---------------------------------------------------------------------------
+
+export type SiteSearchResult = {
+  type: 'page' | 'news' | 'service' | 'doctor'
+  title: string
+  url: string
+}
+
+// Header search (Header.tsx) — fans out across the four public-content
+// collections in parallel. Deliberately NOT wrapped in `cached()`: the query
+// string is arbitrary per-keystroke user input, so caching it would just
+// grow the data cache with one-off entries for no benefit. Each collection
+// query is independently try/caught so one failing collection (e.g. a
+// locale with no match) never blanks out the other three.
+export async function searchSite(locale: Locale, query: string, perTypeLimit = 5): Promise<SiteSearchResult[]> {
+  const q = query.trim()
+  if (q.length < 2) return []
+
+  try {
+    const [payload, toggles] = await Promise.all([getPayloadClient(), _getFeatureToggles()])
+
+    const queries: Promise<SiteSearchResult[]>[] = [
+      payload
+        .find({
+          collection: 'pages',
+          locale,
+          depth: 0,
+          where: { title: { like: q }, status: { equals: 'published' } } as never,
+          limit: perTypeLimit,
+        })
+        .then((r) => r.docs.map((d) => ({ type: 'page' as const, title: d.title, url: `/${locale}/pages/${d.slug}` })))
+        .catch(() => []),
+    ]
+
+    if (isFeatureEnabled(toggles, 'blog')) {
+      queries.push(
+        payload
+          .find({
+            collection: 'news',
+            locale,
+            depth: 0,
+            where: { title: { like: q }, ...publishedNewsWhere() } as never,
+            limit: perTypeLimit,
+          })
+          .then((r) => r.docs.map((d) => ({ type: 'news' as const, title: d.title, url: `/${locale}/blog/${d.slug}` })))
+          .catch(() => []),
+      )
+    }
+
+    if (isFeatureEnabled(toggles, 'services')) {
+      queries.push(
+        payload
+          .find({
+            collection: 'services',
+            locale,
+            depth: 0,
+            where: { name: { like: q } } as never,
+            limit: perTypeLimit,
+          })
+          .then((r) => r.docs.map((d) => ({ type: 'service' as const, title: d.name, url: `/${locale}/services/${d.slug}` })))
+          .catch(() => []),
+      )
+    }
+
+    if (isFeatureEnabled(toggles, 'doctors')) {
+      queries.push(
+        payload
+          .find({
+            collection: 'doctors',
+            locale,
+            depth: 0,
+            // Same visibility rule as the /doctors list (_getDoctors default):
+            // skip inactive doctors and ones hidden from list views.
+            where: {
+              name: { like: q },
+              inactive: { not_equals: true },
+              showOnDoctorsPage: { not_equals: false },
+            } as never,
+            limit: perTypeLimit,
+          })
+          .then((r) => r.docs.map((d) => ({ type: 'doctor' as const, title: d.name, url: `/${locale}/doctors/${d.slug}` })))
+          .catch(() => []),
+      )
+    }
+
+    return (await Promise.all(queries)).flat()
+  } catch {
+    return []
+  }
+}
+
 export const getServices = cached(_getServices, 'getServices', ['services'])
 export const getDoctors = cached(_getDoctors, 'getDoctors', ['doctors'])
 export const getCheckupPackages = cached(_getCheckupPackages, 'getCheckupPackages', ['checkup-packages'])

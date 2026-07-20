@@ -51,7 +51,7 @@ export default function DoctorsPreview({ doctors }: { doctors: Doctor[] }) {
                       alt={doctor.name}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-contain transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                     />
                   ) : (
                     <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-pink/10 to-blackberry-light/20 flex items-center justify-center">

@@ -102,5 +102,19 @@ export const FeatureToggles: GlobalConfig = {
       'საკონტაქტო ფორმა',
       'ყურადღება: ამ საიტზე ამჟამად არ არსებობს ცალკე საკონტაქტო ფორმა (/contact გვერდზე მხოლოდ მისამართი/რუკა/ტელეფონია) — ეს გადამრთველი მხოლოდ მომავალი გამოყენებისთვისაა მომზადებული და ამჟამად არაფერზე გავლენას არ ახდენს. საჭიროების შემთხვევაში დაგვიკავშირდით ფუნქციის ასაშენებლად.',
     ),
+    {
+      name: 'aiAssistant',
+      type: 'checkbox',
+      label: 'AI ასისტენტი',
+      // Defaults OFF (opposite of every other toggle above) — the assistant
+      // calls a paid Gemini model and writes chat-logs on every reply, so it
+      // must be an explicit opt-in rather than silently active the moment
+      // this field ships. Mirrors the `healthLibrary` default-off pattern.
+      defaultValue: false,
+      admin: {
+        description:
+          'ჩართვისას საიტზე გამოჩნდება მცურავი AI ჩატ-ასისტენტი (Gemini-ზე დაფუძნებული) და ხელმისაწვდომი გახდება მისი დამოუკიდებელი გვერდიც (/ai-assistant). გამორთვისას ორივე ქრება და API endpoint 404-ს აბრუნებს. საჭიროებს გარემოს ცვლადს GEMINI_API_KEY — მისი გარეშე ჩართვაც კი შეცდომას დააბრუნებს. დამატებითი ცოდნის ბაზა და სხვა კონფიგურაცია: "საიტის პარამეტრები" → "AI ასისტენტი".',
+      },
+    },
   ],
 }

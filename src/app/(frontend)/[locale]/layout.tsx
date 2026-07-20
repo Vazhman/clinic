@@ -10,10 +10,8 @@ import Footer from "@/components/layout/Footer";
 import SiteChrome from "@/components/layout/SiteChrome";
 import MotionProvider from "@/components/shared/MotionProvider";
 import WhatsAppButton from "@/components/shared/WhatsAppButton";
-// AI chat assistant disabled per client request. Re-enable by uncommenting this
-// import and the <ChatAssistant /> render below.
-// import ChatAssistant from "@/components/chat/ChatAssistant";
-import { getContactPage, getFooter, getNavigation, getPolicies, getSiteSettings, richTextHasContent } from "@/lib/payload-data";
+import ChatAssistant from "@/components/chat/ChatAssistant";
+import { getContactPage, getFeatureToggles, getFooter, getNavigation, getPolicies, getSiteSettings, richTextHasContent } from "@/lib/payload-data";
 import AccessibilityButton from "@/components/accessibility/AccessibilityButton";
 import AccessibilityProvider from "@/components/accessibility/AccessibilityProvider";
 import SpeechProvider from "@/components/accessibility/SpeechProvider";
@@ -121,13 +119,15 @@ export default async function LocaleLayout({
   // Fetch Payload globals once for the whole layout (Header / Footer /
   // WhatsApp button). Each helper returns null on DB error so the layout
   // still renders with next-intl fallbacks.
-  const [navigationCms, footerCms, contactCms, siteSettingsCms, policiesCms] = await Promise.all([
+  const [navigationCms, footerCms, contactCms, siteSettingsCms, policiesCms, featureToggles] = await Promise.all([
     getNavigation(locale as Locale),
     getFooter(locale as Locale),
     getContactPage(locale as Locale),
     getSiteSettings(locale as Locale),
     getPolicies(locale as Locale),
+    getFeatureToggles(),
   ]);
+  const aiAssistantEnabled = featureToggles?.aiAssistant === true;
 
   // Legal footer links are CMS-driven: show Terms / Privacy ONLY when the
   // „Policies" global has real content for THIS locale. Empty → no link (and
@@ -184,8 +184,7 @@ export default async function LocaleLayout({
                 widgets={
                   <>
                     <WhatsAppButton whatsappNumber={footerCms?.whatsappNumber ?? null} />
-                    {/* AI chat assistant disabled per client request. */}
-                    {/* <ChatAssistant /> */}
+                    {aiAssistantEnabled && <ChatAssistant />}
                   </>
                 }
               >

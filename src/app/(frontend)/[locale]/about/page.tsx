@@ -8,6 +8,7 @@ import StructuredData from "@/components/shared/StructuredData";
 import { generateBreadcrumbSchema, generateClinicSchema } from "@/lib/structured-data";
 import { buildLocalizedAlternates, type Locale } from "@/lib/seo-helpers";
 import { getAboutPage } from "@/lib/payload-data";
+import { mediaDerivativeUrl } from "@/lib/media-url";
 
 // Lexical TextNode format bitmask (matches @payloadcms/richtext-lexical's
 // NodeFormat: bold=1, italic=2, strikethrough=4, underline=8, code=16).
@@ -204,10 +205,7 @@ export default async function AboutPage({
   // CMS heroImage + highlights were editable in admin but never rendered —
   // the admin uploaded a photo and wrote highlight cards and "nothing showed".
   // Both render only when populated, so the page is unchanged for empty CMS.
-  const heroImageUrl =
-    typeof aboutCms?.heroImage === "object" && aboutCms.heroImage !== null
-      ? aboutCms.heroImage.url ?? ""
-      : "";
+  const heroImageUrl = mediaDerivativeUrl(aboutCms?.heroImage);
   const highlights = (aboutCms?.highlights ?? [])
     .map((h) => ({ title: h?.title?.trim() ?? "", text: h?.text?.trim() ?? "" }))
     .filter((h) => h.title || h.text);
@@ -215,8 +213,7 @@ export default async function AboutPage({
   const ceo = aboutCms?.ceo;
   const ceoMessage = extractLexicalText(ceo?.message);
   const ceoMessageParagraphNodes = extractLexicalParagraphNodes(ceo?.message);
-  const ceoPhoto =
-    typeof ceo?.photo === "object" && ceo.photo !== null ? ceo.photo.url ?? "" : "";
+  const ceoPhoto = mediaDerivativeUrl(ceo?.photo);
   const ceoName = ceo?.name?.trim() || "";
   const ceoRole = ceo?.role?.trim() || "";
 

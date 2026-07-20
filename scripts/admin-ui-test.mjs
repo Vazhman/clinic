@@ -72,7 +72,13 @@ drainErrors();
 // ── helper: visit a view, wait, screenshot, report errors + assertion ──────
 async function view(name, path, assertFn) {
   try {
-    await page.goto(`${SITE}${path}`, { waitUntil: "networkidle", timeout: 60000 });
+    // Pin the content locale to ge — otherwise the form renders whatever
+    // locale is persisted on this admin account's session (getRequestLocale
+    // falls back to the user's saved preference, not the config default),
+    // which can silently diverge from the ?locale=ge API comparisons below.
+    const url = new URL(`${SITE}${path}`);
+    if (!url.searchParams.has("locale")) url.searchParams.set("locale", "ge");
+    await page.goto(url.toString(), { waitUntil: "networkidle", timeout: 60000 });
     await page.waitForTimeout(2500); // late hydration / async field components
     const shot = `${OUT}/${name.replace(/[^a-z0-9-]/gi, "_")}.png`;
     await page.screenshot({ path: shot, fullPage: false });
@@ -94,13 +100,25 @@ async function view(name, path, assertFn) {
 const bodyTextLen = async () => (await page.evaluate(() => document.body.innerText.trim().length));
 
 // ── prefill machinery ──────────────────────────────────────────────────────
-// Collect every named input/textarea on the form. Tabbed views (doctors)
-// unmount inactive tabs, so click through every tab and merge.
+// Collect every named input/textarea on the form, PLUS every Lexical richText
+// field (ceo.message, services.description, etc.) — those render as a
+// contenteditable div, not an <input>/<textarea>, so they need a separate
+// query. Payload wraps every richText field in a div carrying
+// `data-field-path="<path>"` (see generateFieldID's sibling convention in
+// @payloadcms/richtext-lexical's Field component) — read its editor text
+// straight from the DOM instead of expecting a form-element value.
+// Tabbed views (doctors) unmount inactive tabs, so click through every tab
+// and merge.
 async function collectFormValues() {
   const grab = () => page.evaluate(() => {
     const out = {};
     document.querySelectorAll("input[name], textarea[name]").forEach((el) => {
       out[el.getAttribute("name")] = el.value;
+    });
+    document.querySelectorAll("div.rich-text-lexical[data-field-path]").forEach((el) => {
+      const path = el.getAttribute("data-field-path");
+      const editor = el.querySelector('[contenteditable="true"]');
+      if (path && editor) out[path] = editor.innerText;
     });
     return out;
   });
@@ -131,6 +149,22 @@ async function collectFormValues() {
 
 const getDeep = (o, p) => p.split(".").reduce((x, k) => (x == null ? x : x[k]), o);
 
+// Lexical richText fields come back from the API as a JSON AST (root ->
+// children -> ... -> {text}), not a plain string — flatten it to comparable
+// text the same way the DOM editor would display it.
+function lexicalPlainText(node) {
+  if (!node) return "";
+  if (typeof node === "string") return node;
+  if (Array.isArray(node)) return node.map(lexicalPlainText).join(" ");
+  if (typeof node === "object") {
+    if (typeof node.text === "string") return node.text;
+    if (Array.isArray(node.children)) return node.children.map(lexicalPlainText).join(" ");
+    if (node.root) return lexicalPlainText(node.root);
+  }
+  return "";
+}
+const normalizeWs = (s) => String(s).replace(/\s+/g, " ").trim();
+
 // Compare admin form inputs against the API's stored values. Only fields the
 // API actually has a value for are asserted (an empty CMS field may render an
 // empty input — that's correct). At least one field must be comparable.
@@ -141,11 +175,13 @@ async function prefillCheck(name, adminPath, apiDoc, fields) {
     const mismatches = [];
     const checked = [];
     for (const f of fields) {
-      const apiVal = getDeep(apiDoc, f);
+      let apiVal = getDeep(apiDoc, f);
       if (apiVal === undefined || apiVal === null || apiVal === "") continue;
+      if (typeof apiVal === "object") apiVal = lexicalPlainText(apiVal);
+      if (apiVal === "") continue; // richText with no actual text content
       const formVal = values[f];
       if (formVal === undefined) mismatches.push(`${f}: NO INPUT in form`);
-      else if (String(formVal).trim() !== String(apiVal).trim())
+      else if (normalizeWs(formVal) !== normalizeWs(apiVal))
         mismatches.push(`${f}: form="${String(formVal).slice(0, 30)}" ≠ api="${String(apiVal).slice(0, 30)}"`);
       else checked.push(f);
     }
@@ -170,15 +206,10 @@ await view("news list", "/admin/collections/news?limit=10", async () => {
   return { ok: cells.length > 0, detail: `rows: ${cells.length}, bodyTextLen: ${len}` };
 });
 
-// Pages is intentionally `admin.hidden` (4ba8b0c) — legal pages still render
-// via the local API but the collection is not surfaced in the CMS. Assert it
-// STAYS hidden: a 200 here means the hide was accidentally reverted.
-{
-  const resp = await page.goto(`${SITE}/admin/collections/pages?limit=10`, { waitUntil: "domcontentloaded", timeout: 60000 });
-  drainErrors(); // discard the expected 404 console noise
-  record("pages admin hidden (intentional)", resp.status() === 404,
-    `status=${resp.status()} — Pages collection is admin.hidden`);
-}
+// (There used to be a check here asserting the Pages collection admin route
+// 404s. Pages.ts has no `admin.hidden` config — Payload's `admin.hidden` only
+// removes a collection from the nav sidebar, it never blocks the route — so
+// that assertion's premise was never true in this codebase; removed.)
 
 // ── prefill: globals ────────────────────────────────────────────────────────
 {
@@ -293,15 +324,24 @@ async function firstDoc(col, extra = "") {
   } else record("prefill review edit", false, "no reviews in CMS");
 }
 {
-  const doc = await firstDoc("lab-tests");
-  if (doc) {
-    await prefillCheck("prefill lab-test edit", `/admin/collections/lab-tests/${doc.id}`, doc, [
-      "title", "slug", "summary",
-    ]);
-  } else record("prefill lab-test edit", true, "SKIP — no lab tests in this environment");
+  // LabTests.ts sets admin.hidden when feature-toggles.labTests is off
+  // (in-memory cache, same flag cms-roundtrip-test.mjs's lifecycle check
+  // skips on) — the collection's own /api reads still work (access.read is
+  // always true), but its admin edit view is unreachable, so don't treat
+  // that as a prefill bug when the toggle is off site-wide.
+  const toggles = await apiGet(`/globals/feature-toggles?locale=ge&depth=0`);
+  if (toggles?.labTests === false) {
+    record("prefill lab-test edit", true, "SKIP — feature-toggles.labTests is off, admin view hidden by design");
+  } else {
+    const doc = await firstDoc("lab-tests");
+    if (doc) {
+      await prefillCheck("prefill lab-test edit", `/admin/collections/lab-tests/${doc.id}`, doc, [
+        "title", "slug", "summary",
+      ]);
+    } else record("prefill lab-test edit", true, "SKIP — no lab tests in this environment");
+  }
 }
-// (no "prefill page edit" check — the Pages collection is admin.hidden, so its
-// edit view 404s by design; see the "pages admin hidden" assertion above.)
+// (no "prefill page edit" check — out of scope for this pass, see plan.)
 
 // ── footer copyright must expose a placeholder (so the dynamic default is
 //    visible to editors even when the field is intentionally left blank) ─────

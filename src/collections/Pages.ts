@@ -28,6 +28,9 @@ export const Pages: CollectionConfig = {
     description: 'მარტივი სტატიკური გვერდები (Privacy, Terms, ბილინგი, კარიერა და ა.შ). სათაური + ტექსტი + (სურვილისამებრ) მენიუში ჩვენება. სტატუსით ("მონახაზი"/"გამოქვეყნებული") იმართება გვერდის ჩართვა/გამორთვა საიტზე.',
     defaultColumns: ['title', 'slug', 'status', 'updatedAt'],
     group: 'კონტენტი',
+    components: {
+      beforeListTable: ['/components/admin/PageSettingsPanel'],
+    },
   },
   access: {
     // REST/GraphQL read is restricted to authenticated admins. The public
