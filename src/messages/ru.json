@@ -26,7 +26,9 @@
     "typePage": "Страницы",
     "typeNews": "Новости",
     "typeService": "Услуги",
-    "typeDoctor": "Врачи"
+    "typeDoctor": "Врачи",
+    "typeHint": "Введите минимум 2 символа для поиска",
+    "resultsHint": "навигация · Enter открыть · Esc закрыть"
   },
   "Hero": {
     "headline": "Многопрофильная клиника в Батуми",

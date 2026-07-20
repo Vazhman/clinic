@@ -26,7 +26,9 @@
     "typePage": "Pages",
     "typeNews": "News",
     "typeService": "Services",
-    "typeDoctor": "Doctors"
+    "typeDoctor": "Doctors",
+    "typeHint": "Type at least 2 characters to search",
+    "resultsHint": "navigate · Enter to open · Esc to close"
   },
   "Hero": {
     "headline": "Multi-Profile Clinic in Batumi",
