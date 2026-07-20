@@ -9,6 +9,10 @@ import { generateBreadcrumbSchema, generateClinicSchema } from "@/lib/structured
 import { buildLocalizedAlternates, type Locale } from "@/lib/seo-helpers";
 import { getAboutPage } from "@/lib/payload-data";
 import { mediaDerivativeUrl } from "@/lib/media-url";
+import type { CSSProperties } from "react";
+import { textColorStates, backgroundColorStates } from "@/lexical/textStateColors";
+import { fontSizeStates } from "@/lexical/fontSizeStates";
+import { toCamelCaseCss } from "@/lexical/toCamelCaseCss";
 
 // Lexical TextNode format bitmask (matches @payloadcms/richtext-lexical's
 // NodeFormat: bold=1, italic=2, strikethrough=4, underline=8, code=16).
@@ -21,6 +25,11 @@ type LexicalNode = {
   url?: string;
   tag?: string;
   listType?: string;
+  indent?: number;
+  // TextStateFeature (color / background-color / font-size), written by the
+  // editor's toolbar. See LexicalContent.tsx's `text` converter for the
+  // Payload-side equivalent of this same lookup.
+  $?: { color?: string; bgColor?: string; fontSize?: string };
 };
 
 // Renders one Lexical inline node (text/link/linebreak) to JSX, preserving
@@ -49,6 +58,27 @@ function renderInlineLexicalNode(node: LexicalNode, key: number): ReactNode {
           {el}
         </span>
       );
+    const state = node.$;
+    if (state) {
+      const style: Record<string, string> = {};
+      const colorCss = state.color ? textColorStates[state.color as keyof typeof textColorStates]?.css : undefined;
+      const bgCss = state.bgColor
+        ? backgroundColorStates[state.bgColor as keyof typeof backgroundColorStates]?.css
+        : undefined;
+      const sizeCss = state.fontSize
+        ? fontSizeStates[state.fontSize as keyof typeof fontSizeStates]?.css
+        : undefined;
+      if (colorCss) Object.assign(style, toCamelCaseCss(colorCss));
+      if (bgCss) Object.assign(style, toCamelCaseCss(bgCss));
+      if (sizeCss) Object.assign(style, toCamelCaseCss(sizeCss));
+      if (Object.keys(style).length > 0) {
+        el = (
+          <span key={`state-${key}`} style={style as CSSProperties}>
+            {el}
+          </span>
+        );
+      }
+    }
     return <span key={key}>{el}</span>;
   }
   if (node.type === "link" && Array.isArray(node.children)) {
@@ -95,7 +125,12 @@ function renderListBlock(node: LexicalNode, key: number): ReactNode {
 // block-level element (e.g. <ol>) — callers must render it directly, NOT
 // inside their own <p> wrapper, since nesting <ol>/<ul> inside <p> is
 // invalid HTML and triggers a React hydration mismatch.
-type LexicalParagraphEntry = { isBlock: boolean; nodes: ReactNode[] };
+// `indent` mirrors Payload's own generic indent handling (each level = 40px
+// of paddingInlineStart, applied by convertLexicalNodesToJSX in
+// LexicalContent.tsx's code path) — this bespoke renderer builds its own
+// <p>/<div> wrappers instead of going through that converter, so it has to
+// carry + apply the indent itself or the editor's Tab-indent silently no-ops.
+type LexicalParagraphEntry = { isBlock: boolean; nodes: ReactNode[]; indent: number };
 
 function extractLexicalParagraphNodes(rt: unknown): LexicalParagraphEntry[] {
   if (!rt || typeof rt !== "object") return [];
@@ -103,10 +138,12 @@ function extractLexicalParagraphNodes(rt: unknown): LexicalParagraphEntry[] {
   const blocks = Array.isArray(root?.children) ? root!.children : [];
   return blocks
     .map((b): LexicalParagraphEntry => {
-      if (b.type === "list") return { isBlock: true, nodes: [renderListBlock(b, 0)] };
+      const indent = typeof b.indent === "number" ? b.indent : 0;
+      if (b.type === "list") return { isBlock: true, nodes: [renderListBlock(b, 0)], indent };
       return {
         isBlock: false,
         nodes: Array.isArray(b.children) ? b.children.map((c, i) => renderInlineLexicalNode(c, i)) : [],
+        indent,
       };
     })
     .filter((entry) => entry.nodes.length > 0);
@@ -265,7 +302,10 @@ export default async function AboutPage({
                 (descParagraphNodes[0]?.isBlock ? (
                   descParagraphNodes[0].nodes
                 ) : (
-                  <p className="text-white/70 text-[17px] sm:text-[19px] leading-[1.65] max-w-[58ch] break-words">
+                  <p
+                    className="text-white/70 text-[17px] sm:text-[19px] leading-[1.65] max-w-[58ch] break-words whitespace-pre-wrap"
+                    style={descParagraphNodes[0]?.indent ? { paddingInlineStart: `${descParagraphNodes[0].indent * 40}px` } : undefined}
+                  >
                     {descParagraphNodes[0]?.nodes ?? descParagraphs[0] ?? description}
                   </p>
                 ))}
@@ -299,7 +339,11 @@ export default async function AboutPage({
                     {entry.nodes}
                   </div>
                 ) : (
-                  <p key={i} className="text-[17px] sm:text-[18px] text-grey leading-[1.7] break-words">
+                  <p
+                    key={i}
+                    className="text-[17px] sm:text-[18px] text-grey leading-[1.7] break-words whitespace-pre-wrap"
+                    style={entry.indent ? { paddingInlineStart: `${entry.indent * 40}px` } : undefined}
+                  >
                     {entry.nodes}
                   </p>
                 ),
@@ -415,7 +459,8 @@ export default async function AboutPage({
                         ) : (
                           <p
                             key={i}
-                            className="text-[clamp(1.1rem,1.9vw,1.42rem)] text-blackberry leading-[1.62] font-medium break-words"
+                            className="text-[clamp(1.1rem,1.9vw,1.42rem)] text-blackberry leading-[1.62] font-medium break-words whitespace-pre-wrap"
+                            style={entry.indent ? { paddingInlineStart: `${entry.indent * 40}px` } : undefined}
                           >
                             {entry.nodes}
                           </p>

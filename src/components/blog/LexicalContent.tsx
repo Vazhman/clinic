@@ -8,12 +8,7 @@ import { GalleryRenderer } from './lexical-converters/GalleryRenderer'
 import { ColumnsRenderer } from './lexical-converters/ColumnsRenderer'
 import { textColorStates, backgroundColorStates } from '@/lexical/textStateColors'
 import { fontSizeStates } from '@/lexical/fontSizeStates'
-
-function toCamelCaseCss(css: Record<string, string>): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(css).map(([key, value]) => [key.replace(/-([a-z])/g, (_, c) => c.toUpperCase()), value]),
-  )
-}
+import { toCamelCaseCss } from '@/lexical/toCamelCaseCss'
 
 // JSX converters map Lexical node types -> React components. We override the
 // `upload` node (so it picks up our border/shadow/radius styling) and the

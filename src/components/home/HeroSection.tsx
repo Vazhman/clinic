@@ -173,6 +173,13 @@ export default function HeroSection({
               style={{ zIndex: isActive ? 2 : isPrev ? 1 : 0 }}
               className="absolute inset-0"
               aria-hidden={!isActive}
+              // Framer Motion serializes animated inline styles as literal CSS
+              // strings during SSR (e.g. `opacity: "0"`, `transform:
+              // "translateX(4%)"`), which legitimately differs in format from
+              // the style object React computes client-side for the same
+              // values — a known, cosmetic Framer Motion SSR/hydration
+              // artifact, not a functional bug.
+              suppressHydrationWarning
             >
               <Image
                 src={s.image}
@@ -214,11 +221,16 @@ export default function HeroSection({
               initial="initial"
               animate="enter"
               exit="exit"
+              // See the image-layer m.div above: Framer Motion's SSR style
+              // serialization legitimately differs in format (not value) from
+              // React's client-side style object — cosmetic, safe to suppress.
+              suppressHydrationWarning
             >
               <m.h1
                 variants={textItem}
                 className="text-[clamp(2rem,4.4vw,3.6rem)] font-bold leading-[1.06] tracking-[-0.02em] text-blackberry mb-5 text-balance"
                 style={{ overflowWrap: "normal", wordBreak: "keep-all" }}
+                suppressHydrationWarning
               >
                 {active.headline}
               </m.h1>
@@ -226,12 +238,13 @@ export default function HeroSection({
                 <m.p
                   variants={textItem}
                   className="text-[16px] sm:text-[18px] text-grey-light leading-[1.6] max-w-[46ch] mb-8 break-words"
+                  suppressHydrationWarning
                 >
                   {active.subheadline}
                 </m.p>
               )}
               {active.buttonLabel && active.buttonHref && (
-                <m.div variants={textItem}>
+                <m.div variants={textItem} suppressHydrationWarning>
                   <HeroButton label={active.buttonLabel} href={active.buttonHref} />
                 </m.div>
               )}
