@@ -1300,7 +1300,7 @@ export type AboutPageCms = {
     name?: string | null
     role?: string | null
     photo?: { url?: string | null; alt?: string | null } | string | null
-    message?: string | null
+    message?: unknown // Lexical richText
   } | null
   highlights?: Array<{ title?: string | null; text?: string | null; icon?: string | null }> | null
   stats?: Array<{ label?: string | null; value?: string | null; description?: string | null }> | null

@@ -19,10 +19,10 @@
  * Safe-by-construction: every mutation is restored in a finally block; the
  * sentinel is timestamped so a crashed run is identifiable and re-runnable.
  *
- * Usage: SITE=https://clinic-one-blush.vercel.app ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/cms-roundtrip-test.mjs
+ * Usage: SITE=https://clinic-olive-nu.vercel.app ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/cms-roundtrip-test.mjs
  */
 
-const SITE = process.env.SITE || "https://clinic-one-blush.vercel.app";
+const SITE = process.env.SITE || "https://clinic-olive-nu.vercel.app";
 const EMAIL = process.env.ADMIN_EMAIL || "admin@admin.ge";
 const PASSWORD = process.env.ADMIN_PASSWORD || "111111";
 const SENTINEL = `QA${Date.now().toString(36).toUpperCase()}`;
@@ -185,26 +185,29 @@ for (const c of GLOBAL_CHECKS) {
 }
 
 // ── about-page CEO block (renders only when the group is filled) ───────────
+// message is richText (see the ceo.message richtext check further below,
+// grouped with the other richText checks so it can reuse withSentinelParagraph);
+// name/role are still plain text fields, tested here together.
 {
-  const name = "global:about-page.ceo.{name,role,message} -> /ge/shesakheb";
+  const name = "global:about-page.ceo.{name,role} -> /ge/shesakheb";
   const before = await api(`/globals/about-page?locale=ge&depth=0`);
   const orig = before.body?.ceo ?? {};
   try {
     const patch = await api(`/globals/about-page?locale=ge&depth=0`, {
       method: "POST",
-      body: JSON.stringify({ ceo: { ...orig, name: `${SENTINEL}N`, role: `${SENTINEL}R`, message: `${SENTINEL}M` } }),
+      body: JSON.stringify({ ceo: { ...orig, name: `${SENTINEL}N`, role: `${SENTINEL}R` } }),
     });
     if (patch.status !== 200) {
       record(name, false, `PATCH ${patch.status}: ${JSON.stringify(patch.body?.errors).slice(0, 200)}`);
     } else {
       const pub = await publicHtml("/ge/shesakheb");
-      const all = ["N", "R", "M"].filter((s) => pub.html.includes(`${SENTINEL}${s}`));
-      record(name, all.length === 3, `visible: ${all.length}/3 (name/role/message)`);
+      const all = ["N", "R"].filter((s) => pub.html.includes(`${SENTINEL}${s}`));
+      record(name, all.length === 2, `visible: ${all.length}/2 (name/role)`);
     }
   } finally {
     await api(`/globals/about-page?locale=ge&depth=0`, {
       method: "POST",
-      body: JSON.stringify({ ceo: { name: orig.name ?? "", role: orig.role ?? "", message: orig.message ?? "", photo: orig.photo ?? null } }),
+      body: JSON.stringify({ ceo: { name: orig.name ?? "", role: orig.role ?? "", message: orig.message ?? null, photo: orig.photo ?? null } }),
     });
   }
 }
@@ -293,6 +296,30 @@ const withSentinelParagraph = (rich, text) => {
         body: JSON.stringify({ description: original }),
       });
     }
+  }
+}
+
+// about-page.ceo.message (optional richText greeting on /shesakheb)
+{
+  const name = "global-richtext:about-page.ceo.message -> /ge/shesakheb";
+  const before = await api(`/globals/about-page?locale=ge&depth=0`);
+  const origCeo = before.body?.ceo ?? {};
+  try {
+    const patch = await api(`/globals/about-page?locale=ge&depth=0`, {
+      method: "POST",
+      body: JSON.stringify({ ceo: { ...origCeo, message: withSentinelParagraph(origCeo.message, SENTINEL) } }),
+    });
+    if (patch.status !== 200) {
+      record(name, false, `PATCH ${patch.status}: ${JSON.stringify(patch.body?.errors).slice(0, 200)}`);
+    } else {
+      const pub = await publicHtml("/ge/shesakheb");
+      record(name, pub.html.includes(SENTINEL), pub.html.includes(SENTINEL) ? "rich text paragraph visible" : `saved but NOT on page (HTTP ${pub.status})`);
+    }
+  } finally {
+    await api(`/globals/about-page?locale=ge&depth=0`, {
+      method: "POST",
+      body: JSON.stringify({ ceo: { name: origCeo.name ?? "", role: origCeo.role ?? "", message: origCeo.message ?? null, photo: origCeo.photo ?? null } }),
+    });
   }
 }
 

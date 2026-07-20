@@ -15,7 +15,7 @@
 import { chromium } from "playwright";
 import fs from "node:fs/promises";
 
-const SITE = process.argv[2] || process.env.SITE || "https://clinic-one-blush.vercel.app";
+const SITE = process.argv[2] || process.env.SITE || "https://clinic-olive-nu.vercel.app";
 const EMAIL = process.env.ADMIN_EMAIL || "admin@admin.ge";
 const PASSWORD = process.env.ADMIN_PASSWORD || "111111";
 const OUT = "./test-screenshots/admin";

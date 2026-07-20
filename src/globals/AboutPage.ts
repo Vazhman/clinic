@@ -31,7 +31,7 @@ export const AboutPage: GlobalConfig = {
         { name: 'name', type: 'text', localized: true, label: 'სახელი', admin: { description: 'მაგ: ვასილ ხოზრევანიძე' } },
         { name: 'role', type: 'text', localized: true, label: 'თანამდებობა', admin: { description: 'მაგ: დირექტორი / CEO' } },
         { name: 'photo', type: 'upload', relationTo: 'media', label: 'ფოტო', admin: { description: 'დირექტორის/CEO-ს ფოტო (მიმართვის გვერდით ნაჩვენები).' } },
-        { name: 'message', type: 'textarea', localized: true, label: 'მიმართვის ტექსტი', admin: { description: 'დირექტორის/CEO-ს მისალმება/მიმართვა პაციენტებისადმი.' } },
+        { name: 'message', type: 'richText', localized: true, label: 'მიმართვის ტექსტი', admin: { description: 'დირექტორის/CEO-ს მისალმება/მიმართვა პაციენტებისადმი.' } },
       ],
     },
     {

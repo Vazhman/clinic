@@ -6,8 +6,8 @@ Everything you need to demo this to the customer and deploy it for them.
 
 | | |
 |---|---|
-| **Live demo** | https://clinic-one-blush.vercel.app |
-| **Admin panel** | https://clinic-one-blush.vercel.app/admin |
+| **Live demo** | https://clinic-olive-nu.vercel.app |
+| **Admin panel** | https://clinic-olive-nu.vercel.app/admin |
 | **Repo** | `git@github-personal:Fartenadze89/clinic.git` (`main`) |
 | **Stack** | Next.js 16 (App Router) + Payload CMS 3 + Postgres / SQLite |
 | **Demo DB** | Neon Postgres (Vercel-linked) |
@@ -21,7 +21,7 @@ Everything you need to demo this to the customer and deploy it for them.
 ## Demo credentials
 
 ```
-URL:      https://clinic-one-blush.vercel.app/admin
+URL:      https://clinic-olive-nu.vercel.app/admin
 Email:    admin@admin.ge
 Password: 111111
 ```

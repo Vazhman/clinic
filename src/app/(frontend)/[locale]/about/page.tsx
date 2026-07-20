@@ -18,6 +18,8 @@ type LexicalNode = {
   children?: LexicalNode[];
   fields?: { url?: string; newTab?: boolean };
   url?: string;
+  tag?: string;
+  listType?: string;
 };
 
 // Renders one Lexical inline node (text/link/linebreak) to JSX, preserving
@@ -68,17 +70,45 @@ function renderInlineLexicalNode(node: LexicalNode, key: number): ReactNode {
   return null;
 }
 
-// One entry per top-level Lexical block (paragraph/heading/etc.) so callers
-// can split "first paragraph" (hero lead) from "rest" (story continuation)
-// exactly like extractLexicalParagraphs did, but returning renderable nodes
-// instead of flattened strings.
-function extractLexicalParagraphNodes(rt: unknown): ReactNode[][] {
+// "list" blocks need an actual <ol>/<ul><li> structure — falling through to
+// the generic children-array branch above would flatten listitem nodes into
+// plain concatenated <span>s with no bullets/numbering.
+function renderListBlock(node: LexicalNode, key: number): ReactNode {
+  const Tag = node.tag === "ol" || node.listType === "number" ? "ol" : "ul";
+  const listClass = Tag === "ol" ? "list-decimal list-outside pl-5 space-y-1" : "list-disc list-outside pl-5 space-y-1";
+  return (
+    <Tag key={key} className={listClass}>
+      {(node.children ?? []).map((li, i) => (
+        <li key={i}>{(li.children ?? []).map((c, j) => renderInlineLexicalNode(c, j))}</li>
+      ))}
+    </Tag>
+  );
+}
+
+// One entry per top-level Lexical block (paragraph/heading/list/etc.) so
+// callers can split "first paragraph" (hero lead) from "rest" (story
+// continuation) exactly like extractLexicalParagraphs did, but returning
+// renderable nodes instead of flattened strings.
+//
+// `isBlock: true` (list blocks) means the entry is already a complete
+// block-level element (e.g. <ol>) — callers must render it directly, NOT
+// inside their own <p> wrapper, since nesting <ol>/<ul> inside <p> is
+// invalid HTML and triggers a React hydration mismatch.
+type LexicalParagraphEntry = { isBlock: boolean; nodes: ReactNode[] };
+
+function extractLexicalParagraphNodes(rt: unknown): LexicalParagraphEntry[] {
   if (!rt || typeof rt !== "object") return [];
   const root = (rt as { root?: { children?: LexicalNode[] } }).root;
   const blocks = Array.isArray(root?.children) ? root!.children : [];
   return blocks
-    .map((b) => (Array.isArray(b.children) ? b.children.map((c, i) => renderInlineLexicalNode(c, i)) : []))
-    .filter((nodes) => nodes.length > 0);
+    .map((b): LexicalParagraphEntry => {
+      if (b.type === "list") return { isBlock: true, nodes: [renderListBlock(b, 0)] };
+      return {
+        isBlock: false,
+        nodes: Array.isArray(b.children) ? b.children.map((c, i) => renderInlineLexicalNode(c, i)) : [],
+      };
+    })
+    .filter((entry) => entry.nodes.length > 0);
 }
 
 // Walk a Lexical richText tree and concatenate plain text nodes. Mirrors the
@@ -183,7 +213,8 @@ export default async function AboutPage({
     .filter((h) => h.title || h.text);
 
   const ceo = aboutCms?.ceo;
-  const ceoMessage = ceo?.message?.trim() || "";
+  const ceoMessage = extractLexicalText(ceo?.message);
+  const ceoMessageParagraphNodes = extractLexicalParagraphNodes(ceo?.message);
   const ceoPhoto =
     typeof ceo?.photo === "object" && ceo.photo !== null ? ceo.photo.url ?? "" : "";
   const ceoName = ceo?.name?.trim() || "";
@@ -233,11 +264,14 @@ export default async function AboutPage({
               <h1 className="text-[clamp(2.3rem,5.6vw,4.6rem)] font-bold text-white leading-[1.04] tracking-[-0.025em] mb-8 break-words [text-wrap:balance]">
                 {subtitle}
               </h1>
-              {description && (
-                <p className="text-white/70 text-[17px] sm:text-[19px] leading-[1.65] max-w-[58ch] break-words">
-                  {descParagraphNodes[0] ?? descParagraphs[0] ?? description}
-                </p>
-              )}
+              {description &&
+                (descParagraphNodes[0]?.isBlock ? (
+                  descParagraphNodes[0].nodes
+                ) : (
+                  <p className="text-white/70 text-[17px] sm:text-[19px] leading-[1.65] max-w-[58ch] break-words">
+                    {descParagraphNodes[0]?.nodes ?? descParagraphs[0] ?? description}
+                  </p>
+                ))}
             </div>
 
             {heroImageUrl && (
@@ -262,11 +296,17 @@ export default async function AboutPage({
         <section className="bg-cream pt-2 pb-4">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-10">
             <div className="space-y-5">
-              {descParagraphNodes.slice(1).map((nodes, i) => (
-                <p key={i} className="text-[17px] sm:text-[18px] text-grey leading-[1.7] break-words">
-                  {nodes}
-                </p>
-              ))}
+              {descParagraphNodes.slice(1).map((entry, i) =>
+                entry.isBlock ? (
+                  <div key={i} className="text-[17px] sm:text-[18px] text-grey leading-[1.7] break-words">
+                    {entry.nodes}
+                  </div>
+                ) : (
+                  <p key={i} className="text-[17px] sm:text-[18px] text-grey leading-[1.7] break-words">
+                    {entry.nodes}
+                  </p>
+                ),
+              )}
             </div>
           </div>
         </section>
@@ -366,9 +406,25 @@ export default async function AboutPage({
                     >
                       &ldquo;
                     </span>
-                    <p className="relative text-[clamp(1.1rem,1.9vw,1.42rem)] text-blackberry leading-[1.62] font-medium break-words whitespace-pre-line">
-                      {ceoMessage}
-                    </p>
+                    <div className="relative space-y-4">
+                      {ceoMessageParagraphNodes.map((entry, i) =>
+                        entry.isBlock ? (
+                          <div
+                            key={i}
+                            className="text-[clamp(1.1rem,1.9vw,1.42rem)] text-blackberry leading-[1.62] font-medium break-words"
+                          >
+                            {entry.nodes}
+                          </div>
+                        ) : (
+                          <p
+                            key={i}
+                            className="text-[clamp(1.1rem,1.9vw,1.42rem)] text-blackberry leading-[1.62] font-medium break-words"
+                          >
+                            {entry.nodes}
+                          </p>
+                        ),
+                      )}
+                    </div>
                   </div>
                 )}
                 {(ceoName || ceoRole) && (
