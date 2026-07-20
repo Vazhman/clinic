@@ -69,3 +69,9 @@ blender-work/The-blend/
 # QA browser-test artifacts
 test-screenshots/
 backups/
+
+# Playwright MCP debug artifacts (console logs, page snapshots)
+.playwright-mcp/
+
+# ad-hoc diagnostic scripts (never committed intentionally)
+scratch_*.mjs
