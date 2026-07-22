@@ -159,6 +159,50 @@ export const SiteSettings: GlobalConfig = {
           ],
         },
         {
+          label: 'Pixel და Analytics',
+          description: 'Facebook/Meta Pixel და Google Analytics (ან სხვა ანალიტიკის) კოდები — ჩაისმება საიტის ყველა გვერდზე.',
+          fields: [
+            {
+              name: 'pixelEnabled',
+              label: 'Pixel-ის ჩართვა საიტზე',
+              type: 'checkbox',
+              defaultValue: false,
+              admin: {
+                description: 'ჩართვისას ქვემოთ მითითებული Pixel კოდი აისახება საიტის ყველა გვერდზე. გამორთვისას კოდი საერთოდ არ იტვირთება, თუნდაც შენახული იყოს.',
+              },
+            },
+            {
+              name: 'pixelCode',
+              label: 'Pixel კოდი (Meta/Facebook Pixel)',
+              type: 'code',
+              admin: {
+                language: 'html',
+                condition: (data) => data?.pixelEnabled === true,
+                description: 'ჩასვით სრული <script> კოდი Facebook/Meta Pixel-იდან (Events Manager → Set up Pixel → Install code manually).',
+              },
+            },
+            {
+              name: 'analyticsEnabled',
+              label: 'Analytics-ის ჩართვა საიტზე',
+              type: 'checkbox',
+              defaultValue: false,
+              admin: {
+                description: 'ჩართვისას ქვემოთ მითითებული Analytics კოდი აისახება საიტის ყველა გვერდზე. გამორთვისას კოდი საერთოდ არ იტვირთება, თუნდაც შენახული იყოს.',
+              },
+            },
+            {
+              name: 'analyticsCode',
+              label: 'Analytics კოდი (Google Analytics / GA4 / GTM)',
+              type: 'code',
+              admin: {
+                language: 'html',
+                condition: (data) => data?.analyticsEnabled === true,
+                description: 'ჩასვით სრული <script> კოდი Google Analytics-იდან (GA4) ან Google Tag Manager-იდან.',
+              },
+            },
+          ],
+        },
+        {
           label: 'AI ასისტენტი',
           description:
             'AI ჩატ-ასისტენტის დამატებითი ცოდნის ბაზა და კონფიგურაცია. ასისტენტის ჩართვა/გამორთვა: "ფუნქციების ჩართვა/გამორთვა" → "AI ასისტენტი".',

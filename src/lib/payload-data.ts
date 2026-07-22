@@ -1051,6 +1051,10 @@ export type SiteSettingsCms = {
   extraRobotsRules?: string | null
   enableLlmsTxt?: boolean | null
   llmsTxtContent?: string | null
+  pixelEnabled?: boolean | null
+  pixelCode?: string | null
+  analyticsEnabled?: boolean | null
+  analyticsCode?: string | null
   topGeEnabled?: boolean | null
   topGeScript?: string | null
 } | null

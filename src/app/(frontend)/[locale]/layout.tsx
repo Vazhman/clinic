@@ -9,6 +9,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SiteChrome from "@/components/layout/SiteChrome";
 import MotionProvider from "@/components/shared/MotionProvider";
+import RawEmbedScript from "@/components/shared/RawEmbedScript";
 import WhatsAppButton from "@/components/shared/WhatsAppButton";
 import ChatAssistant from "@/components/chat/ChatAssistant";
 import { getContactPage, getFeatureToggles, getFooter, getNavigation, getPolicies, getSiteSettings, richTextHasContent } from "@/lib/payload-data";
@@ -145,6 +146,11 @@ export default async function LocaleLayout({
   return (
     <html lang={isoLang(locale as Locale)} className="scroll-smooth" suppressHydrationWarning>
       <body className="antialiased bg-white text-grey">
+        {/* Pixel / Analytics — loaded as early as possible so page views are
+            captured before any navigation. Each renders only when its own
+            toggle is on in საიტის პარამეტრები → Pixel და Analytics. */}
+        <RawEmbedScript html={siteSettingsCms?.pixelEnabled ? siteSettingsCms?.pixelCode : undefined} />
+        <RawEmbedScript html={siteSettingsCms?.analyticsEnabled ? siteSettingsCms?.analyticsCode : undefined} />
         {/* Preload the primary body font (FiraGO-Regular) — it's on the
             critical render path; starting the fetch early shaves the FOUT
             gap and helps LCP. React hoists this <link> into <head>. */}
