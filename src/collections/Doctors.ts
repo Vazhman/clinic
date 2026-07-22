@@ -24,18 +24,13 @@ export const Doctors: CollectionConfig = {
   },
   access: {
     read: () => true,
-    // Doctors are owned by Doctra (the HIS). Admins curate existing profiles
-    // (photo, bio, specialty, SEO, visibility) but must NOT change the roster:
-    // new doctors arrive only via the Doctra sync (`/api/import-doctra`), and
-    // removing one is done with the `inactive` checkbox, never a hard delete.
-    //   - create/delete → false: hides the admin "Create new" + "Delete"
-    //     buttons and blocks the REST endpoints.
-    //   - update is left at the default (any authenticated admin) so editing
-    //     still works.
-    // The Doctra sync is unaffected: it runs through the Local API
-    // (`payload.create`), which bypasses access control (overrideAccess:true).
+    // Doctors are owned by Doctra (the HIS): new doctors normally arrive only
+    // via the Doctra sync (`/api/import-doctra`), which runs through the
+    // Local API (`payload.create`) and bypasses access control regardless of
+    // `create` here. Admin bulk-delete is intentionally allowed (2026-07-22)
+    // so the roster can be wiped and rebuilt from a Doctra re-sync — anything
+    // without a `doctraId` will NOT come back and is lost for good.
     create: () => false,
-    delete: () => false,
   },
   fields: [
     // ── List-only virtual field: "view live" external-link icon ─────────

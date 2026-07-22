@@ -52,6 +52,41 @@ function guessCategory(name: string, nameEn: string): ServiceCategory {
   return "other";
 }
 
+// `services.description` is a required Lexical richText field — Payload
+// rejects a plain string. Wrap the Doctra department name in the minimal
+// single-paragraph editorState shape it expects.
+function plainTextToLexical(text: string) {
+  return {
+    root: {
+      type: "root",
+      version: 1,
+      format: "",
+      indent: 0,
+      direction: "ltr" as const,
+      children: [
+        {
+          type: "paragraph",
+          version: 1,
+          format: "",
+          indent: 0,
+          direction: "ltr" as const,
+          children: [
+            {
+              type: "text",
+              text,
+              format: 0,
+              style: "",
+              mode: "normal" as const,
+              detail: 0,
+              version: 1,
+            },
+          ],
+        },
+      ],
+    },
+  };
+}
+
 // URL-safe slug from a romanised name. Doctra's `name_en` is already Latin
 // so this is straightforward; if it's empty we fall back to the doctraId.
 function slugify(input: string, fallback: string): string {
@@ -123,7 +158,7 @@ export async function POST(request: NextRequest) {
             slug,
             doctraBranchId: dep.id,
             category: guessCategory(dep.name, dep.name_en),
-            description: dep.name || dep.name_en || "",
+            description: plainTextToLexical(dep.name || dep.name_en || ""),
             shortDescription: dep.name || dep.name_en || "",
             icon: "activity",
           },
@@ -143,7 +178,7 @@ export async function POST(request: NextRequest) {
               id: justCreated.docs[0].id,
               data: {
                 name: dep.name_en,
-                description: dep.name_en,
+                description: plainTextToLexical(dep.name_en),
                 shortDescription: dep.name_en,
               },
               locale: "en",
