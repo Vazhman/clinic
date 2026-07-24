@@ -21,7 +21,10 @@ const SPECIALTY_COLORS = [
   { bg: "linear-gradient(135deg, #DD64A6 0%, #8A3A6B 100%)", text: "#fff" },
 ];
 
-function getSpecialtyColor(specialty: string) {
+function getSpecialtyColor(specialty: string | null | undefined) {
+  // Defensive: a doctor row missing its specialty (bad/partial data) must not
+  // crash the whole /doctors page — fall back to the first swatch.
+  if (!specialty) return SPECIALTY_COLORS[0];
   // Stable hash from specialty name → index
   let hash = 0;
   for (let i = 0; i < specialty.length; i++) {
