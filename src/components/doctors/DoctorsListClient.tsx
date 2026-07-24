@@ -177,6 +177,7 @@ export default function DoctorsListClient({ doctors, specialties, showLanguages 
 /* ── Doctor card component ── */
 function DoctorCard({
   doctor,
+  index,
   showLanguages = true,
 }: {
   doctor: Doctor;
@@ -205,6 +206,7 @@ function DoctorCard({
               src={doctor.photo}
               alt={doctor.name}
               fill
+              priority={index < 4}
               sizes="(min-width: 1280px) 280px, (min-width: 640px) 33vw, 100vw"
               className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
             />

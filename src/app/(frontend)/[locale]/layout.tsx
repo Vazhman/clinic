@@ -11,7 +11,7 @@ import SiteChrome from "@/components/layout/SiteChrome";
 import MotionProvider from "@/components/shared/MotionProvider";
 import RawEmbedScript from "@/components/shared/RawEmbedScript";
 import WhatsAppButton from "@/components/shared/WhatsAppButton";
-import ChatAssistant from "@/components/chat/ChatAssistant";
+import ChatAssistant from "@/components/chat/ChatAssistantLazy";
 import { getContactPage, getFeatureToggles, getFooter, getNavigation, getPolicies, getSiteSettings, richTextHasContent } from "@/lib/payload-data";
 import AccessibilityButton from "@/components/accessibility/AccessibilityButton";
 import AccessibilityProvider from "@/components/accessibility/AccessibilityProvider";

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { getServices, getDoctors, getLabTestsForService, getFeatureToggles, isFeatureEnabled } from "@/lib/payload-data";
+import { getServiceBySlug, getDoctors, getLabTestsForService, getFeatureToggles, isFeatureEnabled } from "@/lib/payload-data";
 import { Link } from "@/i18n/navigation";
 import Breadcrumbs from "@/components/shared/Breadcrumbs";
 import Button from "@/components/shared/Button";
@@ -15,6 +15,12 @@ import { buildLocalizedAlternates, type Locale } from "@/lib/seo-helpers";
 import LexicalContent from "@/components/blog/LexicalContent";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 
+// Serve this service page from the Full Route Cache and refresh at most hourly,
+// so the box renders it once instead of per request. Editor saves still show
+// instantly: Payload's afterChange hook busts the `services` cache tag, which
+// getServiceBySlug carries.
+export const revalidate = 3600;
+
 export async function generateMetadata({
   params,
 }: {
@@ -22,8 +28,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const loc = locale as "ge" | "en" | "ru";
-  const services = await getServices(loc);
-  const service = services.find((s) => s.slug === slug);
+  const service = await getServiceBySlug(slug, loc);
   if (!service) return {};
 
   const seo = service.seo;
@@ -54,8 +59,7 @@ export default async function ServicePage({
   const toggles = await getFeatureToggles();
   if (!isFeatureEnabled(toggles, "services")) notFound();
   const loc = locale as "ge" | "en" | "ru";
-  const services = await getServices(loc);
-  const service = services.find((s) => s.slug === slug);
+  const service = await getServiceBySlug(slug, loc);
 
   if (!service) notFound();
 

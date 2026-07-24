@@ -1,6 +1,12 @@
 import type { MetadataRoute } from "next";
 import { LOCALES, localizedUrl, hreflangLanguages } from "@/lib/seo-helpers";
 
+// Cache the generated sitemap for 1h instead of re-running ~7 Payload queries
+// on every crawler hit. Content edits already bust the CMS data cache via
+// tag revalidation (see payload-data.ts); this just caps how often the XML
+// itself is rebuilt on the small cPanel box.
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
 

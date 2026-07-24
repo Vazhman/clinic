@@ -19,7 +19,10 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+// `m` (not `motion`) so this global widget uses the slim domAnimation feature
+// set from the app-wide LazyMotion provider (MotionProvider) instead of pulling
+// the full framer-motion bundle onto every page.
+import { m, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
@@ -78,7 +81,7 @@ export default function ChatAssistant() {
   return (
     <>
       {/* Launcher button — stacked above WhatsApp (bottom-4 → ~64px gap) */}
-      <motion.button
+      <m.button
         type="button"
         onClick={() => setOpen(true)}
         initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -99,12 +102,12 @@ export default function ChatAssistant() {
         <span className="absolute -top-1.5 -right-1.5 bg-white text-blackberry text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow ring-1 ring-blackberry/10">
           AI
         </span>
-      </motion.button>
+      </m.button>
 
       {/* Panel */}
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
@@ -261,7 +264,7 @@ export default function ChatAssistant() {
                 </svg>
               </button>
             </form>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

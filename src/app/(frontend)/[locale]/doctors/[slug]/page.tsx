@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { getDoctors, getDoctorsPage, getContactPage, getFeatureToggles, isFeatureEnabled } from "@/lib/payload-data";
+import { getDoctorBySlug, getDoctors, getDoctorsPage, getContactPage, getFeatureToggles, isFeatureEnabled } from "@/lib/payload-data";
 import Breadcrumbs from "@/components/shared/Breadcrumbs";
 import StructuredData from "@/components/shared/StructuredData";
 import { generatePhysicianSchema, generateBreadcrumbSchema } from "@/lib/structured-data";
 import { buildLocalizedAlternates, type Locale } from "@/lib/seo-helpers";
 import DoctorProfileClient from "@/components/doctors/DoctorProfileClient";
+
+// Serve this profile from the Full Route Cache and refresh at most hourly, so
+// the box renders it once instead of per request. Editor saves still show
+// instantly: Payload's afterChange hook busts the `doctors` cache tag, which
+// getDoctorBySlug/getDoctors carry.
+export const revalidate = 3600;
 
 export async function generateMetadata({
   params,
@@ -17,8 +23,7 @@ export async function generateMetadata({
   const loc = locale as "ge" | "en" | "ru";
   // includeHidden: a doctor hidden from the /doctors list must still have a
   // resolvable profile (direct link / booking), so its metadata must resolve too.
-  const doctors = await getDoctors(loc, undefined, { includeHidden: true });
-  const doctor = doctors.find((d) => d.slug === slug);
+  const doctor = await getDoctorBySlug(slug, loc, { includeHidden: true });
   if (!doctor) return {};
 
   const clinicName: Record<string, string> = {
@@ -48,13 +53,16 @@ export default async function DoctorPage({
   const toggles = await getFeatureToggles();
   if (!isFeatureEnabled(toggles, "doctors")) notFound();
   const loc = locale as "ge" | "en" | "ru";
-  const [doctors, doctorsPage, contactPage] = await Promise.all([
+  const [doctor, doctorsPage, contactPage, relatedPool] = await Promise.all([
     // includeHidden so a doctor hidden from the list still has a working profile.
-    getDoctors(loc, undefined, { includeHidden: true }),
+    getDoctorBySlug(slug, loc, { includeHidden: true }),
     getDoctorsPage(loc),
     getContactPage(loc),
+    // Full list, for the "related doctors" strip only. Uses the shared, already-
+    // warm `getDoctors` cache (no includeHidden → hidden/inactive already
+    // excluded); the MAIN doctor above is a single-row fetch.
+    getDoctors(loc),
   ]);
-  const doctor = doctors.find((d) => d.slug === slug);
 
   if (!doctor) notFound();
 
@@ -65,7 +73,7 @@ export default async function DoctorPage({
 
   // Related doctors: same specialty, excluding current AND excluding any hidden
   // from the list (they shouldn't surface in the "related" strip either).
-  const relatedDoctors = doctors
+  const relatedDoctors = relatedPool
     .filter((d) => d.specialty === doctor.specialty && d.id !== doctor.id && d.showOnDoctorsPage !== false)
     .slice(0, 4);
 

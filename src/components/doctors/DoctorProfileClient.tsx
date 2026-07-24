@@ -446,11 +446,12 @@ export default function DoctorProfileClient({
                     <div className="bg-white rounded-2xl overflow-hidden border border-grey-lighter hover:border-pink/20 hover:shadow-md transition-all duration-300">
                       <div className="aspect-[4/5] bg-gradient-to-br from-pink-light/30 to-grey-lighter relative overflow-hidden">
                         {rd.photo ? (
-                          <img
+                          <Image
                             src={rd.photo}
                             alt={rd.name}
-                            className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy"
+                            fill
+                            sizes="(min-width: 768px) 200px, 40vw"
+                            className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
                           />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center">

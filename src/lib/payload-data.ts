@@ -95,6 +95,140 @@ function cached<A extends unknown[], R>(
   return unstable_cache(fn, [key], { tags, revalidate: 3600 })
 }
 
+// ---------------------------------------------------------------------------
+// Shared doc → shape mappers
+//
+// The list getters (`_getServices`/`_getDoctors`) and the single-row getters
+// (`_getServiceBySlug`/`_getDoctorBySlug`) map a Payload doc to the public
+// `Service`/`Doctor` shape through the SAME function each — so a list element
+// and a by-slug result are byte-for-byte identical and the two read paths can
+// never drift.
+//
+// Legacy seed lookups are built once at module load. `photo`/`image` are public
+// asset URLs that resolve in any locale, so they're a safe fallback when a
+// Payload row has no uploaded media.
+// ---------------------------------------------------------------------------
+const legacyServiceImageMap = new Map(legacyServices.map((s) => [s.slug, s.image]))
+const legacyDoctorMap = new Map(legacyDoctors.map((d) => [d.slug, d]))
+
+// Minimal structural view of the fields each mapper reads. Payload's generated
+// doc type (a superset) is assignable to these, so `docs.map(mapServiceDoc)`
+// type-checks exactly as the previous inline `.map((doc) => ({ ... }))` did.
+type ServiceDocShape = {
+  id: string | number
+  slug: string
+  name: string
+  description?: unknown
+  shortDescription: string
+  icon: string
+  image?: MediaLike
+}
+
+function mapServiceDoc(doc: ServiceDocShape): Service {
+  return {
+    id: String(doc.id),
+    slug: doc.slug,
+    name: doc.name,
+    // `description` field was upgraded textarea -> richText for full
+    // editor-toolbar parity (Item 4). Keep a plain-text projection under
+    // `description` for SEO/JSON-LD consumers (generateServiceSchema,
+    // meta descriptions) and pass the raw serialized Lexical state through
+    // as `descriptionRichText` for the actual page body render.
+    // `extractLexicalText` also tolerates legacy rows still holding the
+    // old plain string (pre-migration data).
+    description: extractLexicalText(doc.description),
+    descriptionRichText: doc.description ?? null,
+    shortDescription: doc.shortDescription,
+    icon: doc.icon,
+    image: mediaUrl(doc.image) || legacyServiceImageMap.get(doc.slug) || '',
+    seo: normalizeSeo((doc as { seo?: RawSeo }).seo),
+  }
+}
+
+type DoctorDocShape = {
+  id: string | number
+  slug: string
+  name: string
+  specialty: string
+  photo?: MediaLike
+  biography?: unknown
+  qualifications?: Array<{ qualification?: string | null }> | null
+  specializations?: Array<{ specialization?: string | null }> | null
+  languagesSpoken?: Array<{ language?: string | null }> | null
+  experienceYears?: number | null
+  isDepartmentHead?: boolean | null
+}
+
+function mapDoctorDoc(doc: DoctorDocShape): Doctor {
+  const legacy = legacyDoctorMap.get(doc.slug)
+  const bio = extractLexicalText(doc.biography)
+  // Drop rows with no value in the current locale — Payload returns the
+  // array shape but individual string fields can be undefined, which
+  // breaks any consumer that calls string methods on them.
+  const quals = (doc.qualifications ?? [])
+    .map((q: { qualification?: string | null }) => q?.qualification)
+    .filter((v: unknown): v is string => typeof v === 'string' && v.length > 0)
+  const specs = (doc.specializations ?? [])
+    .map((s: { specialization?: string | null }) => s?.specialization)
+    .filter((v: unknown): v is string => typeof v === 'string' && v.length > 0)
+  const langs = (doc.languagesSpoken ?? [])
+    .map((l: { language?: string | null }) => l?.language)
+    .filter((v: unknown): v is string => typeof v === 'string' && v.length > 0)
+  const exp = doc.experienceYears ?? 0
+
+  // Legacy fallback for `photo` only — that string is a public asset
+  // URL and works in any locale. Text fields (biography, qualifications,
+  // specializations, languagesSpoken, isDepartmentHead) used to fall
+  // back to `src/lib/data.ts` for legacy seed doctors, but that file is
+  // Georgian-only — the fallback leaked Georgian onto /en and /ru. Now
+  // text fields show whatever Payload has in the requested locale (or
+  // nothing if the admin hasn't filled it).
+  return {
+    id: String(doc.id),
+    slug: doc.slug,
+    name: doc.name,
+    specialty: doc.specialty,
+    // A doctor whose only image is the shared `doctor-placeholder` stock
+    // photo (a generic face that mismatches most names) is treated as
+    // photoless — components then render their clean person-icon fallback
+    // instead of a misleading stock portrait. Real headshots are untouched.
+    photo: (() => {
+      const u = mediaUrl(doc.photo) || legacy?.photo || ''
+      return u && /doctor-placeholder/i.test(u) ? '' : u
+    })(),
+    biography: bio,
+    // Raw richText passed through alongside the flattened `bio` string —
+    // DoctorProfileClient renders this via LexicalContent for full
+    // formatting; `bio` above stays as the plain-text projection other
+    // consumers (metaDescription slicing, search) already rely on.
+    biographyRichText: doc.biography ?? null,
+    qualifications: quals,
+    specializations: specs,
+    experienceYears: exp,
+    languagesSpoken: langs,
+    isDepartmentHead: doc.isDepartmentHead ?? false,
+    lastUpdated: (doc as { lastUpdated?: string | null }).lastUpdated ?? null,
+    // Payload's built-in updatedAt — used as fallback for the
+    // "Last updated" line on the profile when admin hasn't filled
+    // in the manual `lastUpdated` date.
+    updatedAt: (doc as { updatedAt?: string | null }).updatedAt ?? null,
+    // Pass through Doctra link fields so DoctorProfileClient can decide
+    // whether to render the booking widget (isBookable check). Without
+    // these the page silently hid the booking CTA + widget on every
+    // doctor profile even though all 146 local doctors are bookable.
+    doctraId: (doc as { doctraId?: string | null }).doctraId ?? null,
+    doctraBranchId: (doc as { doctraBranchId?: string | null }).doctraBranchId ?? null,
+    // Admin-controlled booking switch — defaults to true. Older rows
+    // without the field default to true via the `?? true` so the CTA
+    // appears for all existing doctors until admin curates.
+    bookingEnabled: (doc as { bookingEnabled?: boolean | null }).bookingEnabled ?? true,
+    // Defaults to true (visible) for older rows without the field, so no
+    // doctor is accidentally hidden from the list after this rolls out.
+    showOnDoctorsPage: (doc as { showOnDoctorsPage?: boolean | null }).showOnDoctorsPage ?? true,
+    seo: normalizeSeo((doc as { seo?: RawSeo }).seo),
+  }
+}
+
 async function _getServices(locale: Locale): Promise<Service[]> {
   try {
     const payload = await getPayloadClient()
@@ -109,8 +243,6 @@ async function _getServices(locale: Locale): Promise<Service[]> {
       // and fixed for doctors).
       sort: ['displayOrder', 'slug'] as never,
     })
-
-    const legacyImageMap = new Map(legacyServices.map((s) => [s.slug, s.image]))
 
     // The one `featured` service (if any) always leads — that's what renders
     // as the large purple card on /services. Pinned services float next
@@ -129,27 +261,36 @@ async function _getServices(locale: Locale): Promise<Service[]> {
       return 0
     })
 
-    return sortedDocs.map((doc) => ({
-      id: String(doc.id),
-      slug: doc.slug,
-      name: doc.name,
-      // `description` field was upgraded textarea -> richText for full
-      // editor-toolbar parity (Item 4). Keep a plain-text projection under
-      // `description` for SEO/JSON-LD consumers (generateServiceSchema,
-      // meta descriptions) and pass the raw serialized Lexical state through
-      // as `descriptionRichText` for the actual page body render.
-      // `extractLexicalText` also tolerates legacy rows still holding the
-      // old plain string (pre-migration data).
-      description: extractLexicalText(doc.description),
-      descriptionRichText: doc.description ?? null,
-      shortDescription: doc.shortDescription,
-      icon: doc.icon,
-      image: mediaUrl(doc.image) || legacyImageMap.get(doc.slug) || '',
-      seo: normalizeSeo((doc as { seo?: RawSeo }).seo),
-    }))
+    return sortedDocs.map((doc) => mapServiceDoc(doc as ServiceDocShape))
   } catch {
     // DB unavailable — use locale-aware seed data
     return getLocalizedServices(locale)
+  }
+}
+
+/**
+ * Single service by slug — the /services/[slug] detail page's read path.
+ * Fetches ONLY the one row (limit: 1, filtered in the DB) instead of loading
+ * the whole collection and `.find`-ing in JS. Maps through the SAME
+ * `mapServiceDoc` as `_getServices`, so the result is identical to one element
+ * of that list. Returns null when no service matches.
+ */
+async function _getServiceBySlug(slug: string, locale: Locale): Promise<Service | null> {
+  try {
+    const payload = await getPayloadClient()
+    const result = await payload.find({
+      collection: 'services',
+      locale,
+      where: { slug: { equals: slug } } as never,
+      limit: 1,
+      depth: 1,
+    })
+    const doc = result.docs[0]
+    if (!doc) return null
+    return mapServiceDoc(doc as ServiceDocShape)
+  } catch {
+    // DB unavailable — use locale-aware seed data (same source as _getServices).
+    return getLocalizedServices(locale).find((s) => s.slug === slug) ?? null
   }
 }
 
@@ -193,80 +334,50 @@ async function _getDoctors(
       sort: ['displayOrder', 'slug'] as never,
     })
 
-    const legacyMap = new Map(legacyDoctors.map((d) => [d.slug, d]))
-
-    return result.docs.map((doc) => {
-      const legacy = legacyMap.get(doc.slug)
-      const bio = extractLexicalText(doc.biography)
-      // Drop rows with no value in the current locale — Payload returns the
-      // array shape but individual string fields can be undefined, which
-      // breaks any consumer that calls string methods on them.
-      const quals = (doc.qualifications ?? [])
-        .map((q: { qualification?: string | null }) => q?.qualification)
-        .filter((v: unknown): v is string => typeof v === 'string' && v.length > 0)
-      const specs = (doc.specializations ?? [])
-        .map((s: { specialization?: string | null }) => s?.specialization)
-        .filter((v: unknown): v is string => typeof v === 'string' && v.length > 0)
-      const langs = (doc.languagesSpoken ?? [])
-        .map((l: { language?: string | null }) => l?.language)
-        .filter((v: unknown): v is string => typeof v === 'string' && v.length > 0)
-      const exp = doc.experienceYears ?? 0
-
-      // Legacy fallback for `photo` only — that string is a public asset
-      // URL and works in any locale. Text fields (biography, qualifications,
-      // specializations, languagesSpoken, isDepartmentHead) used to fall
-      // back to `src/lib/data.ts` for legacy seed doctors, but that file is
-      // Georgian-only — the fallback leaked Georgian onto /en and /ru. Now
-      // text fields show whatever Payload has in the requested locale (or
-      // nothing if the admin hasn't filled it).
-      return {
-        id: String(doc.id),
-        slug: doc.slug,
-        name: doc.name,
-        specialty: doc.specialty,
-        // A doctor whose only image is the shared `doctor-placeholder` stock
-        // photo (a generic face that mismatches most names) is treated as
-        // photoless — components then render their clean person-icon fallback
-        // instead of a misleading stock portrait. Real headshots are untouched.
-        photo: (() => {
-          const u = mediaUrl(doc.photo) || legacy?.photo || ''
-          return u && /doctor-placeholder/i.test(u) ? '' : u
-        })(),
-        biography: bio,
-        // Raw richText passed through alongside the flattened `bio` string —
-        // DoctorProfileClient renders this via LexicalContent for full
-        // formatting; `bio` above stays as the plain-text projection other
-        // consumers (metaDescription slicing, search) already rely on.
-        biographyRichText: doc.biography ?? null,
-        qualifications: quals,
-        specializations: specs,
-        experienceYears: exp,
-        languagesSpoken: langs,
-        isDepartmentHead: doc.isDepartmentHead ?? false,
-        lastUpdated: (doc as { lastUpdated?: string | null }).lastUpdated ?? null,
-        // Payload's built-in updatedAt — used as fallback for the
-        // "Last updated" line on the profile when admin hasn't filled
-        // in the manual `lastUpdated` date.
-        updatedAt: (doc as { updatedAt?: string | null }).updatedAt ?? null,
-        // Pass through Doctra link fields so DoctorProfileClient can decide
-        // whether to render the booking widget (isBookable check). Without
-        // these the page silently hid the booking CTA + widget on every
-        // doctor profile even though all 146 local doctors are bookable.
-        doctraId: (doc as { doctraId?: string | null }).doctraId ?? null,
-        doctraBranchId: (doc as { doctraBranchId?: string | null }).doctraBranchId ?? null,
-        // Admin-controlled booking switch — defaults to true. Older rows
-        // without the field default to true via the `?? true` so the CTA
-        // appears for all existing doctors until admin curates.
-        bookingEnabled: (doc as { bookingEnabled?: boolean | null }).bookingEnabled ?? true,
-        // Defaults to true (visible) for older rows without the field, so no
-        // doctor is accidentally hidden from the list after this rolls out.
-        showOnDoctorsPage: (doc as { showOnDoctorsPage?: boolean | null }).showOnDoctorsPage ?? true,
-        seo: normalizeSeo((doc as { seo?: RawSeo }).seo),
-      }
-    })
+    return result.docs.map((doc) => mapDoctorDoc(doc as DoctorDocShape))
   } catch {
     // DB unavailable — use locale-aware seed data
     return getLocalizedDoctors(locale, limit)
+  }
+}
+
+/**
+ * Single doctor by slug — the /doctors/[slug] detail page's read path.
+ * Fetches ONLY the one row (limit: 1, filtered in the DB) instead of loading
+ * all ~147 doctors (every full Lexical bio) and `.find`-ing in JS. Maps through
+ * the SAME `mapDoctorDoc` as `_getDoctors`, so the result is identical to one
+ * element of that list. Returns null when no doctor matches.
+ *
+ * Visibility mirrors `_getDoctors`: `inactive` always hides a doctor from the
+ * entire public site (profile included); `showOnDoctorsPage: false` only hides
+ * from the /doctors list, so the profile stays reachable by direct link when
+ * `includeHidden` is set (what the profile page passes).
+ */
+async function _getDoctorBySlug(
+  slug: string,
+  locale: Locale,
+  opts: { includeHidden?: boolean } = {},
+): Promise<Doctor | null> {
+  try {
+    const payload = await getPayloadClient()
+    const where: Record<string, unknown> = {
+      slug: { equals: slug },
+      inactive: { not_equals: true },
+    }
+    if (!opts.includeHidden) where.showOnDoctorsPage = { not_equals: false }
+    const result = await payload.find({
+      collection: 'doctors',
+      locale,
+      where: where as never,
+      limit: 1,
+      depth: 1,
+    })
+    const doc = result.docs[0]
+    if (!doc) return null
+    return mapDoctorDoc(doc as DoctorDocShape)
+  } catch {
+    // DB unavailable — use locale-aware seed data (same source as _getDoctors).
+    return getLocalizedDoctors(locale).find((d) => d.slug === slug) ?? null
   }
 }
 
@@ -1666,7 +1777,9 @@ export async function searchSite(locale: Locale, query: string, perTypeLimit = 5
 }
 
 export const getServices = cached(_getServices, 'getServices', ['services'])
+export const getServiceBySlug = cached(_getServiceBySlug, 'getServiceBySlug', ['services'])
 export const getDoctors = cached(_getDoctors, 'getDoctors', ['doctors'])
+export const getDoctorBySlug = cached(_getDoctorBySlug, 'getDoctorBySlug', ['doctors'])
 export const getCheckupPackages = cached(_getCheckupPackages, 'getCheckupPackages', ['checkup-packages'])
 export const getReviews = cached(_getReviews, 'getReviews', ['reviews'])
 export const getStats = cached(_getStats, 'getStats', ['home-page', 'site-settings'])

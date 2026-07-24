@@ -36,6 +36,11 @@ services:
         TOTP_DISABLED: "true"
     container_name: clinic-app
     restart: unless-stopped
+    volumes:
+      # Persist Next's image-optimization cache (.next/cache/images) across
+      # container recreates so optimized images aren't cold re-encoded every
+      # rebuild. WORKDIR in the Dockerfile is /app.
+      - clinic-next-cache:/app/.next/cache
     ports:
       - "3000:3000"
     environment:
@@ -53,3 +58,4 @@ services:
 
 volumes:
   clinic-pgdata:
+  clinic-next-cache:

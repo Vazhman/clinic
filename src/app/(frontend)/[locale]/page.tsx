@@ -3,7 +3,7 @@ import HeroSection from "@/components/home/HeroSection";
 import SymptomNavigator from "@/components/home/SymptomNavigator";
 import StatsCounter from "@/components/home/StatsCounter";
 import ServicesGrid from "@/components/home/ServicesGrid";
-import DoctorsPreview from "@/components/home/DoctorsPreview";
+import RandomizedDoctors from "@/components/home/RandomizedDoctors";
 import CheckupCards from "@/components/home/CheckupCards";
 import NewsSection from "@/components/blog/NewsSection";
 import ReviewsCarousel from "@/components/home/ReviewsCarousel";
@@ -27,23 +27,14 @@ import {
   isFeatureEnabled,
 } from "@/lib/payload-data";
 
-// Render the homepage fresh on every request so CMS edits (hero slides,
-// featured doctors, stats, FAQs…) appear instantly — no cache to wait out.
-// Every other public page is already dynamic; this matches them. The target
-// host is a persistent Node runtime (cPanel), where per-request rendering is
-// cheap, so there's no real cost to dropping the ISR cache.
-export const dynamic = "force-dynamic";
-
-// Random subset for the homepage "Our doctors" section (when the admin turns on
-// `randomizeFeaturedDoctors`). With force-dynamic the pick is recomputed on
-// every request, so the featured doctors reshuffle per visit.
-function pickRandomDoctors<T>(list: T[], count: number): T[] {
-  return [...list]
-    .map((item) => ({ item, r: Math.random() }))
-    .sort((a, b) => a.r - b.r)
-    .map(({ item }) => item)
-    .slice(0, count);
-}
+// The homepage is now statically rendered and cached (Full Route Cache + ISR):
+// it's served from cache and re-rendered at most once an hour, then revalidated.
+// This is the big perf win on the small self-hosted box — no per-request render.
+// CMS edits still surface promptly because the data cache is busted by tag
+// revalidation elsewhere. The "Our doctors" per-visit reshuffle that used to
+// force `dynamic` moved client-side (see RandomizedDoctors), so the server
+// render stays deterministic and cacheable.
+export const revalidate = 3600;
 
 export async function generateMetadata({
   params,
@@ -124,26 +115,27 @@ export default async function HomePage({
   const featuredPoolIds = (homeCms?.featuredDoctors ?? []).map((d) =>
     String(typeof d === "object" && d !== null ? d.id : d),
   );
-  let doctors: Doctor[];
+  // Build the featured doctor POOL deterministically (its natural, non-random
+  // order). The optional per-visit reshuffle now happens client-side after
+  // hydration (RandomizedDoctors), so this server render stays cacheable.
+  let doctorPool: Doctor[];
   if (featuredPoolIds.length > 0) {
     // includeHidden: the admin explicitly chose these for the home page, so the
     // `showOnDoctorsPage` switch (a /doctors-list control) shouldn't hide them
     // here; only `inactive` excludes a doctor everywhere.
     const pool = await getDoctors(loc, undefined, { ids: featuredPoolIds, includeHidden: true });
-    const ordered = featuredPoolIds
+    doctorPool = featuredPoolIds
       .map((id) => pool.find((doc) => doc.id === id))
       .filter((doc): doc is Doctor => Boolean(doc));
-    doctors = homeCms?.randomizeFeaturedDoctors
-      ? pickRandomDoctors(ordered, featuredCount)
-      : ordered.slice(0, featuredCount);
   } else {
     const fallback = await getDoctors(loc, Math.max(featuredCount * 3, 9));
-    doctors = homeCms?.randomizeFeaturedDoctors
-      ? pickRandomDoctors(fallback, featuredCount)
-      : [...fallback]
-          .sort((a, b) => Number(b.isDepartmentHead) - Number(a.isDepartmentHead))
-          .slice(0, featuredCount);
+    doctorPool = [...fallback].sort((a, b) => Number(b.isDepartmentHead) - Number(a.isDepartmentHead));
   }
+  const randomizeDoctors = Boolean(homeCms?.randomizeFeaturedDoctors);
+  // Deterministic first `featuredCount` for the SSR/first-paint render and the
+  // hero doctor card. When `randomizeDoctors` is on, RandomizedDoctors swaps in
+  // a random subset of `doctorPool` after mount.
+  const doctors = doctorPool.slice(0, featuredCount);
 
   // Phone for the checkup teaser's details modal (phone-booking CTA), read the
   // same way the /checkups page reads it.
@@ -193,7 +185,7 @@ export default async function HomePage({
         />
       )}
       {showServicesGrid && <ServicesGrid services={services.slice(0, 8)} totalCount={services.length} />}
-      {showDoctorsPreview && <DoctorsPreview doctors={doctors} />}
+      {showDoctorsPreview && <RandomizedDoctors doctors={doctorPool} count={featuredCount} randomize={randomizeDoctors} />}
       {/* Full packages: the teaser cards now open the same /checkups details
           modal (package list ⇄ details) in place, so they need the package
           names/descriptions/tests too. */}
