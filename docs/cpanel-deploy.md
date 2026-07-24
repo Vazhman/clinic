@@ -86,7 +86,7 @@ In cPanel → **Setup Node.js App** → Create Application:
 | Application mode | Production |
 | Application root | `/home/<user>/clinic` (or wherever you uploaded) |
 | Application URL | `khozrevanidze.ge` |
-| Application startup file | `node_modules/.bin/next` |
+| Application startup file | `server.js` (Passenger runs this file; it boots Next — do NOT use `node_modules/.bin/next`, Passenger won't pass it the `start` command) |
 | Passenger log file | (auto) |
 
 Click "Setup". cPanel creates an Application URL and a virtual env path.
@@ -116,8 +116,18 @@ Watch the Passenger log for errors. First boot:
 
 1. Payload reads `DATABASE_TYPE=sqlite`, opens `database.sqlite` (creates
    the file if it doesn't exist).
-2. With `push: true`, Payload syncs the schema — creates all tables.
-3. Next.js starts serving on the Passenger port.
+2. Next.js starts serving on the Passenger port. **The public frontend
+   renders immediately even with an empty/table-less DB** — the page data
+   getters fall back to built-in demo content on any DB error. This is the
+   "frontend visible without data" state.
+3. IMPORTANT: schema-push is **disabled** whenever `NODE_ENV=production`, so
+   a fresh DB stays table-less and the CMS/admin cannot store real data yet.
+   To make the CMS functional, create the tables via migrations:
+   `npm run migrate:create` locally (commit `src/migrations/`), then
+   `npm run migrate` on the server before starting. See `database-setup.md`.
+   (Quick throwaway alternative for a demo: start the app once with
+   `NODE_ENV` unset so push builds the schema, then set it back to
+   `production` — never do this against a DB you care about.)
 
 ## Step 7 — Bootstrap the admin + data
 
