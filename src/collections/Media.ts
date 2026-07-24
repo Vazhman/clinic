@@ -73,6 +73,11 @@ export const Media: CollectionConfig = {
   upload: {
     staticDir: 'media',
     adminThumbnail: 'thumbnail',
+    // Raster images only. SVG is intentionally excluded: it can carry inline
+    // <script>, and it's served same-origin from /api/media/file/* with no CSP
+    // backstop, so a stored SVG would be a persistent XSS vector. Site icons
+    // that are genuinely SVG live in /public, not the CMS.
+    mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'],
     imageSizes: [
       { name: 'thumbnail', width: 400, height: 300, position: 'centre' },
       { name: 'card', width: 768, height: 512, position: 'centre' },

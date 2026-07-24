@@ -170,6 +170,17 @@ export default buildConfig({
       : postgresAdapter({
           pool: {
             connectionString: process.env.DATABASE_URL,
+            // Shared/managed Postgres (the cPanel/proservice target) usually
+            // caps total connections at ~20-25, and Passenger may run several
+            // Node processes — cap each process's pool well below that.
+            max: Number(process.env.DATABASE_POOL_MAX || 5),
+            idleTimeoutMillis: 30_000,
+            connectionTimeoutMillis: 10_000,
+            // Managed Postgres typically requires TLS but presents a cert that
+            // fails strict verification (pg treats `sslmode=require` in the URL
+            // as verify-full). DATABASE_SSL=true enables TLS without cert
+            // verification — set it for the proservice/managed DB.
+            ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
           },
           push: process.env.PAYLOAD_DISABLE_PUSH !== 'true',
         }),
@@ -418,7 +429,7 @@ export default buildConfig({
     // it, the plugin's `totpAccess` wrapper returns false on every public
     // request without a user, killing public reads (doctor photos via
     // /api/media/file/*, all globals the public site fetches).
-    ...(false ? [
+    ...(process.env.TOTP_DISABLED !== 'true' ? [
       payloadTotp({
         collection: 'users',
         forceSetup: true,

@@ -46,7 +46,7 @@ DATABASE_TYPE=sqlite \
   PAYLOAD_SECRET="$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")" \
   DOCTRA_API_URL='http://31.146.167.162:9090/doctra/hs/portal_exchange/v1' \
   DOCTRA_USER='khozrevanidze' \
-  DOCTRA_PASSWORD='#z8Q)v3h]d(hTt#p' \
+  DOCTRA_PASSWORD='<REDACTED — the previous value was committed to git and MUST be rotated; keep it env-only>' \
   npm run build
 ```
 
@@ -102,7 +102,7 @@ DATABASE_URL=file:/home/<user>/clinic/database.sqlite
 PAYLOAD_SECRET=<random 32-byte hex — generate on your machine>
 DOCTRA_API_URL=http://31.146.167.162:9090/doctra/hs/portal_exchange/v1
 DOCTRA_USER=khozrevanidze
-DOCTRA_PASSWORD="#z8Q)v3h]d(hTt#p"
+DOCTRA_PASSWORD="<REDACTED — rotate the previously committed value; never commit it>"
 # Leave BOOKING_SUBMIT_DISABLED unset → real bookings hit Doctra in prod.
 # DO NOT set BLOB_READ_WRITE_TOKEN — Vercel Blob is unavailable. Without
 # the token, the Blob plugin disables itself and uploads go to local disk.

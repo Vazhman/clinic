@@ -13,7 +13,11 @@ export const News: CollectionConfig = {
     defaultColumns: ['title', 'categoryRef', 'status', 'showOnHomepage', 'publishedDate'],
     group: 'კონტენტი',
   },
-  access: { read: () => true },
+  // Anonymous REST reads only see published docs (the public REST API honours
+  // ?draft=true unless access restricts it — unrestricted, unpublished drafts
+  // would leak). Admins see everything; server-side getters use the local API
+  // with overrideAccess, so the site's own queries are unaffected.
+  access: { read: ({ req }) => (req.user ? true : { _status: { equals: 'published' } }) },
   versions: { drafts: true },
   // Keeps the custom `status` field (used by frontend queries) in sync with
   // Payload's native publish/draft state — see syncPublishStatus.ts for why

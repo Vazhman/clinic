@@ -149,8 +149,13 @@ export const Doctors: CollectionConfig = {
           description: 'სპეციალიზაცია, ბიოგრაფია, კვალიფიკაცია',
           fields: [
             { name: 'specialty', label: 'სპეციალობა', type: 'text', required: true, localized: true },
-            { name: 'phone', label: 'ტელეფონი', type: 'text', admin: { description: 'ექიმის ტელეფონი (Doctra-დან). რედაქცია სავალდებულო არ არის — საიტზე ჩვენების გადაწყვეტილება ცალკეა.' } },
-            { name: 'email', label: 'ელფოსტა', type: 'email', admin: { description: 'ექიმის ელფოსტა (Doctra-დან). იხილე phone-ის შენიშვნა.' } },
+            // access.read: personal contact details imported from the HIS must
+            // not be exposed through the public REST API (/api/doctors) — only
+            // authenticated admins see them. The public site never renders
+            // these (mapDoctorDoc omits them), and server-side getters use the
+            // local API with overrideAccess, so nothing on the site changes.
+            { name: 'phone', label: 'ტელეფონი', type: 'text', access: { read: ({ req }) => Boolean(req.user) }, admin: { description: 'ექიმის ტელეფონი (Doctra-დან). რედაქცია სავალდებულო არ არის — საიტზე ჩვენების გადაწყვეტილება ცალკეა.' } },
+            { name: 'email', label: 'ელფოსტა', type: 'email', access: { read: ({ req }) => Boolean(req.user) }, admin: { description: 'ექიმის ელფოსტა (Doctra-დან). იხილე phone-ის შენიშვნა.' } },
             { name: 'biography', label: 'ბიოგრაფია', type: 'richText', localized: true, admin: { description: 'ექიმის ბიოგრაფია და გამოცდილება' } },
             {
               name: 'qualifications',

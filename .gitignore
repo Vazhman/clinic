@@ -35,8 +35,15 @@ yarn-error.log*
 !.env.example
 
 # Payload
+# NOTE: the DB file is database.sqlite (payload.config.ts default) — the old
+# `database.db` entry ignored the wrong name and let the real DB get committed.
 database.db
+database.sqlite
+*.sqlite
 media/
+
+# curl session dumps — a payload-token cookie was once committed from here
+cookies.txt
 
 # vercel
 .vercel

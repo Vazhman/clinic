@@ -50,20 +50,46 @@ npm run db:reset       # wipe volume + restart (drops all local data)
 
 ## 2. Production on cPanel (proservice.ge)
 
-cPanel here provides only MySQL/MariaDB, which Payload can't use. Run the app on
-cPanel's Node runtime and point it at a **managed Postgres** instead:
+proservice provides the Postgres database. Run the app on cPanel's Node runtime
+and point it at that Postgres.
 
-1. Create a free/managed Postgres (Neon, Supabase, or Railway). Copy its
-   connection string (must allow SSL; append `?sslmode=require` if needed).
-2. In cPanel → *Setup Node.js App* → Environment variables, set:
-   - `DATABASE_URL=postgresql://USER:PASS@HOST/DB?sslmode=require`
-   - (do **not** set `DATABASE_TYPE`)
-   - `PAYLOAD_SECRET=<32-byte hex>` — `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
-3. Build and start (`next build` then `next start`). First boot pushes the
-   schema into the managed Postgres.
+### Required environment variables
 
-This keeps you on Payload's officially supported adapter while the DB lives off
-the cPanel box.
+| Var | Value | Why |
+|-----|-------|-----|
+| `DATABASE_URL` | `postgresql://USER:PASS@HOST:5432/DB` | provider-supplied |
+| `DATABASE_SSL` | `true` | managed Postgres needs TLS but usually has a cert that fails strict verification; this enables TLS without cert-verify (see `payload.config.ts` pool block). If the provider is plain TCP with no TLS, leave unset. |
+| `DATABASE_POOL_MAX` | `4` (or `5`) | caps connections **per Node process**. Shared Postgres often allows only ~20-25 total, and Passenger may spawn several app processes — keep the product under the cap. Also cap Passenger app instances to 1-2. |
+| `PAYLOAD_DISABLE_PUSH` | `true` | **critical** — see migrations below |
+| `PAYLOAD_SECRET` | 32-byte hex | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `NODE_ENV` | `production` | gates the seed routes' 403 and the secret fail-fast |
+| `DATABASE_TYPE` | *(unset)* | unset → Postgres |
+
+### ⚠️ Schema: use migrations, NOT push (data-loss risk)
+
+`push` (auto-sync schema on boot) is **disabled by Payload whenever
+`NODE_ENV=production`** — so on the cPanel box it does nothing, and a fresh DB
+would boot with **zero tables**. You must use migrations:
+
+```bash
+# 1. LOCALLY, with DATABASE_URL pointing at a dev DB, snapshot the schema:
+npm run migrate:create          # writes SQL into src/migrations/ (commit these)
+
+# 2. On the server, as a deploy step BEFORE `next start`:
+npm run migrate                 # applies pending migrations to the prod DB
+```
+
+Set `PAYLOAD_DISABLE_PUSH=true` everywhere except a throwaway local dev DB. Never
+run `npm run dev` (which can push) against the production database — an additive
+change is survivable, but a rename/remove will **drop columns/tables**.
+
+Also note: several page getters in `payload-data.ts` silently fall back to
+hardcoded demo content on a DB error. So a missing-migration "no such column"
+won't show an error — the live site just quietly reverts to stale demo data.
+That makes running migrations before start a hard requirement, not a nicety.
+
+This keeps you on Payload's officially supported adapter while the DB is the one
+proservice provides.
 
 ## 3. Fallback to SQLite (no external DB)
 
