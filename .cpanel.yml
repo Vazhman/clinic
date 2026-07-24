@@ -1,0 +1,17 @@
+---
+# cPanel Git Version Control deploy recipe (runs on "Deploy HEAD Commit").
+#
+# It copies the app SOURCE from the repository checkout into the live
+# application directory ($DEPLOYPATH). It deliberately does NOT run
+# `npm install` or `npm run build`: this 1 GB cPanel box OOMs on those. Build
+# `.next` locally and upload it into $DEPLOYPATH, and run "Run NPM Install" from
+# the Setup Node.js App UI. This copy never touches the live node_modules/ or
+# .next/ (they aren't in the repo), so they survive every deploy.
+#
+# IMPORTANT: set the Node.js App "Application root" to the SAME path as
+# DEPLOYPATH below (/home/sureitge/clinic). Change the username if different.
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/sureitge/clinic
+    - /bin/mkdir -p "$DEPLOYPATH"
+    - /bin/cp -R -f src public patches package.json package-lock.json next.config.ts tsconfig.json postcss.config.mjs server.js "$DEPLOYPATH/"
